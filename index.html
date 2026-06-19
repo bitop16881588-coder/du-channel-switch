@@ -32,8 +32,6 @@
   .stats{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
   .stat{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:9px 14px;flex:1;min-width:120px}
   .stat .n{font-size:23px;font-weight:800;line-height:1;color:#fff}
-  .stat .l">区域</div></div>
-  .stat .n{font-size:23px;font-weight:800;line-height:1;color:#fff}
   .stat .l{font-size:11.5px;color:#9fb0c8;margin-top:4px}
   .stat.on .n{color:#5fe39b} .stat.off .n{color:#ff8a8a}
 
@@ -53,6 +51,9 @@
   .chip.active.g{background:var(--g);border-color:var(--g)}
   .chip.active.r{background:var(--red);border-color:var(--red)}
   .actions{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+  .btn{border:1.5px solid var(--line);background:#fff;color:var(--ink2);padding:6px 12px;border-radius:999px;font-size:12.5px;font-weight:700;cursor:pointer;transition:.12s}
+  .btn:hover{border-color:var(--gold)}
+  .btn.armed{background:var(--red);color:#fff;border-color:var(--red)}
 
   /* toggle switch */
   .sw{display:inline-flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;font-weight:700;color:var(--ink2);user-select:none}
@@ -93,10 +94,12 @@
   .recv-on{color:var(--g);font-weight:800;font-size:13px;white-space:nowrap}
   .recv-off{color:var(--red);font-weight:800;font-size:13px;white-space:nowrap}
 
+  /* view badges */
   .rowio{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
   .io{display:flex;align-items:center;gap:5px;background:#f7f9fb;border:1px solid var(--line);border-radius:8px;padding:3px 9px;font-size:12px;font-weight:600}
   .io .k{color:var(--muted)} .io .v.on{color:var(--g)} .io .v.off{color:var(--gray)}
 
+  /* edit controls: 内部/外部 分开 */
   .ctrl{margin-top:11px;border-top:1px dashed var(--line);padding-top:11px;display:flex;flex-direction:column;gap:8px}
   .ie{display:flex;gap:8px}
   .ie .col{flex:1;background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:7px 9px}
@@ -121,7 +124,7 @@
   .empty{text-align:center;color:var(--muted);padding:50px 0;font-size:14px}
   .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:var(--nav);color:#fff;padding:9px 18px;border-radius:10px;font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:60}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-  .cloud-syncing{font-size:11px;background:#2f6f8f;color:#fff;padding:2px 6px;border-radius:4px;margin-left:8px;font-weight:normal;display:none}
+  .cloud-tag{font-size:11px;background:#2f6f8f;color:#fff;padding:2px 7px;border-radius:5px;margin-left:8px;font-weight:normal;display:none}
   footer{margin-top:30px;color:var(--muted);font-size:11.5px;text-align:center;line-height:1.7}
   @media (max-width:560px){.grid{grid-template-columns:1fr}.title{font-size:19px}.stat{min-width:calc(50% - 5px);flex:none}header.top{border-radius:0 0 16px 16px}}
 </style>
@@ -129,7 +132,7 @@
 <body>
 <div class="wrap">
   <header class="top">
-    <div class="title"><span id="siteTitle"></span> <span class="tag" id="siteBadge"></span> <span id="syncLabel" class="cloud-syncing">同步中...</span></div>
+    <div class="title"><span id="siteTitle"></span> <span class="tag" id="siteBadge"></span> <span id="syncLabel" class="cloud-tag">同步中...</span></div>
     <div class="sub">
       <span>支付通道收款 / 出款 / 下发状态速查与开关台</span>
       <span>共 <b id="totalN"></b> 条通道</span>
@@ -161,6 +164,10 @@
       </div>
       <div class="actions">
         <span class="sw" id="editSw"><span class="track"><span class="knob"></span></span><span>编辑模式</span></span>
+        <button class="btn" id="exportBtn">汇出</button>
+        <button class="btn" id="importBtn">汇入</button>
+        <button class="btn" id="resetBtn">还原预设</button>
+        <input type="file" id="importFile" accept="application/json" style="display:none">
       </div>
     </div>
   </div>
@@ -181,16 +188,16 @@
 
   <div id="list"></div>
   <div class="empty" id="empty" style="display:none">找不到符合的通道</div>
-  <footer>资料来源：DU_四方_第三方开关记录《四方『内外部』NEW》分页 · 实时云端广播同步版</footer>
+  <footer>资料来源：DU_四方_第三方开关记录《四方『内外部』NEW》分页 · 实时云端广播同步版 · 点商户名称可复制</footer>
 </div>
 <div class="toast" id="toast"></div>
 
 <script>
-/* ════════ 可自行修改区 ════════ */
+/* ════════ 可自行修改区（改这四行就好）════════ */
 const SITE_TITLE   = "四方『内外部』通道开关";
 const SITE_BADGE   = "NEW";
 const LAST_UPDATED = "2026/06/19";
-// 【无线路由器钥匙】：多台电脑共享同一个路径即可实时互通
+// 【无线路由器钥匙】：共享此URL的设备状态将实时互通同步
 const CLOUD_URL    = "https://kvdb.io/MN9vGghpS7j7xGf6qf7kUu/du_channels";
 /* ═══════════════════════════════════════════ */
 
@@ -217,34 +224,13 @@ function stMeta(v){
 function isOn(v){ return (v||'').trim()==='✅'; }
 function recvOn(v){ return (v||'').indexOf('⭕')>=0; }
 
-/* ── 核心逻辑：云端即时同步 ── */
+/* ── 核心广播机制连线（保留所有功能，接入云端路由器） ── */
+const KEY='du_channel_overrides_v1';
 let overrides={}, editMode=false;
-try{ editMode=localStorage.getItem('du_channel_overrides_v1_edit')==='1'; }catch(e){}
 
-function today(){const d=new Date(),p=n=>String(n).padStart(2,'0');return d.getFullYear()+'/'+p(d.getMonth()+1)+'/'+p(d.getDate());}
+try{ editMode=localStorage.getItem(KEY+'_edit')==='1'; }catch(e){}
 
-// 1. 从云数据库获取最新数据
-async function pullFromCloud() {
-  const label = document.getElementById('syncLabel');
-  try {
-    const res = await fetch(CLOUD_URL);
-    if(res.ok) {
-      const cloudData = await res.json();
-      if (cloudData && typeof cloudData === 'object') {
-        // 比对是否有改变，避免频繁重绘
-        if (JSON.stringify(overrides) !== JSON.stringify(cloudData)) {
-          overrides = cloudData;
-          render();
-          stats();
-        }
-      }
-    }
-  } catch (e) {
-    console.error("云端同步失败: ", e);
-  }
-}
-
-// 2. 将本地修改上传到云数据库
+// 1. 同步给所有人：上传至云端路由器
 async function pushToCloud() {
   const label = document.getElementById('syncLabel');
   if(label) label.style.display = 'inline-block';
@@ -255,11 +241,38 @@ async function pushToCloud() {
       body: JSON.stringify(overrides)
     });
   } catch (e) {
-    console.error("云端推送失败: ", e);
+    console.error("同步至云端失败:", e);
   } finally {
-    if(label) setTimeout(() => label.style.display = 'none', 500);
+    if(label) setTimeout(() => label.style.display = 'none', 400);
   }
 }
+
+// 2. 接收广播：从云端拉取最新状态
+async function pullFromCloud() {
+  try {
+    const res = await fetch(CLOUD_URL);
+    if(res.ok) {
+      const cloudData = await res.json();
+      if(cloudData && typeof cloudData === 'object') {
+        if(JSON.stringify(overrides) !== JSON.stringify(cloudData)) {
+          overrides = cloudData;
+          // 本地备份，防断网
+          try { localStorage.setItem(KEY, JSON.stringify(overrides)); } catch(e){}
+          render(); stats();
+        }
+      }
+    }
+  } catch (e) {
+    console.error("拉取云端数据失败:", e);
+  }
+}
+
+function persist(){ 
+  try{ localStorage.setItem(KEY,JSON.stringify(overrides)); }catch(e){} 
+  pushToCloud(); // 本地发生任何持久化变更时，自动广播推送到云端
+}
+function persistEdit(){ try{ localStorage.setItem(KEY+'_edit',editMode?'1':'0'); }catch(e){} }
+function today(){const d=new Date(),p=n=>String(n).padStart(2,'0');return d.getFullYear()+'/'+p(d.getMonth()+1)+'/'+p(d.getDate());}
 
 function eff(d){
   const o=overrides[d.id]||{};
@@ -269,14 +282,11 @@ function eff(d){
     下发:'下发' in o?o.下发:d.下发, changed:o.changed||''
   };
 }
-
 function setOverride(id,field,val){
   overrides[id]=overrides[id]||{};
   overrides[id][field]=val;
   overrides[id].changed=today();
-  pushToCloud(); // 改变状态立即推送
-  render();
-  stats();
+  persist();
 }
 
 const state={sec:'all',recv:null,出款:null,下发:null,q:''};
@@ -379,13 +389,13 @@ clr.addEventListener('click',()=>{q.value='';state.q='';clr.style.display='none'
 const list=document.getElementById('list');
 list.addEventListener('change',e=>{
   const s=e.target.closest('select.sel'); if(!s)return;
-  setOverride(+s.dataset.id,s.dataset.field,s.value);
+  setOverride(+s.dataset.id,s.dataset.field,s.value); render(); stats();
 });
 list.addEventListener('click',e=>{
   const sw=e.target.closest('.sw');
   if(sw){ const id=+sw.dataset.id,f=sw.dataset.field,cur=eff(DATA[id])[f];
     let nv; if(f==='收款') nv=recvOn(cur)?'❌':'⭕️'; else nv=isOn(cur)?'X':'✅';
-    setOverride(id,f,nv); return; }
+    setOverride(id,f,nv); render(); stats(); return; }
   const n=e.target.closest('[data-copy]');
   if(n){ const t=n.dataset.copy; (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>toast('已复制：'+t)).catch(()=>toast('已复制：'+t)); }
 });
@@ -393,7 +403,28 @@ list.addEventListener('click',e=>{
 /* edit mode */
 const editSw=document.getElementById('editSw');
 function syncEdit(){ editSw.classList.toggle('on',editMode); }
-editSw.addEventListener('click',()=>{ editMode=!editMode; try{localStorage.setItem('du_channel_overrides_v1_edit',editMode?'1':'0');}catch(e){} syncEdit(); render(); });
+editSw.addEventListener('click',()=>{ editMode=!editMode; persistEdit(); syncEdit(); render(); });
+
+/* export / import / reset */
+document.getElementById('exportBtn').addEventListener('click',()=>{
+  const blob=new Blob([JSON.stringify(overrides,null,1)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download='du_channel_overrides_'+today().replace(/\//g,'')+'.json'; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),1000); toast('已汇出变更档');
+});
+document.getElementById('importBtn').addEventListener('click',()=>document.getElementById('importFile').click());
+document.getElementById('importFile').addEventListener('change',e=>{
+  const f=e.target.files[0]; if(!f)return; const r=new FileReader();
+  r.onload=()=>{ try{ overrides=JSON.parse(r.result)||{}; persist(); render(); stats(); toast('已汇入变更档并广播'); }
+    catch(err){ toast('档案格式错误'); } e.target.value=''; };
+  r.readAsText(f);
+});
+let armed=false,armT;
+const resetBtn=document.getElementById('resetBtn');
+resetBtn.addEventListener('click',()=>{
+  if(!armed){ armed=true; resetBtn.classList.add('armed'); resetBtn.textContent='确认还原？'; clearTimeout(armT); armT=setTimeout(()=>{armed=false;resetBtn.classList.remove('armed');resetBtn.textContent='还原预设';},3000); return; }
+  overrides={}; persist(); armed=false; resetBtn.classList.remove('armed'); resetBtn.textContent='还原预设'; render(); stats(); toast('已还原成原始资料并广播');
+});
 
 const toastEl=document.getElementById('toast');let tT;
 function toast(m){toastEl.textContent=m;toastEl.classList.add('show');clearTimeout(tT);tT=setTimeout(()=>toastEl.classList.remove('show'),1500);}
@@ -402,9 +433,11 @@ document.title=SITE_TITLE+' '+SITE_BADGE;
 document.getElementById('siteTitle').textContent=SITE_TITLE;
 document.getElementById('siteBadge').textContent=SITE_BADGE;
 document.getElementById('lastUpdated').textContent=LAST_UPDATED;
-syncEdit();
 
-// 初始化数据拉取，并且设置每 3 秒自动抓取一次云端最新状态
+// 优先读取本地，并立即启动云端常驻广播监听（每 3 秒刷新一次）
+try{ overrides=JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){ overrides={}; }
+syncEdit(); stats(); render();
+
 pullFromCloud();
 setInterval(pullFromCloud, 3000);
 </script>
