@@ -51,7 +51,7 @@
   .chip.active.g{background:var(--g);border-color:var(--g)}
   .chip.active.r{background:var(--red);border-color:var(--red)}
   .actions{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
-  .btn{border:1.5px solid var(--line);background:#fff;color:var(--ink2);padding:6px 12px;border-radius:999px;font-size:12.5px;font-weight:700;cursor:pointer;transition:.12s}
+  .btn{border:1.5px solid var(--line);background:#fff;color:var(--ink2);padding:6px 12px;border-radius:9px;font-size:12.5px;font-weight:700;cursor:pointer;transition:.12s}
   .btn:hover{border-color:var(--gold)}
   .btn.armed{background:var(--red);color:#fff;border-color:var(--red)}
 
@@ -124,7 +124,6 @@
   .empty{text-align:center;color:var(--muted);padding:50px 0;font-size:14px}
   .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:var(--nav);color:#fff;padding:9px 18px;border-radius:10px;font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:60}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-  .cloud-tag{font-size:11px;background:#2f6f8f;color:#fff;padding:2px 7px;border-radius:5px;margin-left:8px;font-weight:normal;display:none}
   footer{margin-top:30px;color:var(--muted);font-size:11.5px;text-align:center;line-height:1.7}
   @media (max-width:560px){.grid{grid-template-columns:1fr}.title{font-size:19px}.stat{min-width:calc(50% - 5px);flex:none}header.top{border-radius:0 0 16px 16px}}
 </style>
@@ -132,7 +131,7 @@
 <body>
 <div class="wrap">
   <header class="top">
-    <div class="title"><span id="siteTitle"></span> <span class="tag" id="siteBadge"></span> <span id="syncLabel" class="cloud-tag">同步中...</span></div>
+    <div class="title"><span id="siteTitle"></span> <span class="tag" id="siteBadge"></span></div>
     <div class="sub">
       <span>支付通道收款 / 出款 / 下发状态速查与开关台</span>
       <span>共 <b id="totalN"></b> 条通道</span>
@@ -188,31 +187,29 @@
 
   <div id="list"></div>
   <div class="empty" id="empty" style="display:none">找不到符合的通道</div>
-  <footer>资料来源：DU_四方_第三方开关记录《四方『内外部』NEW》分页 · 实时云端广播同步版 · 点商户名称可复制</footer>
+  <footer>资料来源：DU_四方_第三方开关记录《四方『内外部』NEW》分页 · 编辑模式可调整状态，变更会记录在本机并显示日期 · 点商户名称可复制</footer>
 </div>
 <div class="toast" id="toast"></div>
 
 <script>
-/* ════════ 可自行修改区（改这四行就好）════════ */
+/* ════════ 可自行修改区（改这三行就好）════════ */
 const SITE_TITLE   = "四方『内外部』通道开关";
 const SITE_BADGE   = "NEW";
 const LAST_UPDATED = "2026/06/19";
-// 【无线路由器钥匙】：共享此URL的设备状态将实时互通同步
-const CLOUD_URL    = "https://kvdb.io/MN9vGghpS7j7xGf6qf7kUu/du_channels";
 /* ═══════════════════════════════════════════ */
 
 const DATA = [{"收款": "⭕️", "商户": "JJ卡卡", "内部": "", "外部": "", "放置金": "", "下发时间": "", "出款": "✅", "下发": "X", "备注": "", "color": "#E6B8AF", "section": "使用中", "id": 0}, {"收款": "⭕️", "商户": "JJ支付宝", "内部": "", "外部": "", "放置金": "", "下发时间": "", "出款": "✅", "下发": "X", "备注": "", "color": "#E6B8AF", "section": "使用中", "id": 1}, {"收款": "⭕️", "商户": "JJ数字人民币", "内部": "", "外部": "X", "放置金": "", "下发时间": "", "出款": "✅", "下发": "X", "备注": "", "color": "#E6B8AF", "section": "使用中", "id": 2}, {"收款": "⭕️", "商户": "JJ微信", "内部": "", "外部": "X", "放置金": "", "下发时间": "", "出款": "✅", "下发": "X", "备注": "", "color": "#E6B8AF", "section": "使用中", "id": 3}, {"收款": "⭕️", "商户": "WF微信", "内部": "日切", "外部": "X", "放置金": "", "下发时间": "", "出款": "✅", "下发": "X", "备注": "", "color": "#F4CCCC", "section": "使用中", "id": 4}, {"收款": "⭕️", "商户": "WF支付宝", "内部": "日切", "外部": "日切", "放置金": "", "下发时间": "", "出款": "✅", "下发": "X", "备注": "", "color": "#F4CCCC", "section": "使用中", "id": 5}, {"收款": "❌", "商户": "ZCPAY支付宝", "内部": "", "外部": "", "放置金": "5A", "下发时间": "", "出款": "X", "下发": "✅", "备注": "2/8 日量：内4外1", "color": "#FCE5CD", "section": "使用中", "id": 6}, {"收款": "❌", "商户": "全通支付宝", "内部": "维护", "外部": "维护", "放置金": "10A", "下发时间": "", "出款": "X", "下发": "✅", "备注": "内2外2 ；25/6/29改24H", "color": "#FFF2CC", "section": "使用中", "id": 7}, {"收款": "⭕️", "商户": "和奕代收付", "内部": "馀额过高", "外部": "日切", "放置金": "", "下发时间": "x", "出款": "✅", "下发": "X", "备注": "10/12 预留5000起 当测试金 农业.工商不出款", "color": "#D9EAD3", "section": "使用中", "id": 8}, {"收款": "⭕️", "商户": "和奕支付宝", "内部": "馀额过高", "外部": "X", "放置金": "", "下发时间": "x", "出款": "X", "下发": "X", "备注": "09/03 开跑", "color": "#D9EAD3", "section": "使用中", "id": 9}, {"收款": "❌", "商户": "新宝支付宝", "内部": "", "外部": "", "放置金": "20A", "下发时间": "", "出款": "X", "下发": "✅", "备注": "5/21 日量：内8外15 ，26/1/7改24H", "color": "#D0E0E3", "section": "使用中", "id": 10}, {"收款": "❌", "商户": "新宝银联", "内部": "", "外部": "X", "放置金": "3A", "下发时间": "", "出款": "X", "下发": "✅", "备注": "26/05/06通知开启", "color": "#D0E0E3", "section": "使用中", "id": 11}, {"收款": "❌", "商户": "新宝数字人民币", "内部": "等组长通知开启", "外部": "X", "放置金": "3A", "下发时间": "", "出款": "X", "下发": "✅", "备注": "26/05/06通知开启", "color": "#D0E0E3", "section": "使用中", "id": 12}, {"收款": "❌", "商户": "GOSM米多多【支付宝】", "内部": "", "外部": "停用", "放置金": "10A", "下发时间": "下发单间需满2000U", "出款": "X", "下发": "✅", "备注": "6/24：内10A 25/08/13通知开启", "color": "#C9DAF8", "section": "使用中", "id": 13}, {"收款": "❌", "商户": "GOSM米多多【微信】", "内部": "", "外部": "X", "放置金": "10A", "下发时间": "", "出款": "X", "下发": "✅", "备注": "日量无限制 收款已开内部全平台", "color": "#C9DAF8", "section": "使用中", "id": 14}, {"收款": "⭕️", "商户": "VCOTC支付宝", "内部": "", "外部": "X", "放置金": "10A", "下发时间": "", "出款": "X", "下发": "✅", "备注": "", "color": "#CFE2F3", "section": "使用中", "id": 15}, {"收款": "⭕️", "商户": "码上支付宝（新人层）", "内部": "", "外部": "X", "放置金": "10A", "下发时间": "下发单间需满5000U", "出款": "X", "下发": "✅", "备注": "25/6/4 告知：开启", "color": "#D9D2E9", "section": "使用中", "id": 16}, {"收款": "⭕️", "商户": "码上纯代收", "内部": "", "外部": "X", "放置金": "", "下发时间": "下发单间需满5000U", "出款": "X", "下发": "✅", "备注": "日量5A", "color": "#D9D2E9", "section": "使用中", "id": 17}, {"收款": "⭕️", "商户": "码上小额卡卡", "内部": "", "外部": "X", "放置金": "4A", "下发时间": "下发单间需满5000U", "出款": "X", "下发": "✅", "备注": "26/2/4 告知：开启", "color": "#D9D2E9", "section": "使用中", "id": 18}, {"收款": "❌", "商户": "onepay【小荷包】-109", "内部": "", "外部": "X", "放置金": "5A", "下发时间": "", "出款": "X", "下发": "✅", "备注": "日量1A", "color": "#EAD1DC", "section": "使用中", "id": 19}, {"收款": "❌", "商户": "onepay【数字人民币】-302", "内部": "等组长通知开启", "外部": "X", "放置金": "5A", "下发时间": "", "出款": "X", "下发": "✅", "备注": "25/11/8 告知：开启", "color": "#EAD1DC", "section": "使用中", "id": 20}, {"收款": "⭕️", "商户": "onepay【银联扫码】-304", "内部": "", "外部": "X", "放置金": "8000.0", "下发时间": "下发单间需满1000U", "出款": "X", "下发": "✅", "备注": "25/10/23 告知：开启", "color": "#EAD1DC", "section": "使用中", "id": 21}, {"收款": "⭕️", "商户": "宝诺银联扫码『8007』", "内部": "", "外部": "X", "放置金": "8000.0", "下发时间": "下发单间需满1000U", "出款": "X", "下发": "✅", "备注": "宝诺系列余额可互转", "color": "#DD7E6B", "section": "使用中", "id": 22}, {"收款": "⭕️", "商户": "宝诺数字人民币『8005』", "内部": "", "外部": "X", "放置金": "3A", "下发时间": "", "出款": "X", "下发": "✅", "备注": "25/11/3 告知：开启", "color": "#DD7E6B", "section": "使用中", "id": 23}, {"收款": "⭕️", "商户": "宝诺小荷包『8001』", "内部": "", "外部": "X", "放置金": "3A", "下发时间": "", "出款": "X", "下发": "✅", "备注": "25/10/23 告知：开启", "color": "#DD7E6B", "section": "使用中", "id": 24}, {"收款": "⭕️", "商户": "宝诺原生支付宝H5『8077』", "内部": "等组长通知开启", "外部": "X", "放置金": "3A", "下发时间": "上午9点", "出款": "X", "下发": "✅", "备注": "26/3/5 告知：开启", "color": "#DD7E6B", "section": "使用中", "id": 25}, {"收款": "⭕️", "商户": "宝诺支付宝UID『8084』", "内部": "等组长通知开启", "外部": "", "放置金": "10A", "下发时间": "", "出款": "X", "下发": "✅", "备注": "26/1/5 告知：开启", "color": "#DD7E6B", "section": "使用中", "id": 26}, {"收款": "⭕️", "商户": "XQ支付-小额卡卡", "内部": "", "外部": "X", "放置金": "3A", "下发时间": "", "出款": "X", "下发": "✅", "备注": "25/9/17 告知：开启", "color": "#EA9999", "section": "使用中", "id": 27}, {"收款": "⭕️", "商户": "红喜鹊卡转卡", "内部": "", "外部": "X", "放置金": "5A", "下发时间": "", "出款": "X", "下发": "✅", "备注": "26/04/08 告知：开启", "color": "#EA9999", "section": "使用中", "id": 28}, {"收款": "⭕️", "商户": "红喜鹊支转支", "内部": "等组长通知开启", "外部": "X", "放置金": "5A", "下发时间": "下发单间需满1000U", "出款": "X", "下发": "✅", "备注": "26/04/15 告知：开启", "color": "#EA9999", "section": "使用中", "id": 29}, {"收款": "⭕️", "商户": "XPAY支付宝", "内部": "", "外部": "", "放置金": "5A", "下发时间": "", "出款": "X", "下发": "✅", "备注": "26/5/28 告知：开启", "color": "#F9CB9C", "section": "使用中", "id": 30}, {"收款": "❌", "商户": "乐支付宝", "内部": "", "外部": "X", "放置金": "3A", "下发时间": "下发单间需满3000U", "出款": "X", "下发": "✅", "备注": "日量4A", "color": "#FFE599", "section": "使用中", "id": 31}, {"收款": "❌", "商户": "KW支付宝", "内部": "", "外部": "", "放置金": "3A", "下发时间": "下发单间需满人民币2A", "出款": "X", "下发": "✅", "备注": "26/3/18 告知：开启", "color": "#B6D7A8", "section": "使用中", "id": 32}, {"收款": "❌", "商户": "KW支付宝-TOMMY", "内部": "", "外部": "", "放置金": "4A", "下发时间": "下发单间需满3000U", "出款": "X", "下发": "✅", "备注": "26/4/22 告知：开启", "color": "#B6D7A8", "section": "使用中", "id": 33}, {"收款": "⭕️", "商户": "TKpay支付宝", "内部": "日切", "外部": "", "放置金": "3A", "下发时间": "下发单间需满人民币2A", "出款": "X", "下发": "✅", "备注": "26/3/18 告知：开启", "color": "#A2C4C9", "section": "使用中", "id": 34}, {"收款": "⭕️", "商户": "HCPAY", "内部": "日切", "外部": "X", "放置金": "3A", "下发时间": "下发单间需满3000U", "出款": "X", "下发": "✅", "备注": "日量3A 26/1/14 告知：开启", "color": "#A4C2F4", "section": "使用中", "id": 35}, {"收款": "⭕️", "商户": "SIANGO PAY支付宝金条原生H5", "内部": "", "外部": "X", "放置金": "预R 5A↓", "下发时间": "x", "出款": "X", "下发": "X", "备注": "25/12/17 告知：开启", "color": "#9FC5E8", "section": "使用中", "id": 36}, {"收款": "❌", "商户": "乐力付支付宝", "内部": "", "外部": "X", "放置金": "3A", "下发时间": "下发单间需满3000U", "出款": "X", "下发": "✅", "备注": "日量3A 26/4/29 告知：开启", "color": "#B4A7D6", "section": "使用中", "id": 37}, {"收款": "❌", "商户": "新宝支付宝(小额)", "内部": "等组长通知开启", "外部": "X", "放置金": "10A", "下发时间": "x", "出款": "X", "下发": "✅", "备注": "日量8A，26/1/7改24H", "color": "#CCCCCC", "section": "不使用", "id": 38}, {"收款": "", "商户": "草东银联扫码", "内部": "停用", "外部": "X", "放置金": "1.5A", "下发时间": "清空 不用核对", "出款": "X", "下发": "✅", "备注": "26/4/9 旧商户换新商户", "color": "#CCCCCC", "section": "不使用", "id": 39}, {"收款": "⭕️", "商户": "草东银联", "内部": "停用", "外部": "X", "放置金": "1.5A", "下发时间": "清空 不用核对", "出款": "X", "下发": "✅", "备注": "25/10/23 组长告知：开启", "color": "#CCCCCC", "section": "不使用", "id": 40}, {"收款": "⭕️", "商户": "红喜鹊支付宝转卡", "内部": "维护", "外部": "X", "放置金": "3A", "下发时间": "清空 不用核对", "出款": "X", "下发": "✅", "备注": "26/3/25 组长告知：开启", "color": "#CCCCCC", "section": "不使用", "id": 41}, {"收款": "❌", "商户": "新宝微信", "内部": "维护", "外部": "X", "放置金": "10A", "下发时间": "清空 不用核对", "出款": "X", "下发": "✅", "备注": "25/8/25 组长告知：开启", "color": "#CCCCCC", "section": "不使用", "id": 42}, {"收款": "❌", "商户": "新宝支付小额卡卡", "内部": "维护", "外部": "维护", "放置金": "10A", "下发时间": "清空 不用核对", "出款": "X", "下发": "✅", "备注": "", "color": "#CCCCCC", "section": "不使用", "id": 43}, {"收款": "❌", "商户": "新宝原生支付宝", "内部": "维护", "外部": "X", "放置金": "", "下发时间": "清空 不用核对", "出款": "X", "下发": "✅", "备注": "", "color": "#CCCCCC", "section": "不使用", "id": 44}, {"收款": "⭕️", "商户": "ED小额卡卡", "内部": "维护", "外部": "X", "放置金": "3A", "下发时间": "清空 不用核对", "出款": "X", "下发": "✅", "备注": "", "color": "#CCCCCC", "section": "不使用", "id": 45}, {"收款": "⭕️", "商户": "siango pay-数字人民币", "内部": "停用", "外部": "X", "放置金": "", "下发时间": "清空 不用核对", "出款": "X", "下发": "X", "备注": "26/01/26 商户告知 原则上不会跑了 预付已转移至 原生H5", "color": "#CCCCCC", "section": "不使用", "id": 46}, {"收款": "⭕️", "商户": "码上支付宝（NEW）", "内部": "停用", "外部": "X", "放置金": "10A", "下发时间": "清空 不用核对", "出款": "X", "下发": "✅", "备注": "5/27日量13A", "color": "#999999", "section": "不使用", "id": 47}, {"收款": "⭕️", "商户": "福气银联", "内部": "停用", "外部": "X", "放置金": "1.5A", "下发时间": "清空 不用核对", "出款": "X", "下发": "✅", "备注": "25/10/23 组长告知：开启", "color": "#999999", "section": "不使用", "id": 48}, {"收款": "⭕️", "商户": "守恒支付-小额卡卡", "内部": "等组长通知开启", "外部": "X", "放置金": "3A", "下发时间": "清空 不用核对", "出款": "X", "下发": "✅", "备注": "", "color": "#999999", "section": "不使用", "id": 49}, {"收款": "❌", "商户": "Onepay手机银行H5", "内部": "等组长通知开启", "外部": "X", "放置金": "10A", "下发时间": "清空 不用核对", "出款": "X", "下发": "✅", "备注": "25/8/6 组长告知:开启", "color": "#999999", "section": "不使用", "id": 50}, {"收款": "⭕️", "商户": "宝诺手机银行H5", "内部": "等组长通知开启", "外部": "X", "放置金": "3A", "下发时间": "清空 不用核对", "出款": "X", "下发": "✅", "备注": "9/21商户馀额显示问题 实际是0元", "color": "#999999", "section": "不使用", "id": 51}, {"收款": "⭕️", "商户": "福气手机银行H5", "内部": "等组长通知开启", "外部": "X", "放置金": "10A", "下发时间": "清空 不用核对", "出款": "X", "下发": "✅", "备注": "7/2 已正式开跑", "color": "#999999", "section": "不使用", "id": 52}, {"收款": "⭕️", "商户": "ROG【数字人民币】", "内部": "等组长通知开启", "外部": "X", "放置金": "10A", "下发时间": "清空 不用核对", "出款": "X", "下发": "✅", "备注": "25/09/15 组长通知关闭清空，等通知", "color": "#999999", "section": "不使用", "id": 53}, {"收款": "⭕️", "商户": "J支付宝", "内部": "停用", "外部": "X", "放置金": "", "下发时间": "清空 不用核对", "出款": "X", "下发": "✅", "备注": "25/08/14组长通知停用", "color": "#999999", "section": "不使用", "id": 54}, {"收款": "⭕️", "商户": "WF卡卡", "内部": "停用", "外部": "停用", "放置金": "", "下发时间": "清空 不用核对", "出款": "✅", "下发": "X", "备注": "", "color": "#999999", "section": "不使用", "id": 55}, {"收款": "", "商户": "皇冠支付宝(小额2999以下)", "内部": "维护", "外部": "维护", "放置金": "内外共10", "下发时间": "清空 不用核对", "出款": "X", "下发": "✅", "备注": "12/27 组长告知清空馀额后就不用了", "color": "#999999", "section": "不使用", "id": 56}, {"收款": "", "商户": "皇冠支付宝(大额3000以上)", "内部": "维护", "外部": "维护", "放置金": "内外共10", "下发时间": "清空 不用核对", "出款": "X", "下发": "✅", "备注": "12/27 组长告知清空馀额后就不用了", "color": "#999999", "section": "不使用", "id": 57}, {"收款": "❌", "商户": "新宝支付-大额卡卡", "内部": "维护", "外部": "维护", "放置金": "内外共10", "下发时间": "清空 不用核对", "出款": "X", "下发": "✅", "备注": "", "color": "#999999", "section": "不使用", "id": 58}, {"收款": "❌", "商户": "新宝支付-小额卡卡", "内部": "维护", "外部": "维护", "放置金": "内外共10", "下发时间": "清空 不用核对", "出款": "X", "下发": "✅", "备注": "", "color": "#999999", "section": "不使用", "id": 59}, {"收款": "❌", "商户": "新宝-卡转云", "内部": "维护", "外部": "X", "放置金": "", "下发时间": "清空 不用核对", "出款": "X", "下发": "X", "备注": "", "color": "#999999", "section": "不使用", "id": 60}, {"收款": "❌", "商户": "新宝支付宝新人层", "内部": "维护", "外部": "X", "放置金": "20A", "下发时间": "清空 不用核对", "出款": "X", "下发": "✅", "备注": "25/5/23 有与组长谘询开启时间尚未确定 先清空", "color": "#999999", "section": "不使用", "id": 61}, {"收款": "❌", "商户": "新宝银联扫码", "内部": "维护", "外部": "X", "放置金": "5A", "下发时间": "清空 不用核对", "出款": "X", "下发": "✅", "备注": "日收量10A 25/5/23 有与组长谘询开启时间尚未确定 先清空", "color": "#999999", "section": "不使用", "id": 62}, {"收款": "❌", "商户": "米多多卡卡", "内部": "维护", "外部": "X", "放置金": "", "下发时间": "清空 不用核对", "出款": "✅", "下发": "✅", "备注": "9/11 中 清空待通知", "color": "#999999", "section": "不使用", "id": 63}, {"收款": "", "商户": "码上支付", "内部": "维护", "外部": "维护", "放置金": "内外共10", "下发时间": "清空 不用核对", "出款": "X", "下发": "✅", "备注": "", "color": "#999999", "section": "不使用", "id": 64}, {"收款": "", "商户": "EZPAY支付宝", "内部": "维护", "外部": "维护", "放置金": "内外共10", "下发时间": "清空 不用核对", "出款": "X", "下发": "✅", "备注": "上午11点", "color": "#999999", "section": "不使用", "id": 65}, {"收款": "", "商户": "JST支付宝", "内部": "维护", "外部": "维护", "放置金": "内外共20", "下发时间": "清空 不用核对", "出款": "X", "下发": "✅", "备注": "预计早上9点开启通道", "color": "#999999", "section": "不使用", "id": 66}, {"收款": "⭕️", "商户": "七匹狼银联", "内部": "维护", "外部": "X", "放置金": "内5A", "下发时间": "清空 不用核对", "出款": "X", "下发": "✅", "备注": "4/29 清空 恢复待组长通知", "color": "#999999", "section": "不使用", "id": 67}, {"收款": "", "商户": "OTC通道", "内部": "停用", "外部": "停用", "放置金": "", "下发时间": "", "出款": "X", "下发": "X", "备注": "会计专用", "color": "#999999", "section": "不使用", "id": 68}, {"收款": "", "商户": "OTC支付宝", "内部": "停用", "外部": "停用", "放置金": "", "下发时间": "", "出款": "X", "下发": "X", "备注": "会计专用", "color": "#999999", "section": "不使用", "id": 69}, {"收款": "❌", "商户": "心碎支付宝", "内部": "维护", "外部": "维护", "放置金": "10A", "下发时间": "清空 不用核对", "出款": "X", "下发": "✅", "备注": "日量 内5外2", "color": "#999999", "section": "不使用", "id": 70}, {"收款": "❌", "商户": "心碎支付宝(新人层)", "内部": "维护", "外部": "X", "放置金": "4.5A", "下发时间": "清空 不用核对", "出款": "X", "下发": "✅", "备注": "6/4 日量：内4", "color": "#999999", "section": "不使用", "id": 71}, {"收款": "⭕️", "商户": "ONE小额卡卡", "内部": "停用", "外部": "X", "放置金": "4A", "下发时间": "清空 不用核对", "出款": "X", "下发": "✅", "备注": "", "color": "#999999", "section": "不使用", "id": 72}, {"收款": "❌", "商户": "凌霄支付-手机银行H5", "内部": "停用", "外部": "X", "放置金": "3A", "下发时间": "清空 不用核对", "出款": "X", "下发": "✅", "备注": "9/8 组长告知清空不使用", "color": "#999999", "section": "不使用", "id": 73}, {"收款": "❌", "商户": "中联支付（新卡密）", "内部": "维护", "外部": "X", "放置金": "2.5A", "下发时间": "清空 不用核对", "出款": "X", "下发": "✅", "备注": "26/3/28 已退群 不使用", "color": "#999999", "section": "不使用", "id": 74}];
 DATA.forEach((d,i)=>d.id=i);
 
 const STATES=[
-  {v:'',          t:'正常',     sel:'sel-ok',    badge:'b-ok',     btxt:'正常'},
+  {v:'',         t:'正常',     sel:'sel-ok',    badge:'b-ok',     btxt:'正常'},
   {v:'日切',      t:'日切',     sel:'sel-amber', badge:'b-amber',  btxt:'日切'},
-  {v:'维护',      t:'维护',     sel:'sel-red',    badge:'b-red',    btxt:'维护'},
-  {v:'限额满',    t:'限额满',    sel:'sel-red',    badge:'b-red',    btxt:'限额满'},
-  {v:'馀额过高',  t:'馀额过高', sel:'sel-blue',  badge:'b-blue',    btxt:'馀额过高'},
+  {v:'维护',      t:'维护',     sel:'sel-red',   badge:'b-red',    btxt:'维护'},
+  {v:'限额满',    t:'限额满',   sel:'sel-red',   badge:'b-red',    btxt:'限额满'},
+  {v:'馀额过高',  t:'馀额过高', sel:'sel-blue',  badge:'b-blue',   btxt:'馀额过高'},
   {v:'等组长通知开启',t:'待通知',sel:'sel-purple',badge:'b-purple',btxt:'待通知'},
-  {v:'停用',      t:'停用',     sel:'sel-gray',  badge:'b-gray',    btxt:'停用'},
-  {v:'X',          t:'X / 不开启',sel:'sel-gray', badge:'b-gray',    btxt:'X'}
+  {v:'停用',      t:'停用',     sel:'sel-gray',  badge:'b-gray',   btxt:'停用'},
+  {v:'X',         t:'X / 不开启',sel:'sel-gray', badge:'b-gray',   btxt:'X'}
 ];
 function stMeta(v){
   v=(v||'').trim();
@@ -224,53 +221,12 @@ function stMeta(v){
 function isOn(v){ return (v||'').trim()==='✅'; }
 function recvOn(v){ return (v||'').indexOf('⭕')>=0; }
 
-/* ── 核心广播机制连线（保留所有功能，接入云端路由器） ── */
+/* ── 本机储存（部署后会记住，预览环境失败则仅暂存）── */
 const KEY='du_channel_overrides_v1';
 let overrides={}, editMode=false;
-
+try{ overrides=JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){ overrides={}; }
 try{ editMode=localStorage.getItem(KEY+'_edit')==='1'; }catch(e){}
-
-// 1. 同步给所有人：上传至云端路由器
-async function pushToCloud() {
-  const label = document.getElementById('syncLabel');
-  if(label) label.style.display = 'inline-block';
-  try {
-    await fetch(CLOUD_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(overrides)
-    });
-  } catch (e) {
-    console.error("同步至云端失败:", e);
-  } finally {
-    if(label) setTimeout(() => label.style.display = 'none', 400);
-  }
-}
-
-// 2. 接收广播：从云端拉取最新状态
-async function pullFromCloud() {
-  try {
-    const res = await fetch(CLOUD_URL);
-    if(res.ok) {
-      const cloudData = await res.json();
-      if(cloudData && typeof cloudData === 'object') {
-        if(JSON.stringify(overrides) !== JSON.stringify(cloudData)) {
-          overrides = cloudData;
-          // 本地备份，防断网
-          try { localStorage.setItem(KEY, JSON.stringify(overrides)); } catch(e){}
-          render(); stats();
-        }
-      }
-    }
-  } catch (e) {
-    console.error("拉取云端数据失败:", e);
-  }
-}
-
-function persist(){ 
-  try{ localStorage.setItem(KEY,JSON.stringify(overrides)); }catch(e){} 
-  pushToCloud(); // 本地发生任何持久化变更时，自动广播推送到云端
-}
+function persist(){ try{ localStorage.setItem(KEY,JSON.stringify(overrides)); }catch(e){} }
 function persistEdit(){ try{ localStorage.setItem(KEY+'_edit',editMode?'1':'0'); }catch(e){} }
 function today(){const d=new Date(),p=n=>String(n).padStart(2,'0');return d.getFullYear()+'/'+p(d.getMonth()+1)+'/'+p(d.getDate());}
 
@@ -415,7 +371,7 @@ document.getElementById('exportBtn').addEventListener('click',()=>{
 document.getElementById('importBtn').addEventListener('click',()=>document.getElementById('importFile').click());
 document.getElementById('importFile').addEventListener('change',e=>{
   const f=e.target.files[0]; if(!f)return; const r=new FileReader();
-  r.onload=()=>{ try{ overrides=JSON.parse(r.result)||{}; persist(); render(); stats(); toast('已汇入变更档并广播'); }
+  r.onload=()=>{ try{ overrides=JSON.parse(r.result)||{}; persist(); render(); stats(); toast('已汇入变更档'); }
     catch(err){ toast('档案格式错误'); } e.target.value=''; };
   r.readAsText(f);
 });
@@ -423,7 +379,7 @@ let armed=false,armT;
 const resetBtn=document.getElementById('resetBtn');
 resetBtn.addEventListener('click',()=>{
   if(!armed){ armed=true; resetBtn.classList.add('armed'); resetBtn.textContent='确认还原？'; clearTimeout(armT); armT=setTimeout(()=>{armed=false;resetBtn.classList.remove('armed');resetBtn.textContent='还原预设';},3000); return; }
-  overrides={}; persist(); armed=false; resetBtn.classList.remove('armed'); resetBtn.textContent='还原预设'; render(); stats(); toast('已还原成原始资料并广播');
+  overrides={}; persist(); armed=false; resetBtn.classList.remove('armed'); resetBtn.textContent='还原预设'; render(); stats(); toast('已还原成原始资料');
 });
 
 const toastEl=document.getElementById('toast');let tT;
@@ -433,13 +389,7 @@ document.title=SITE_TITLE+' '+SITE_BADGE;
 document.getElementById('siteTitle').textContent=SITE_TITLE;
 document.getElementById('siteBadge').textContent=SITE_BADGE;
 document.getElementById('lastUpdated').textContent=LAST_UPDATED;
-
-// 优先读取本地，并立即启动云端常驻广播监听（每 3 秒刷新一次）
-try{ overrides=JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){ overrides={}; }
 syncEdit(); stats(); render();
-
-pullFromCloud();
-setInterval(pullFromCloud, 3000);
 </script>
 </body>
 </html>
