@@ -1,482 +1,69 @@
-<!DOCTYPE html>
-<html lang="zh-Hant">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>四方『内外部』通道开关 NEW</title>
-<style>
-  :root{
-    --nav:#15233b; --nav2:#1d3050; --gold:#c79a3a; --gold-soft:#e8d199;
-    --ink:#1c2128; --ink2:#3a424d; --muted:#6b7682; --line:#e3e7ec;
-    --bg:#eef1f5; --card:#ffffff;
-    --g:#1f9d57; --g-bg:#e7f6ec; --amber:#c9871a; --amber-bg:#fdf3e0;
-    --red:#cf3b3b; --red-bg:#fbe9e9; --blue:#2f6f8f; --blue-bg:#e6f1f6;
-    --purple:#7a51c4; --purple-bg:#efe9fb; --gray:#8a939e; --gray-bg:#eef1f4;
-    --orange:#d9772e; --orange-bg:#fbeede;
-    --shadow:0 1px 2px rgba(20,30,40,.06),0 2px 8px rgba(20,30,40,.05);
-  }
-  *{box-sizing:border-box;margin:0;padding:0}
-  html{-webkit-text-size-adjust:100%}
-  body{font-family:"PingFang TC","PingFang SC","Microsoft JhengHei","Noto Sans TC",system-ui,-apple-system,sans-serif;
-    background:var(--bg);color:var(--ink);line-height:1.5;padding-bottom:48px;-webkit-font-smoothing:antialiased}
-  .wrap{max-width:1180px;margin:0 auto;padding:0 16px}
+const SHEET = 'overrides';
 
-  header.top{background:linear-gradient(160deg,var(--nav) 0%,var(--nav2) 100%);
-    border-radius:0 0 20px 20px;padding:24px 22px 20px;color:#fff;
-    box-shadow:0 6px 22px rgba(21,35,59,.25);position:relative;overflow:hidden}
-  header.top::after{content:"";position:absolute;right:-40px;top:-40px;width:160px;height:160px;
-    background:radial-gradient(circle,rgba(199,154,58,.22),transparent 70%);pointer-events:none}
-  .title{font-size:22px;font-weight:800;letter-spacing:1px;display:flex;align-items:center;gap:11px;color:#fff}
-  .title .tag{font-size:11px;font-weight:800;color:var(--nav);background:var(--gold);padding:3px 9px;border-radius:6px;letter-spacing:1.5px}
-  .sub{color:#aebbd0;font-size:12.5px;margin-top:6px;display:flex;gap:14px;flex-wrap:wrap}
-  .sub b{color:var(--gold-soft);font-weight:700}
-  .stats{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
-  .stat{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:9px 14px;flex:1;min-width:120px}
-  .stat .n{font-size:23px;font-weight:800;line-height:1;color:#fff}
-  .stat .l{font-size:11.5px;color:#9fb0c8;margin-top:4px}
-  .stat.on .n{color:#5fe39b} .stat.off .n{color:#ff8a8a}
+function doGet(e)  { return handle(e, 'get');  }
+function doPost(e) { return handle(e, 'post'); }
 
-  .bar{position:sticky;top:0;z-index:20;background:rgba(238,241,245,.93);backdrop-filter:blur(8px);
-    padding:12px 0 10px;margin-bottom:4px;border-bottom:1px solid var(--line)}
-  .search{position:relative}
-  .search input{width:100%;padding:11px 38px 11px 38px;border:1.5px solid var(--line);border-radius:11px;font-size:15px;background:#fff;color:var(--ink);outline:none;transition:border .15s}
-  .search input:focus{border-color:var(--gold)}
-  .search .ic{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:15px}
-  .search .clr{position:absolute;right:8px;top:50%;transform:translateY(-50%);border:none;background:none;color:var(--muted);font-size:18px;cursor:pointer;padding:4px 8px;display:none}
+function handle(e, method) {
+  const lock = LockService.getScriptLock();
+  try { lock.waitLock(20000); } catch (err) { return out({ ok: false, error: 'busy' }); }
+  try {
+    const sh = getSheet();
+    let action = 'pull', body = {};
 
-  .toolrow{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:9px}
-  .filters{display:flex;gap:7px;flex-wrap:wrap}
-  .chip{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--line);background:#fff;color:var(--ink2);padding:6px 13px;border-radius:999px;font-size:13px;font-weight:700;cursor:pointer;transition:.12s;user-select:none}
-  .chip::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor;opacity:.9;flex:none}
-  .chip:hover{filter:brightness(.97);box-shadow:0 0 0 2px rgba(199,154,58,.25)}
-  .chip.c-neutral{color:var(--ink2)} .chip.c-neutral::before{display:none}
-  .chip.c-green{color:var(--g);border-color:#bfe6cd;background:var(--g-bg)}
-  .chip.c-gray{color:var(--gray);border-color:#d4dae0;background:var(--gray-bg)}
-  .chip.c-red{color:var(--red);border-color:#f0c4c4;background:var(--red-bg)}
-  .chip.c-blue{color:var(--blue);border-color:#bcd9e6;background:var(--blue-bg)}
-  .chip.c-amber{color:var(--amber);border-color:#f0dcb4;background:var(--amber-bg)}
-  .chip.active{color:#fff}
-  .chip.active::before{background:#fff}
-  .chip.c-neutral.active{background:var(--nav);border-color:var(--nav)}
-  .chip.c-green.active{background:var(--g);border-color:var(--g)}
-  .chip.c-gray.active{background:var(--gray);border-color:var(--gray)}
-  .chip.c-red.active{background:var(--red);border-color:var(--red)}
-  .chip.c-blue.active{background:var(--blue);border-color:var(--blue)}
-  .chip.c-amber.active{background:var(--amber);border-color:var(--amber)}
-  .actions{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
-  .btn{border:1.5px solid var(--line);background:#fff;color:var(--ink2);padding:6px 12px;border-radius:9px;font-size:12.5px;font-weight:700;cursor:pointer;transition:.12s}
-  .btn:hover{border-color:var(--gold)}
-  .btn.armed{background:var(--red);color:#fff;border-color:var(--red)}
+    if (method === 'post' && e.postData && e.postData.contents) {
+      body = JSON.parse(e.postData.contents);
+      action = body.action || 'push';
+    } else if (e.parameter && e.parameter.action) {
+      action = e.parameter.action;
+    }
 
-  /* toggle switch */
-  .sw{display:inline-flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;font-weight:700;color:var(--ink2);user-select:none}
-  .sw .track{width:38px;height:21px;border-radius:999px;background:#cbd2da;position:relative;transition:.18s;flex:none}
-  .sw .knob{position:absolute;top:2px;left:2px;width:17px;height:17px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:.18s}
-  .sw.on .track{background:var(--g)}
-  .sw.on .knob{transform:translateX(17px)}
-  .sw.sw-recv:not(.on) .track{background:var(--red)}
-  .toolrow .sw{background:#fff;border:1.5px solid var(--line);border-radius:9px;padding:5px 11px}
-  .sync{display:inline-flex;align-items:center;gap:7px;cursor:pointer;background:#fff;border:1.5px solid var(--line);border-radius:9px;padding:5px 11px;font-size:12.5px;font-weight:700;color:var(--ink2);user-select:none;transition:.12s}
-  .sync:hover{box-shadow:0 0 0 2px rgba(199,154,58,.25)}
-  .sync .sdot{width:8px;height:8px;border-radius:50%;background:var(--gray);flex:none}
-  .sync.off{opacity:.85}
-  .sync.idle{color:var(--g);border-color:#bfe6cd} .sync.idle .sdot{background:var(--g)}
-  .sync.busy .sdot{background:var(--amber);animation:syncpulse 1s infinite}
-  .sync.err{color:var(--red);border-color:#f0c4c4} .sync.err .sdot{background:var(--red)}
-  @keyframes syncpulse{0%,100%{opacity:1}50%{opacity:.25}}
+    if (action === 'pull') {
+      const rows = sh.getDataRange().getValues();
+      rows.shift();
+      const cells = rows
+        .filter(function (r) { return r[0] !== '' && r[0] !== null; })
+        .map(function (r) { return { i: String(r[0]), f: String(r[1]), v: String(r[2]), t: Number(r[3]) || 0 }; });
+      return out({ ok: true, cells: cells });
+    }
 
-  details.legend{background:var(--card);border:1px solid var(--line);border-radius:12px;margin:12px 0 4px;box-shadow:var(--shadow)}
-  details.legend summary{cursor:pointer;padding:11px 15px;font-weight:700;font-size:13.5px;list-style:none;display:flex;align-items:center;gap:8px}
-  details.legend summary::-webkit-details-marker{display:none}
-  details.legend summary::before{content:"▸";color:var(--gold);transition:.15s}
-  details.legend[open] summary::before{transform:rotate(90deg)}
-  .legend-grid{display:flex;flex-wrap:wrap;gap:8px;padding:4px 15px 15px}
-  .legend-grid .li{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--ink2)}
+    if (action === 'push') {
+      const cells = body.cells || [];
+      const rows = sh.getDataRange().getValues();
+      const idx = {};
+      for (var r = 1; r < rows.length; r++) { idx[rows[r][0] + '|' + rows[r][1]] = r + 1; }
 
-  .badge{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:7px;white-space:nowrap;line-height:1.6}
-  .b-ok{background:var(--g-bg);color:var(--g)} .b-amber{background:var(--amber-bg);color:var(--amber)}
-  .b-red{background:var(--red-bg);color:var(--red)} .b-blue{background:var(--blue-bg);color:var(--blue)}
-  .b-purple{background:var(--purple-bg);color:var(--purple)} .b-gray{background:var(--gray-bg);color:var(--gray)}
-  .b-orange{background:var(--orange-bg);color:var(--orange)}
-
-  .section{border-radius:16px;padding:14px 14px 16px;margin-top:20px}
-  .section.sec-use{background:#edf8f1;box-shadow:inset 0 0 0 1px #d2ecdd}
-  .section.sec-unused{background:#eceff3;box-shadow:inset 0 0 0 1px #dde3ea}
-  .section-title{display:inline-flex;align-items:center;gap:8px;font-size:13.5px;font-weight:800;
-    padding:6px 15px;border-radius:999px;margin:0 0 13px;color:#fff;letter-spacing:.5px}
-  .section-title.t-use{background:var(--g)}
-  .section-title.t-unused{background:var(--gray)}
-  .section-title .cnt{font-size:12px;font-weight:600;opacity:.9}
-
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:12px}
-  .card{position:relative;background:var(--card);border:1px solid var(--line);border-radius:13px;padding:13px 15px 13px 18px;box-shadow:var(--shadow);overflow:hidden;transition:.12s}
-  .card:hover{box-shadow:0 4px 14px rgba(20,30,40,.10)}
-  .card .accent{position:absolute;left:0;top:0;bottom:0;width:5px}
-  .card.dim{opacity:.66}
-  .card.dim .accent{filter:saturate(.25)}
-  .c-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
-  .c-name{font-size:15.5px;font-weight:800;letter-spacing:.2px;cursor:pointer}
-  .c-name:hover{color:var(--gold)}
-  .recv-on{color:var(--g);font-weight:800;font-size:13px;white-space:nowrap}
-  .recv-off{color:var(--red);font-weight:800;font-size:13px;white-space:nowrap}
-
-  /* view badges */
-  .rowio{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
-  .io{display:flex;align-items:center;gap:5px;background:#f7f9fb;border:1px solid var(--line);border-radius:8px;padding:3px 9px;font-size:12px;font-weight:600}
-  .io .k{color:var(--muted)} .io .v.on{color:var(--g)} .io .v.off{color:var(--gray)}
-
-  /* edit controls: 内部/外部 分开 */
-  .ctrl{margin-top:11px;border-top:1px dashed var(--line);padding-top:11px;display:flex;flex-direction:column;gap:8px}
-  .ie{display:flex;gap:8px}
-  .ie .col{flex:1;background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:7px 9px}
-  .ie .cl{font-size:11px;color:var(--muted);font-weight:700;display:block;margin-bottom:4px;letter-spacing:.5px}
-  .sel{width:100%;appearance:none;-webkit-appearance:none;border:1.5px solid var(--line);border-radius:8px;
-    padding:6px 26px 6px 10px;font-size:13px;font-weight:800;background:#fff;color:var(--ink);cursor:pointer;
-    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><path d='M1 1l4 4 4-4' fill='none' stroke='%236b7682' stroke-width='1.6'/></svg>");background-repeat:no-repeat;background-position:right 8px center}
-  .sel.sel-ok{color:var(--g);border-color:#bfe6cd;background-color:var(--g-bg)}
-  .sel.sel-amber{color:var(--amber);border-color:#f0dcb4;background-color:var(--amber-bg)}
-  .sel.sel-red{color:var(--red);border-color:#f0c4c4;background-color:var(--red-bg)}
-  .sel.sel-blue{color:var(--blue);border-color:#bcd9e6;background-color:var(--blue-bg)}
-  .sel.sel-purple{color:var(--purple);border-color:#d6c5f0;background-color:var(--purple-bg)}
-  .sel.sel-orange{color:var(--orange);border-color:#f0d2b4;background-color:var(--orange-bg)}
-  .sel.sel-gray{color:var(--gray);border-color:#d4dae0;background-color:var(--gray-bg)}
-  .sw-row{display:flex;gap:14px;flex-wrap:wrap;padding-top:2px}
-
-  .meta{display:flex;gap:14px;flex-wrap:wrap;margin-top:9px;font-size:12.5px;color:var(--ink2)}
-  .meta .m .k{color:var(--muted);font-size:11px;display:block} .meta .m .v{font-weight:700}
-  .note{margin-top:10px;background:#fafbfc;border:1px dashed var(--line);border-radius:8px;padding:7px 10px;font-size:12px;color:var(--ink2);line-height:1.45}
-  .note .nk{color:var(--gold);font-weight:800;margin-right:5px}
-  .note-edit{width:100%;margin-top:10px;border:1.5px solid var(--line);border-radius:8px;padding:7px 10px;font-size:12.5px;font-family:inherit;color:var(--ink2);background:#fff;resize:vertical;min-height:40px;outline:none;line-height:1.45}
-  .note-edit:focus{border-color:var(--gold)}
-  .note-edit::placeholder{color:#aab2bb}
-  .note.n2 .nk{color:var(--blue)}
-  .note-wrap{margin-top:10px}
-  .note-wrap .ncl{font-size:11px;color:var(--muted);font-weight:700;display:block;margin-bottom:4px;letter-spacing:.5px}
-  .note-wrap .note-edit{margin-top:0}
-  .srctip{margin-top:5px;font-size:11px;color:var(--muted);background:#f1f4f7;border-left:3px solid var(--line);border-radius:6px;padding:5px 9px;line-height:1.4}
-  .chg{margin-top:8px;font-size:11px;color:var(--gold);font-weight:700;display:flex;align-items:center;gap:5px}
-
-  .empty{text-align:center;color:var(--muted);padding:50px 0;font-size:14px}
-  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:var(--nav);color:#fff;padding:9px 18px;border-radius:10px;font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:60}
-  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-  footer{margin-top:30px;color:var(--muted);font-size:11.5px;text-align:center;line-height:1.7}
-  @media (max-width:560px){.grid{grid-template-columns:1fr}.title{font-size:19px}.stat{min-width:calc(50% - 5px);flex:none}header.top{border-radius:0 0 16px 16px}}
-</style>
-</head>
-<body>
-<div class="wrap">
-  <header class="top">
-    <div class="title"><span id="siteTitle"></span> <span class="tag" id="siteBadge"></span></div>
-    <div class="sub">
-      <span>支付通道收款 / 出款 / 下发状态速查与开关台</span>
-      <span>共 <b id="totalN"></b> 条通道</span>
-      <span>最后更新：<b id="lastUpdated"></b></span>
-    </div>
-    <div class="stats">
-      <div class="stat"><div class="n" id="s-use">0</div><div class="l">使用中</div></div>
-      <div class="stat"><div class="n" id="s-unused">0</div><div class="l">不使用</div></div>
-      <div class="stat on"><div class="n" id="s-recv">0</div><div class="l">收款开启 ⭕️</div></div>
-      <div class="stat off"><div class="n" id="s-recvoff">0</div><div class="l">收款关闭 ❌</div></div>
-    </div>
-  </header>
-
-  <div class="bar">
-    <div class="search">
-      <span class="ic">🔍</span>
-      <input id="q" type="search" placeholder="搜寻商户名称或备注…" autocomplete="off">
-      <button class="clr" id="clr">×</button>
-    </div>
-    <div class="toolrow">
-      <div class="filters" id="filters">
-        <span class="chip c-neutral active" data-f="sec" data-v="all">全部区块</span>
-        <span class="chip c-green" data-f="sec" data-v="使用中">使用中</span>
-        <span class="chip c-gray" data-f="sec" data-v="不使用">不使用</span>
-        <span class="chip c-green" data-f="recv" data-v="on">收款开 ⭕️</span>
-        <span class="chip c-red" data-f="recv" data-v="off">收款关 ❌</span>
-        <span class="chip c-blue" data-f="出款" data-v="on">出款开</span>
-        <span class="chip c-amber" data-f="下发" data-v="on">下发开</span>
-      </div>
-      <div class="actions">
-        <span class="sw" id="editSw"><span class="track"><span class="knob"></span></span><span>编辑模式</span></span>
-        <span class="sync off" id="syncStat" title="点击立即与云端同步"><span class="sdot"></span><span id="syncTxt">仅本机</span></span>
-      </div>
-    </div>
-  </div>
-
-  <details class="legend">
-    <summary>状态说明（内部 / 外部 栏位）</summary>
-    <div class="legend-grid">
-      <span class="li"><span class="badge b-ok">正常</span>栏位空白＝开启正常</span>
-      <span class="li"><span class="badge b-amber">日切</span>非营业时间</span>
-      <span class="li"><span class="badge b-red">维护</span>渠道维护中</span>
-      <span class="li"><span class="badge b-red">额满，充值关</span>额满且充值已关</span>
-      <span class="li"><span class="badge b-amber">额满，充值没关</span>额满但充值未关</span>
-      <span class="li"><span class="badge b-orange">代付不顺</span>代付出款不顺</span>
-      <span class="li"><span class="badge b-blue">馀额过高</span>馀额过高暂停</span>
-      <span class="li"><span class="badge b-purple">待通知</span>等组长通知开启</span>
-      <span class="li"><span class="badge b-gray">停用</span>停用 / 不开启</span>
-      <span class="li"><span class="badge b-gray">X</span>无 or 不开启</span>
-    </div>
-  </details>
-
-  <div id="list"></div>
-  <div class="empty" id="empty" style="display:none">找不到符合的通道</div>
-  <footer>资料来源：DU_四方_第三方开关记录《四方『内外部』NEW》分页 · 编辑模式可调整状态，变更会记录在本机并显示日期 · 点商户名称可复制</footer>
-</div>
-<div class="toast" id="toast"></div>
-
-<script>
-/* ════════ 可自行修改区 ════════ */
-const SITE_TITLE   = "四方『内外部』通道开关";
-const SITE_BADGE   = "NEW";
-const LAST_UPDATED = "2026/06/19";
-const SYNC_URL     = "https://script.google.com/macros/s/AKfycbwrO_e_GZKavZbADa0Rj9UX1T-dNQMXOg7eakuGyt1H1oSSjdTaozPQ8J6OzWYs8fTDQQ/exec";   // ← 已设定云端同步
-/* ═══════════════════════════════════════════ */
-
-const DATA = [{"收款": "⭕️", "商户": "JJ卡卡", "内部": "", "外部": "", "放置金": "", "下发时间": "", "出款": "✅", "下发": "X", "备注": "", "color": "#E6B8AF", "section": "使用中", "id": 0}, {"收款": "⭕️", "商户": "JJ支付宝", "内部": "", "外部": "", "放置金": "", "下发时间": "", "出款": "✅", "下发": "X", "备注": "", "color": "#E6B8AF", "section": "使用中", "id": 1}, {"收款": "⭕️", "商户": "JJ数字人民币", "内部": "", "外部": "X", "放置金": "", "下发时间": "", "出款": "✅", "下发": "X", "备注": "", "color": "#E6B8AF", "section": "使用中", "id": 2}, {"收款": "⭕️", "商户": "JJ微信", "内部": "", "外部": "X", "放置金": "", "下发时间": "", "出款": "✅", "下发": "X", "备注": "", "color": "#E6B8AF", "section": "使用中", "id": 3}, {"收款": "⭕️", "商户": "WF微信", "内部": "日切", "外部": "X", "放置金": "", "下发时间": "", "出款": "✅", "下发": "X", "备注": "", "color": "#F4CCCC", "section": "使用中", "id": 4}, {"收款": "⭕️", "商户": "WF支付宝", "内部": "日切", "外部": "日切", "放置金": "", "下发时间": "", "出款": "✅", "下发": "X", "备注": "", "color": "#F4CCCC", "section": "使用中", "id": 5}, {"收款": "❌", "商户": "ZCPAY支付宝", "内部": "", "外部": "", "放置金": "5A", "下发时间": "", "出款": "X", "下发": "✅", "备注": "2/8 日量：内4外1", "color": "#FCE5CD", "section": "使用中", "id": 6}, {"收款": "❌", "商户": "全通支付宝", "内部": "维护", "外部": "维护", "放置金": "10A", "下发时间": "", "出款": "X", "下发": "✅", "备注": "内2外2 ；25/6/29改24H", "color": "#FFF2CC", "section": "使用中", "id": 7}, {"收款": "⭕️", "商户": "和奕代收付", "内部": "馀额过高", "外部": "日切", "放置金": "", "下发时间": "x", "出款": "✅", "下发": "X", "备注": "10/12 预留5000起 当测试金 农业.工商不出款", "color": "#D9EAD3", "section": "使用中", "id": 8}, {"收款": "⭕️", "商户": "和奕支付宝", "内部": "馀额过高", "外部": "X", "放置金": "", "下发时间": "x", "出款": "X", "下发": "X", "备注": "09/03 开跑", "color": "#D9EAD3", "section": "使用中", "id": 9}, {"收款": "❌", "商户": "新宝支付宝", "内部": "", "外部": "", "放置金": "20A", "下发时间": "", "出款": "X", "下发": "✅", "备注": "5/21 日量：内8外15 ，26/1/7改24H", "color": "#D0E0E3", "section": "使用中", "id": 10}, {"收款": "❌", "商户": "新宝银联", "内部": "", "外部": "X", "放置金": "3A", "下发时间": "", "出款": "X", "下发": "✅", "备注": "26/05/06通知开启", "color": "#D0E0E3", "section": "使用中", "id": 11}, {"收款": "❌", "商户": "新宝数字人民币", "内部": "等组长通知开启", "外部": "X", "放置金": "3A", "下发时间": "", "出款": "X", "下发": "✅", "备注": "26/05/06通知开启", "color": "#D0E0E3", "section": "使用中", "id": 12}, {"收款": "❌", "商户": "GOSM米多多【支付宝】", "内部": "", "外部": "停用", "放置金": "10A", "下发时间": "下发单间需满2000U", "出款": "X", "下发": "✅", "备注": "6/24：内10A 25/08/13通知开启", "color": "#C9DAF8", "section": "使用中", "id": 13}, {"收款": "❌", "商户": "GOSM米多多【微信】", "内部": "", "外部": "X", "放置金": "10A", "下发时间": "", "出款": "X", "下发": "✅", "备注": "日量无限制 收款已开内部全平台", "color": "#C9DAF8", "section": "使用中", "id": 14}, {"收款": "⭕️", "商户": "VCOTC支付宝", "内部": "", "外部": "X", "放置金": "10A", "下发时间": "", "出款": "X", "下发": "✅", "备注": "", "color": "#CFE2F3", "section": "使用中", "id": 15}, {"收款": "⭕️", "商户": "码上支付宝（新人层）", "内部": "", "外部": "X", "放置金": "10A", "下发时间": "下发单间需满5000U", "出款": "X", "下发": "✅", "备注": "25/6/4 告知：开启", "color": "#D9D2E9", "section": "使用中", "id": 16}, {"收款": "⭕️", "商户": "码上纯代收", "内部": "", "外部": "X", "放置金": "", "下发时间": "下发单间需满5000U", "出款": "X", "下发": "✅", "备注": "日量5A", "color": "#D9D2E9", "section": "使用中", "id": 17}, {"收款": "⭕️", "商户": "码上小额卡卡", "内部": "", "外部": "X", "放置金": "4A", "下发时间": "下发单间需满5000U", "出款": "X", "下发": "✅", "备注": "26/2/4 告知：开启", "color": "#D9D2E9", "section": "使用中", "id": 18}, {"收款": "❌", "商户": "onepay【小荷包】-109", "内部": "", "外部": "X", "放置金": "5A", "下发时间": "", "出款": "X", "下发": "✅", "备注": "日量1A", "color": "#EAD1DC", "section": "使用中", "id": 19}, {"收款": "❌", "商户": "onepay【数字人民币】-302", "内部": "等组长通知开启", "外部": "X", "放置金": "5A", "下发时间": "", "出款": "X", "下发": "✅", "备注": "25/11/8 告知：开启", "color": "#EAD1DC", "section": "使用中", "id": 20}, {"收款": "⭕️", "商户": "onepay【银联扫码】-304", "内部": "", "外部": "X", "放置金": "8000.0", "下发时间": "下发单间需满1000U", "出款": "X", "下发": "✅", "备注": "25/10/23 告知：开启", "color": "#EAD1DC", "section": "使用中", "id": 21}, {"收款": "⭕️", "商户": "宝诺银联扫码『8007』", "内部": "", "外部": "X", "放置金": "8000.0", "下发时间": "下发单间需满1000U", "出款": "X", "下发": "✅", "备注": "宝诺系列余额可互转", "color": "#DD7E6B", "section": "使用中", "id": 22}, {"收款": "⭕️", "商户": "宝诺数字人民币『8005』", "内部": "", "外部": "X", "放置金": "3A", "下发时间": "", "出款": "X", "下发": "✅", "备注": "25/11/3 告知：开启", "color": "#DD7E6B", "section": "使用中", "id": 23}, {"收款": "⭕️", "商户": "宝诺小荷包『8001』", "内部": "", "外部": "X", "放置金": "3A", "下发时间": "", "出款": "X", "下发": "✅", "备注": "25/10/23 告知：开启", "color": "#DD7E6B", "section": "使用中", "id": 24}, {"收款": "⭕️", "商户": "宝诺原生支付宝H5『8077』", "内部": "等组长通知开启", "外部": "X", "放置金": "3A", "下发时间": "上午9点", "出款": "X", "下发": "✅", "备注": "26/3/5 告知：开启", "color": "#DD7E6B", "section": "使用中", "id": 25}, {"收款": "⭕️", "商户": "宝诺支付宝UID『8084』", "内部": "等组长通知开启", "外部": "", "放置金": "10A", "下发时间": "", "出款": "X", "下发": "✅", "备注": "26/1/5 告知：开启", "color": "#DD7E6B", "section": "使用中", "id": 26}, {"收款": "⭕️", "商户": "XQ支付-小额卡卡", "内部": "", "外部": "X", "放置金": "3A", "下发时间": "", "出款": "X", "下发": "✅", "备注": "25/9/17 告知：开启", "color": "#EA9999", "section": "使用中", "id": 27}, {"收款": "⭕️", "商户": "红喜鹊卡转卡", "内部": "", "外部": "X", "放置金": "5A", "下发时间": "", "出款": "X", "下发": "✅", "备注": "26/04/08 告知：开启", "color": "#EA9999", "section": "使用中", "id": 28}, {"收款": "⭕️", "商户": "红喜鹊支转支", "内部": "等组长通知开启", "外部": "X", "放置金": "5A", "下发时间": "下发单间需满1000U", "出款": "X", "下发": "✅", "备注": "26/04/15 告知：开启", "color": "#EA9999", "section": "使用中", "id": 29}, {"收款": "⭕️", "商户": "XPAY支付宝", "内部": "", "外部": "", "放置金": "5A", "下发时间": "", "出款": "X", "下发": "✅", "备注": "26/5/28 告知：开启", "color": "#F9CB9C", "section": "使用中", "id": 30}, {"收款": "❌", "商户": "乐支付宝", "内部": "", "外部": "X", "放置金": "3A", "下发时间": "下发单间需满3000U", "出款": "X", "下发": "✅", "备注": "日量4A", "color": "#FFE599", "section": "使用中", "id": 31}, {"收款": "❌", "商户": "KW支付宝", "内部": "", "外部": "", "放置金": "3A", "下发时间": "下发单间需满人民币2A", "出款": "X", "下发": "✅", "备注": "26/3/18 告知：开启", "color": "#B6D7A8", "section": "使用中", "id": 32}, {"收款": "❌", "商户": "KW支付宝-TOMMY", "内部": "", "外部": "", "放置金": "4A", "下发时间": "下发单间需满3000U", "出款": "X", "下发": "✅", "备注": "26/4/22 告知：开启", "color": "#B6D7A8", "section": "使用中", "id": 33}, {"收款": "⭕️", "商户": "TKpay支付宝", "内部": "日切", "外部": "", "放置金": "3A", "下发时间": "下发单间需满人民币2A", "出款": "X", "下发": "✅", "备注": "26/3/18 告知：开启", "color": "#A2C4C9", "section": "使用中", "id": 34}, {"收款": "⭕️", "商户": "HCPAY", "内部": "日切", "外部": "X", "放置金": "3A", "下发时间": "下发单间需满3000U", "出款": "X", "下发": "✅", "备注": "日量3A 26/1/14 告知：开启", "color": "#A4C2F4", "section": "使用中", "id": 35}, {"收款": "⭕️", "商户": "SIANGO PAY支付宝金条原生H5", "内部": "", "外部": "X", "放置金": "预R 5A↓", "下发时间": "x", "出款": "X", "下发": "X", "备注": "25/12/17 告知：开启", "color": "#9FC5E8", "section": "使用中", "id": 36}, {"收款": "❌", "商户": "乐力付支付宝", "内部": "", "外部": "X", "放置金": "3A", "下发时间": "下发单间需满3000U", "出款": "X", "下发": "✅", "备注": "日量3A 26/4/29 告知：开启", "color": "#B4A7D6", "section": "使用中", "id": 37}, {"收款": "❌", "商户": "新宝支付宝(小额)", "内部": "等组长通知开启", "外部": "X", "放置金": "10A", "下发时间": "x", "出款": "X", "下发": "✅", "备注": "日量8A，26/1/7改24H", "color": "#CCCCCC", "section": "不使用", "id": 38}, {"收款": "", "商户": "草东银联扫码", "内部": "停用", "外部": "X", "放置金": "1.5A", "下发时间": "清空 不用核对", "出款": "X", "下发": "✅", "备注": "26/4/9 旧商户换新商户", "color": "#CCCCCC", "section": "不使用", "id": 39}, {"收款": "⭕️", "商户": "草东银联", "内部": "停用", "外部": "X", "放置金": "1.5A", "下发时间": "清空 不用核对", "出款": "X", "下发": "✅", "备注": "25/10/23 组长告知：开启", "color": "#CCCCCC", "section": "不使用", "id": 40}, {"收款": "⭕️", "商户": "红喜鹊支付宝转卡", "内部": "维护", "外部": "X", "放置金": "3A", "下发时间": "清空 不用核对", "出款": "X", "下发": "✅", "备注": "26/3/25 组长告知：开启", "color": "#CCCCCC", "section": "不使用", "id": 41}, {"收款": "❌", "商户": "新宝微信", "内部": "维护", "外部": "X", "放置金": "10A", "下发时间": "清空 不用核对", "出款": "X", "下发": "✅", "备注": "25/8/25 组长告知：开启", "color": "#CCCCCC", "section": "不使用", "id": 42}, {"收款": "❌", "商户": "新宝支付小额卡卡", "内部": "维护", "外部": "维护", "放置金": "10A", "下发时间": "清空 不用核对", "出款": "X", "下发": "✅", "备注": "", "color": "#CCCCCC", "section": "不使用", "id": 43}, {"收款": "❌", "商户": "新宝原生支付宝", "内部": "维护", "外部": "X", "放置金": "", "下发时间": "清空 不用核对", "出款": "X", "下发": "✅", "备注": "", "color": "#CCCCCC", "section": "不使用", "id": 44}, {"收款": "⭕️", "商户": "ED小额卡卡", "内部": "维护", "外部": "X", "放置金": "3A", "下发时间": "清空 不用核对", "出款": "X", "下发": "✅", "备注": "", "color": "#CCCCCC", "section": "不使用", "id": 45}, {"收款": "⭕️", "商户": "siango pay-数字人民币", "内部": "停用", "外部": "X", "放置金": "", "下发时间": "清空 不用核对", "出款": "X", "下发": "X", "备注": "26/01/26 商户告知 原则上不会跑了 预付已转移至 原生H5", "color": "#CCCCCC", "section": "不使用", "id": 46}, {"收款": "⭕️", "商户": "码上支付宝（NEW）", "内部": "停用", "外部": "X", "放置金": "10A", "下发时间": "清空 不用核对", "出款": "X", "下发": "✅", "备注": "5/27日量13A", "color": "#999999", "section": "不使用", "id": 47}, {"收款": "⭕️", "商户": "福气银联", "内部": "停用", "外部": "X", "放置金": "1.5A", "下发时间": "清空 不用核对", "出款": "X", "下发": "✅", "备注": "25/10/23 组长告知：开启", "color": "#999999", "section": "不使用", "id": 48}, {"收款": "⭕️", "商户": "守恒支付-小额卡卡", "内部": "等组长通知开启", "外部": "X", "放置金": "3A", "下发时间": "清空 不用核对", "出款": "X", "下发": "✅", "备注": "", "color": "#999999", "section": "不使用", "id": 49}, {"收款": "❌", "商户": "Onepay手机银行H5", "内部": "等组长通知开启", "外部": "X", "放置金": "10A", "下发时间": "清空 不用核对", "出款": "X", "下发": "✅", "备注": "25/8/6 组长告知:开启", "color": "#999999", "section": "不使用", "id": 50}, {"收款": "⭕️", "商户": "宝诺手机银行H5", "内部": "等组长通知开启", "外部": "X", "放置金": "3A", "下发时间": "清空 不用核对", "出款": "X", "下发": "✅", "备注": "9/21商户馀额显示问题 实际是0元", "color": "#999999", "section": "不使用", "id": 51}, {"收款": "⭕️", "商户": "福气手机银行H5", "内部": "等组长通知开启", "外部": "X", "放置金": "10A", "下发时间": "清空 不用核对", "出款": "X", "下发": "✅", "备注": "7/2 已正式开跑", "color": "#999999", "section": "不使用", "id": 52}, {"收款": "⭕️", "商户": "ROG【数字人民币】", "内部": "等组长通知开启", "外部": "X", "放置金": "10A", "下发时间": "清空 不用核对", "出款": "X", "下发": "✅", "备注": "25/09/15 组长通知关闭清空，等通知", "color": "#999999", "section": "不使用", "id": 53}, {"收款": "⭕️", "商户": "J支付宝", "内部": "停用", "外部": "X", "放置金": "", "下发时间": "清空 不用核对", "出款": "X", "下发": "✅", "备注": "25/08/14组长通知停用", "color": "#999999", "section": "不使用", "id": 54}, {"收款": "⭕️", "商户": "WF卡卡", "内部": "停用", "外部": "停用", "放置金": "", "下发时间": "清空 不用核对", "出款": "✅", "下发": "X", "备注": "", "color": "#999999", "section": "不使用", "id": 55}, {"收款": "", "商户": "皇冠支付宝(小额2999以下)", "内部": "维护", "外部": "维护", "放置金": "内外共10", "下发时间": "清空 不用核对", "出款": "X", "下发": "✅", "备注": "12/27 组长告知清空馀额后就不用了", "color": "#999999", "section": "不使用", "id": 56}, {"收款": "", "商户": "皇冠支付宝(大额3000以上)", "内部": "维护", "外部": "维护", "放置金": "内外共10", "下发时间": "清空 不用核对", "出款": "X", "下发": "✅", "备注": "12/27 组长告知清空馀额后就不用了", "color": "#999999", "section": "不使用", "id": 57}, {"收款": "❌", "商户": "新宝支付-大额卡卡", "内部": "维护", "外部": "维护", "放置金": "内外共10", "下发时间": "清空 不用核对", "出款": "X", "下发": "✅", "备注": "", "color": "#999999", "section": "不使用", "id": 58}, {"收款": "❌", "商户": "新宝支付-小额卡卡", "内部": "维护", "外部": "维护", "放置金": "内外共10", "下发时间": "清空 不用核对", "出款": "X", "下发": "✅", "备注": "", "color": "#999999", "section": "不使用", "id": 59}, {"收款": "❌", "商户": "新宝-卡转云", "内部": "维护", "外部": "X", "放置金": "", "下发时间": "清空 不用核对", "出款": "X", "下发": "X", "备注": "", "color": "#999999", "section": "不使用", "id": 60}, {"收款": "❌", "商户": "新宝支付宝新人层", "内部": "维护", "外部": "X", "放置金": "20A", "下发时间": "清空 不用核对", "出款": "X", "下发": "✅", "备注": "25/5/23 有与组长谘询开启时间尚未确定 先清空", "color": "#999999", "section": "不使用", "id": 61}, {"收款": "❌", "商户": "新宝银联扫码", "内部": "维护", "外部": "X", "放置金": "5A", "下发时间": "清空 不用核对", "出款": "X", "下发": "✅", "备注": "日收量10A 25/5/23 有与组长谘询开启时间尚未确定 先清空", "color": "#999999", "section": "不使用", "id": 62}, {"收款": "❌", "商户": "米多多卡卡", "内部": "维护", "外部": "X", "放置金": "", "下发时间": "清空 不用核对", "出款": "✅", "下发": "✅", "备注": "9/11 中 清空待通知", "color": "#999999", "section": "不使用", "id": 63}, {"收款": "", "商户": "码上支付", "内部": "维护", "外部": "维护", "放置金": "内外共10", "下发时间": "清空 不用核对", "出款": "X", "下发": "✅", "备注": "", "color": "#999999", "section": "不使用", "id": 64}, {"收款": "", "商户": "EZPAY支付宝", "内部": "维护", "外部": "维护", "放置金": "内外共10", "下发时间": "清空 不用核对", "出款": "X", "下发": "✅", "备注": "上午11点", "color": "#999999", "section": "不使用", "id": 65}, {"收款": "", "商户": "JST支付宝", "内部": "维护", "外部": "维护", "放置金": "内外共20", "下发时间": "清空 不用核对", "出款": "X", "下发": "✅", "备注": "预计早上9点开启通道", "color": "#999999", "section": "不使用", "id": 66}, {"收款": "⭕️", "商户": "七匹狼银联", "内部": "维护", "外部": "X", "放置金": "内5A", "下发时间": "清空 不用核对", "出款": "X", "下发": "✅", "备注": "4/29 清空 恢复待组长通知", "color": "#999999", "section": "不使用", "id": 67}, {"收款": "", "商户": "OTC通道", "内部": "停用", "外部": "停用", "放置金": "", "下发时间": "", "出款": "X", "下发": "X", "备注": "会计专用", "color": "#999999", "section": "不使用", "id": 68}, {"收款": "", "商户": "OTC支付宝", "内部": "停用", "外部": "停用", "放置金": "", "下发时间": "", "出款": "X", "下发": "X", "备注": "会计专用", "color": "#999999", "section": "不使用", "id": 69}, {"收款": "❌", "商户": "心碎支付宝", "内部": "维护", "外部": "维护", "放置金": "10A", "下发时间": "清空 不用核对", "出款": "X", "下发": "✅", "备注": "日量 内5外2", "color": "#999999", "section": "不使用", "id": 70}, {"收款": "❌", "商户": "心碎支付宝(新人层)", "内部": "维护", "外部": "X", "放置金": "4.5A", "下发时间": "清空 不用核对", "出款": "X", "下发": "✅", "备注": "6/4 日量：内4", "color": "#999999", "section": "不使用", "id": 71}, {"收款": "⭕️", "商户": "ONE小额卡卡", "内部": "停用", "外部": "X", "放置金": "4A", "下发时间": "清空 不用核对", "出款": "X", "下发": "✅", "备注": "", "color": "#999999", "section": "不使用", "id": 72}, {"收款": "❌", "商户": "凌霄支付-手机银行H5", "内部": "停用", "外部": "X", "放置金": "3A", "下发时间": "清空 不用核对", "出款": "X", "下发": "✅", "备注": "9/8 组长告知清空不使用", "color": "#999999", "section": "不使用", "id": 73}, {"收款": "❌", "商户": "中联支付（新卡密）", "内部": "维护", "外部": "X", "放置金": "2.5A", "下发时间": "清空 不用核对", "出款": "X", "下发": "✅", "备注": "26/3/28 已退群 不使用", "color": "#999999", "section": "不使用", "id": 74}];
-DATA.forEach((d,i)=>d.id=i);
-
-const STATES=[
-  {v:'',         t:'正常',     sel:'sel-ok',    badge:'b-ok',     btxt:'正常'},
-  {v:'日切',      t:'日切',     sel:'sel-amber', badge:'b-amber',  btxt:'日切'},
-  {v:'维护',      t:'维护',     sel:'sel-red',   badge:'b-red',    btxt:'维护'},
-  {v:'额满，充值关',  t:'额满，充值关',   sel:'sel-red',    badge:'b-red',    btxt:'额满，充值关'},
-  {v:'额满，充值没关',t:'额满，充值没关', sel:'sel-amber',  badge:'b-amber',  btxt:'额满，充值没关'},
-  {v:'代付不顺',     t:'代付不顺',       sel:'sel-orange', badge:'b-orange', btxt:'代付不顺'},
-  {v:'馀额过高',  t:'馀额过高', sel:'sel-blue',  badge:'b-blue',   btxt:'馀额过高'},
-  {v:'等组长通知开启',t:'待通知',sel:'sel-purple',badge:'b-purple',btxt:'待通知'},
-  {v:'停用',      t:'停用',     sel:'sel-gray',  badge:'b-gray',   btxt:'停用'},
-  {v:'X',         t:'X / 不开启',sel:'sel-gray', badge:'b-gray',   btxt:'X'}
-];
-function stMeta(v){
-  v=(v||'').trim();
-  let m=STATES.find(s=>s.v===v);
-  if(m) return m;
-  if(v.indexOf('通知')>=0||v.indexOf('待')>=0) return STATES[5];
-  return {v:v,t:v,sel:'sel-gray',badge:'b-gray',btxt:v};
-}
-function isOn(v){ return (v||'').trim()==='✅'; }
-function recvOn(v){ return (v||'').indexOf('⭕')>=0; }
-
-/* ── 本机储存 + 云端同步 ── */
-const KEY='du_channel_overrides_v1';
-let overrides={}, tsMap={}, editMode=false;
-try{ overrides=JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){ overrides={}; }
-try{ tsMap=JSON.parse(localStorage.getItem(KEY+'_ts'))||{}; }catch(e){ tsMap={}; }
-try{ editMode=localStorage.getItem(KEY+'_edit')==='1'; }catch(e){}
-function persist(){ try{ localStorage.setItem(KEY,JSON.stringify(overrides)); localStorage.setItem(KEY+'_ts',JSON.stringify(tsMap)); }catch(e){} }
-function persistEdit(){ try{ localStorage.setItem(KEY+'_edit',editMode?'1':'0'); }catch(e){} }
-function fmtDate(ts){const d=new Date(ts),p=n=>String(n).padStart(2,'0');return d.getFullYear()+'/'+p(d.getMonth()+1)+'/'+p(d.getDate());}
-function today(){return fmtDate(Date.now());}
-
-function eff(d){
-  const o=overrides[d.id]||{};
-  return {
-    内部:'内部' in o?o.内部:d.内部, 外部:'外部' in o?o.外部:d.外部,
-    收款:'收款' in o?o.收款:d.收款, 出款:'出款' in o?o.出款:d.出款,
-    下发:'下发' in o?o.下发:d.下发, 备注:'备注' in o?o.备注:d.备注, 备注2:'备注2' in o?o.备注2:'', changed:o.changed||''
-  };
-}
-/* 套用单一栏位（本机编辑或云端拉回共用）*/
-function applyCell(id,field,val,ts){
-  overrides[id]=overrides[id]||{};
-  overrides[id][field]=val;
-  overrides[id].changed=fmtDate(ts);
-  tsMap[id+'|'+field]=ts;
-}
-function setOverride(id,field,val){
-  const ts=Date.now();
-  applyCell(id,field,val,ts);
-  persist();
-  queuePush(id,field,val,ts);
-}
-
-/* ── Google Apps Script + Google Sheet 后端 ── */
-let pushQ={}, pushT=null;
-function setSync(s){
-  const el=document.getElementById('syncStat'); if(!el)return;
-  el.className='sync '+s;
-  document.getElementById('syncTxt').textContent=
-    ({off:'仅本机',idle:'云端已连接',busy:'同步中…',err:'同步失败·点此重试'})[s]||'';
-}
-function queuePush(id,field,val,ts){
-  if(!SYNC_URL) return;
-  pushQ[id+'|'+field]={i:id,f:field,v:val,t:ts};
-  clearTimeout(pushT); pushT=setTimeout(flushPush,800);
-}
-function flushPush(){
-  if(!SYNC_URL) return;
-  const cells=Object.values(pushQ); if(!cells.length) return;
-  pushQ={}; setSync('busy');
-  fetch(SYNC_URL,{method:'POST',body:JSON.stringify({action:'push',cells:cells})})
-    .then(r=>r.json()).then(()=>setSync('idle'))
-    .catch(()=>{ cells.forEach(c=>pushQ[c.i+'|'+c.f]=c); setSync('err'); });
-}
-function cloudPull(){
-  if(!SYNC_URL){ setSync('off'); return; }
-  setSync('busy');
-  fetch(SYNC_URL+(SYNC_URL.indexOf('?')<0?'?':'&')+'action=pull&_t='+Date.now())
-    .then(r=>r.json()).then(res=>{
-      const cells=(res&&res.cells)||[]; let changed=false;
-      cells.forEach(c=>{ const key=c.i+'|'+c.f;
-        if((c.t||0)>(tsMap[key]||0)){ applyCell(c.i,c.f,c.v,c.t); changed=true; } });
-      /* 把本机较新的（离线时改的）推回云端 */
-      const up=[];
-      Object.keys(tsMap).forEach(key=>{
-        const cloud=cells.find(c=>(c.i+'|'+c.f)===key);
-        if(!cloud || tsMap[key]>(cloud.t||0)){ const p=key.split('|'); up.push({i:+p[0],f:p[1],v:overrides[p[0]][p[1]],t:tsMap[key]}); }
+      cells.forEach(function (c) {
+        const key = c.i + '|' + c.f;
+        const ts = Number(c.t) || 0;
+        const rn = idx[key];
+        if (rn) {
+          const existTs = Number(sh.getRange(rn, 4).getValue()) || 0;
+          if (ts >= existTs) { sh.getRange(rn, 1, 1, 4).setValues([[c.i, c.f, c.v, ts]]); }
+        } else {
+          sh.appendRow([c.i, c.f, c.v, ts]);
+          idx[key] = sh.getLastRow();
+        }
       });
-      if(up.length){ up.forEach(c=>pushQ[c.i+'|'+c.f]=c); flushPush(); }
-      persist(); setSync('idle');
-      if(changed){ render(); stats(); }
-    })
-    .catch(()=>setSync('err'));
-}
+      return out({ ok: true, saved: cells.length });
+    }
 
-const state={sec:'all',recv:null,出款:null,下发:null,q:''};
-function pass(d){
-  const e=eff(d);
-  if(state.sec!=='all' && d.section!==state.sec) return false;
-  if(state.recv==='on' && !recvOn(e.收款)) return false;
-  if(state.recv==='off' && recvOn(e.收款)) return false;
-  if(state.出款==='on' && !isOn(e.出款)) return false;
-  if(state.下发==='on' && !isOn(e.下发)) return false;
-  if(state.q){ if((d.商户+' '+(e.备注||'')).toLowerCase().indexOf(state.q.toLowerCase())<0) return false; }
-  return true;
-}
-function esc(s){return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
-
-function optsHTML(cur){
-  return STATES.map(s=>`<option value="${esc(s.v)}"${s.v===(cur||'').trim()?' selected':''}>${s.t}</option>`).join('');
-}
-function swHTML(label,on,id,field,recv){
-  return `<span class="sw ${recv?'sw-recv':''} ${on?'on':''}" data-id="${id}" data-field="${field}">
-    <span class="track"><span class="knob"></span></span><span>${label}</span></span>`;
-}
-
-function cardHTML(d){
-  const e=eff(d);
-  const recv=recvOn(e.收款), inM=stMeta(e.内部), outM=stMeta(e.外部);
-  const dim=d.section==='不使用'?' dim':'';
-  let body;
-  if(editMode){
-    body=`<div class="ctrl">
-      <div class="ie">
-        <div class="col"><span class="cl">内部</span>
-          <select class="sel ${inM.sel}" data-id="${d.id}" data-field="内部">${optsHTML(e.内部)}</select></div>
-        <div class="col"><span class="cl">外部</span>
-          <select class="sel ${outM.sel}" data-id="${d.id}" data-field="外部">${optsHTML(e.外部)}</select></div>
-      </div>
-      <div class="sw-row">
-        ${swHTML('收款',recv,d.id,'收款',true)}
-        ${swHTML('出款',isOn(e.出款),d.id,'出款')}
-        ${swHTML('下发',isOn(e.下发),d.id,'下发')}
-      </div>
-    </div>`;
-  } else {
-    body=`<div class="rowio">
-      <span class="io"><span class="k">内部</span><span class="badge ${inM.badge}">${inM.btxt}</span></span>
-      <span class="io"><span class="k">外部</span><span class="badge ${outM.badge}">${outM.btxt}</span></span>
-      <span class="io"><span class="k">出款</span><span class="v ${isOn(e.出款)?'on':'off'}">${isOn(e.出款)?'✅':'✕'}</span></span>
-      <span class="io"><span class="k">下发</span><span class="v ${isOn(e.下发)?'on':'off'}">${isOn(e.下发)?'✅':'✕'}</span></span>
-    </div>`;
+    return out({ ok: false, error: 'unknown action' });
+  } catch (err) {
+    return out({ ok: false, error: String(err) });
+  } finally {
+    lock.releaseLock();
   }
-  let meta='';
-  if(d.放置金) meta+=`<div class="m"><span class="k">放置金</span><span class="v">${esc(d.放置金)}</span></div>`;
-  if(d.下发时间) meta+=`<div class="m"><span class="k">下发时间</span><span class="v">${esc(d.下发时间)}</span></div>`;
-  const n1=e.备注||'', n2=e.备注2||'';
-  let note;
-  if(editMode){
-    note=`<div class="note-wrap"><span class="ncl">原始备注</span>`
-      +`<textarea class="note-edit" data-id="${d.id}" data-field="备注" rows="2" placeholder="点此输入 / 修改原始备注…">${esc(n1)}</textarea>`
-      +((d.备注 && d.备注!==n1)?`<div class="srctip">原文：${esc(d.备注)}</div>`:'')
-      +`</div>`
-      +`<div class="note-wrap"><span class="ncl">补充备注</span>`
-      +`<textarea class="note-edit" data-id="${d.id}" data-field="备注2" rows="2" placeholder="点此输入补充备注…">${esc(n2)}</textarea></div>`;
-  } else {
-    note=(n1?`<div class="note"><span class="nk">原始备注</span>${esc(n1)}</div>`:'')
-       +(n2?`<div class="note n2"><span class="nk">补充备注</span>${esc(n2)}</div>`:'');
-  }
-  const chg=e.changed?`<div class="chg">✎ 最后变更：${e.changed}</div>`:'';
-  return `<div class="card${dim}">
-    <span class="accent" style="background:${d.color||'#ccc'}"></span>
-    <div class="c-head">
-      <span class="c-name" data-copy="${esc(d.商户)}">${esc(d.商户)}</span>
-      <span>${recv?'<span class="recv-on">⭕️ 收款</span>':'<span class="recv-off">❌ 停收</span>'}</span>
-    </div>
-    ${body}${meta?`<div class="meta">${meta}</div>`:''}${note}${chg}</div>`;
 }
 
-function render(){
-  const rows=DATA.filter(pass);
-  let html='';
-  [['使用中','use'],['不使用','unused']].forEach(([name,key])=>{
-    const items=rows.filter(d=>d.section===name);
-    if(!items.length) return;
-    html+=`<div class="section sec-${key}"><div class="section-title t-${key}">${name}<span class="cnt">${items.length} 条</span></div><div class="grid">${items.map(cardHTML).join('')}</div></div>`;
-  });
-  document.getElementById('list').innerHTML=html;
-  document.getElementById('empty').style.display=rows.length?'none':'block';
-}
-function stats(){
-  const on=DATA.filter(d=>recvOn(eff(d).收款)).length;
-  document.getElementById('s-use').textContent=DATA.filter(d=>d.section==='使用中').length;
-  document.getElementById('s-unused').textContent=DATA.filter(d=>d.section==='不使用').length;
-  document.getElementById('s-recv').textContent=on;
-  document.getElementById('s-recvoff').textContent=DATA.length-on;
-  document.getElementById('totalN').textContent=DATA.length;
+function getSheet() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  let sh = ss.getSheetByName(SHEET);
+  if (!sh) { sh = ss.insertSheet(SHEET); sh.appendRow(['id', 'field', 'value', 'ts']); }
+  return sh;
 }
 
-/* filters */
-document.getElementById('filters').addEventListener('click',e=>{
-  const chip=e.target.closest('.chip'); if(!chip)return;
-  const f=chip.dataset.f,v=chip.dataset.v;
-  if(f==='sec'){ state.sec=v; document.querySelectorAll('[data-f=sec]').forEach(c=>c.classList.remove('active')); chip.classList.add('active'); }
-  else{ const cur=state[f]===v; state[f]=cur?null:v; chip.classList.toggle('active',!cur); }
-  render();
-});
-
-/* search */
-const q=document.getElementById('q'),clr=document.getElementById('clr');
-q.addEventListener('input',()=>{state.q=q.value.trim();clr.style.display=q.value?'block':'none';render();});
-clr.addEventListener('click',()=>{q.value='';state.q='';clr.style.display='none';render();q.focus();});
-
-/* list interactions: select change / toggle / copy */
-const list=document.getElementById('list');
-list.addEventListener('change',e=>{
-  const s=e.target.closest('select.sel'); if(!s)return;
-  setOverride(+s.dataset.id,s.dataset.field,s.value); render(); stats();
-});
-list.addEventListener('input',e=>{
-  const ta=e.target.closest('textarea.note-edit'); if(!ta)return;
-  setOverride(+ta.dataset.id,ta.dataset.field,ta.value); /* 不重绘以保留游标 */
-});
-list.addEventListener('click',e=>{
-  const sw=e.target.closest('.sw');
-  if(sw){ const id=+sw.dataset.id,f=sw.dataset.field,cur=eff(DATA[id])[f];
-    let nv; if(f==='收款') nv=recvOn(cur)?'❌':'⭕️'; else nv=isOn(cur)?'X':'✅';
-    setOverride(id,f,nv); render(); stats(); return; }
-  const n=e.target.closest('[data-copy]');
-  if(n){ const t=n.dataset.copy; (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>toast('已复制：'+t)).catch(()=>toast('已复制：'+t)); }
-});
-
-/* edit mode */
-const editSw=document.getElementById('editSw');
-function syncEdit(){ editSw.classList.toggle('on',editMode); }
-editSw.addEventListener('click',()=>{ editMode=!editMode; persistEdit(); syncEdit(); render(); });
-
-const toastEl=document.getElementById('toast');let tT;
-function toast(m){toastEl.textContent=m;toastEl.classList.add('show');clearTimeout(tT);tT=setTimeout(()=>toastEl.classList.remove('show'),1500);}
-
-document.title=SITE_TITLE+' '+SITE_BADGE;
-document.getElementById('siteTitle').textContent=SITE_TITLE;
-document.getElementById('siteBadge').textContent=SITE_BADGE;
-document.getElementById('lastUpdated').textContent=LAST_UPDATED;
-syncEdit(); stats(); render();
-
-document.getElementById('syncStat').addEventListener('click',cloudPull);
-if(SYNC_URL){ cloudPull(); setInterval(cloudPull,25000); window.addEventListener('focus',cloudPull); }
-else setSync('off');
-</script>
-</body>
-</html>
+function out(obj) {
+  return ContentService
+    .createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
+}
