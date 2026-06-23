@@ -125,6 +125,11 @@
   .note-edit{width:100%;margin-top:10px;border:1.5px solid var(--line);border-radius:8px;padding:7px 10px;font-size:12.5px;font-family:inherit;color:var(--ink2);background:#fff;resize:vertical;min-height:40px;outline:none;line-height:1.45}
   .note-edit:focus{border-color:var(--gold)}
   .note-edit::placeholder{color:#aab2bb}
+  .note.n2 .nk{color:var(--blue)}
+  .note-wrap{margin-top:10px}
+  .note-wrap .ncl{font-size:11px;color:var(--muted);font-weight:700;display:block;margin-bottom:4px;letter-spacing:.5px}
+  .note-wrap .note-edit{margin-top:0}
+  .srctip{margin-top:5px;font-size:11px;color:var(--muted);background:#f1f4f7;border-left:3px solid var(--line);border-radius:6px;padding:5px 9px;line-height:1.4}
   .chg{margin-top:8px;font-size:11px;color:var(--gold);font-weight:700;display:flex;align-items:center;gap:5px}
 
   .empty{text-align:center;color:var(--muted);padding:50px 0;font-size:14px}
@@ -241,7 +246,7 @@ function eff(d){
   return {
     内部:'内部' in o?o.内部:d.内部, 外部:'外部' in o?o.外部:d.外部,
     收款:'收款' in o?o.收款:d.收款, 出款:'出款' in o?o.出款:d.出款,
-    下发:'下发' in o?o.下发:d.下发, 备注:'备注' in o?o.备注:d.备注, changed:o.changed||''
+    下发:'下发' in o?o.下发:d.下发, 备注:'备注' in o?o.备注:d.备注, 备注2:'备注2' in o?o.备注2:'', changed:o.changed||''
   };
 }
 function setOverride(id,field,val){
@@ -302,10 +307,19 @@ function cardHTML(d){
   let meta='';
   if(d.放置金) meta+=`<div class="m"><span class="k">放置金</span><span class="v">${esc(d.放置金)}</span></div>`;
   if(d.下发时间) meta+=`<div class="m"><span class="k">下发时间</span><span class="v">${esc(d.下发时间)}</span></div>`;
-  const noteVal=e.备注||'';
-  const note=editMode
-    ? `<textarea class="note-edit" data-id="${d.id}" rows="2" placeholder="点此输入 / 修改备注…">${esc(noteVal)}</textarea>`
-    : (noteVal?`<div class="note"><span class="nk">备注</span>${esc(noteVal)}</div>`:'');
+  const n1=e.备注||'', n2=e.备注2||'';
+  let note;
+  if(editMode){
+    note=`<div class="note-wrap"><span class="ncl">原始备注</span>`
+      +`<textarea class="note-edit" data-id="${d.id}" data-field="备注" rows="2" placeholder="点此输入 / 修改原始备注…">${esc(n1)}</textarea>`
+      +((d.备注 && d.备注!==n1)?`<div class="srctip">原文：${esc(d.备注)}</div>`:'')
+      +`</div>`
+      +`<div class="note-wrap"><span class="ncl">补充备注</span>`
+      +`<textarea class="note-edit" data-id="${d.id}" data-field="备注2" rows="2" placeholder="点此输入补充备注…">${esc(n2)}</textarea></div>`;
+  } else {
+    note=(n1?`<div class="note"><span class="nk">原始备注</span>${esc(n1)}</div>`:'')
+       +(n2?`<div class="note n2"><span class="nk">补充备注</span>${esc(n2)}</div>`:'');
+  }
   const chg=e.changed?`<div class="chg">✎ 最后变更：${e.changed}</div>`:'';
   return `<div class="card${dim}">
     <span class="accent" style="background:${d.color||'#ccc'}"></span>
@@ -358,7 +372,7 @@ list.addEventListener('change',e=>{
 });
 list.addEventListener('input',e=>{
   const ta=e.target.closest('textarea.note-edit'); if(!ta)return;
-  setOverride(+ta.dataset.id,'备注',ta.value); /* 不重绘以保留游标 */
+  setOverride(+ta.dataset.id,ta.dataset.field,ta.value); /* 不重绘以保留游标 */
 });
 list.addEventListener('click',e=>{
   const sw=e.target.closest('.sw');
