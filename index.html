@@ -12,6 +12,7 @@
     --g:#1f9d57; --g-bg:#e7f6ec; --amber:#c9871a; --amber-bg:#fdf3e0;
     --red:#cf3b3b; --red-bg:#fbe9e9; --blue:#2f6f8f; --blue-bg:#e6f1f6;
     --purple:#7a51c4; --purple-bg:#efe9fb; --gray:#8a939e; --gray-bg:#eef1f4;
+    --orange:#d9772e; --orange-bg:#fbeede;
     --shadow:0 1px 2px rgba(20,30,40,.06),0 2px 8px rgba(20,30,40,.05);
   }
   *{box-sizing:border-box;margin:0;padding:0}
@@ -76,6 +77,7 @@
   .b-ok{background:var(--g-bg);color:var(--g)} .b-amber{background:var(--amber-bg);color:var(--amber)}
   .b-red{background:var(--red-bg);color:var(--red)} .b-blue{background:var(--blue-bg);color:var(--blue)}
   .b-purple{background:var(--purple-bg);color:var(--purple)} .b-gray{background:var(--gray-bg);color:var(--gray)}
+  .b-orange{background:var(--orange-bg);color:var(--orange)}
 
   .section-title{font-size:14px;font-weight:800;margin:22px 4px 10px;display:flex;align-items:center;gap:9px;color:var(--ink)}
   .section-title .dot{width:9px;height:9px;border-radius:50%}
@@ -112,6 +114,7 @@
   .sel.sel-red{color:var(--red);border-color:#f0c4c4;background-color:var(--red-bg)}
   .sel.sel-blue{color:var(--blue);border-color:#bcd9e6;background-color:var(--blue-bg)}
   .sel.sel-purple{color:var(--purple);border-color:#d6c5f0;background-color:var(--purple-bg)}
+  .sel.sel-orange{color:var(--orange);border-color:#f0d2b4;background-color:var(--orange-bg)}
   .sel.sel-gray{color:var(--gray);border-color:#d4dae0;background-color:var(--gray-bg)}
   .sw-row{display:flex;gap:14px;flex-wrap:wrap;padding-top:2px}
 
@@ -163,10 +166,6 @@
       </div>
       <div class="actions">
         <span class="sw" id="editSw"><span class="track"><span class="knob"></span></span><span>编辑模式</span></span>
-        <button class="btn" id="exportBtn">汇出</button>
-        <button class="btn" id="importBtn">汇入</button>
-        <button class="btn" id="resetBtn">还原预设</button>
-        <input type="file" id="importFile" accept="application/json" style="display:none">
       </div>
     </div>
   </div>
@@ -177,7 +176,9 @@
       <span class="li"><span class="badge b-ok">正常</span>栏位空白＝开启正常</span>
       <span class="li"><span class="badge b-amber">日切</span>非营业时间</span>
       <span class="li"><span class="badge b-red">维护</span>渠道维护中</span>
-      <span class="li"><span class="badge b-red">限额满</span>当日限额已满</span>
+      <span class="li"><span class="badge b-red">额满，充值关</span>额满且充值已关</span>
+      <span class="li"><span class="badge b-amber">额满，充值没关</span>额满但充值未关</span>
+      <span class="li"><span class="badge b-orange">代付不顺</span>代付出款不顺</span>
       <span class="li"><span class="badge b-blue">馀额过高</span>馀额过高暂停</span>
       <span class="li"><span class="badge b-purple">待通知</span>等组长通知开启</span>
       <span class="li"><span class="badge b-gray">停用</span>停用 / 不开启</span>
@@ -205,7 +206,9 @@ const STATES=[
   {v:'',         t:'正常',     sel:'sel-ok',    badge:'b-ok',     btxt:'正常'},
   {v:'日切',      t:'日切',     sel:'sel-amber', badge:'b-amber',  btxt:'日切'},
   {v:'维护',      t:'维护',     sel:'sel-red',   badge:'b-red',    btxt:'维护'},
-  {v:'限额满',    t:'限额满',   sel:'sel-red',   badge:'b-red',    btxt:'限额满'},
+  {v:'额满，充值关',  t:'额满，充值关',   sel:'sel-red',    badge:'b-red',    btxt:'额满，充值关'},
+  {v:'额满，充值没关',t:'额满，充值没关', sel:'sel-amber',  badge:'b-amber',  btxt:'额满，充值没关'},
+  {v:'代付不顺',     t:'代付不顺',       sel:'sel-orange', badge:'b-orange', btxt:'代付不顺'},
   {v:'馀额过高',  t:'馀额过高', sel:'sel-blue',  badge:'b-blue',   btxt:'馀额过高'},
   {v:'等组长通知开启',t:'待通知',sel:'sel-purple',badge:'b-purple',btxt:'待通知'},
   {v:'停用',      t:'停用',     sel:'sel-gray',  badge:'b-gray',   btxt:'停用'},
@@ -360,27 +363,6 @@ list.addEventListener('click',e=>{
 const editSw=document.getElementById('editSw');
 function syncEdit(){ editSw.classList.toggle('on',editMode); }
 editSw.addEventListener('click',()=>{ editMode=!editMode; persistEdit(); syncEdit(); render(); });
-
-/* export / import / reset */
-document.getElementById('exportBtn').addEventListener('click',()=>{
-  const blob=new Blob([JSON.stringify(overrides,null,1)],{type:'application/json'});
-  const a=document.createElement('a'); a.href=URL.createObjectURL(blob);
-  a.download='du_channel_overrides_'+today().replace(/\//g,'')+'.json'; a.click();
-  setTimeout(()=>URL.revokeObjectURL(a.href),1000); toast('已汇出变更档');
-});
-document.getElementById('importBtn').addEventListener('click',()=>document.getElementById('importFile').click());
-document.getElementById('importFile').addEventListener('change',e=>{
-  const f=e.target.files[0]; if(!f)return; const r=new FileReader();
-  r.onload=()=>{ try{ overrides=JSON.parse(r.result)||{}; persist(); render(); stats(); toast('已汇入变更档'); }
-    catch(err){ toast('档案格式错误'); } e.target.value=''; };
-  r.readAsText(f);
-});
-let armed=false,armT;
-const resetBtn=document.getElementById('resetBtn');
-resetBtn.addEventListener('click',()=>{
-  if(!armed){ armed=true; resetBtn.classList.add('armed'); resetBtn.textContent='确认还原？'; clearTimeout(armT); armT=setTimeout(()=>{armed=false;resetBtn.classList.remove('armed');resetBtn.textContent='还原预设';},3000); return; }
-  overrides={}; persist(); armed=false; resetBtn.classList.remove('armed'); resetBtn.textContent='还原预设'; render(); stats(); toast('已还原成原始资料');
-});
 
 const toastEl=document.getElementById('toast');let tT;
 function toast(m){toastEl.textContent=m;toastEl.classList.add('show');clearTimeout(tT);tT=setTimeout(()=>toastEl.classList.remove('show'),1500);}
