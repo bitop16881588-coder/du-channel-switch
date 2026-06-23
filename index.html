@@ -46,11 +46,23 @@
 
   .toolrow{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:9px}
   .filters{display:flex;gap:7px;flex-wrap:wrap}
-  .chip{border:1.5px solid var(--line);background:#fff;color:var(--ink2);padding:6px 13px;border-radius:999px;font-size:13px;font-weight:600;cursor:pointer;transition:.12s;user-select:none}
-  .chip:hover{border-color:var(--gold)}
-  .chip.active{background:var(--nav);color:#fff;border-color:var(--nav)}
-  .chip.active.g{background:var(--g);border-color:var(--g)}
-  .chip.active.r{background:var(--red);border-color:var(--red)}
+  .chip{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--line);background:#fff;color:var(--ink2);padding:6px 13px;border-radius:999px;font-size:13px;font-weight:700;cursor:pointer;transition:.12s;user-select:none}
+  .chip::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor;opacity:.9;flex:none}
+  .chip:hover{filter:brightness(.97);box-shadow:0 0 0 2px rgba(199,154,58,.25)}
+  .chip.c-neutral{color:var(--ink2)} .chip.c-neutral::before{display:none}
+  .chip.c-green{color:var(--g);border-color:#bfe6cd;background:var(--g-bg)}
+  .chip.c-gray{color:var(--gray);border-color:#d4dae0;background:var(--gray-bg)}
+  .chip.c-red{color:var(--red);border-color:#f0c4c4;background:var(--red-bg)}
+  .chip.c-blue{color:var(--blue);border-color:#bcd9e6;background:var(--blue-bg)}
+  .chip.c-amber{color:var(--amber);border-color:#f0dcb4;background:var(--amber-bg)}
+  .chip.active{color:#fff}
+  .chip.active::before{background:#fff}
+  .chip.c-neutral.active{background:var(--nav);border-color:var(--nav)}
+  .chip.c-green.active{background:var(--g);border-color:var(--g)}
+  .chip.c-gray.active{background:var(--gray);border-color:var(--gray)}
+  .chip.c-red.active{background:var(--red);border-color:var(--red)}
+  .chip.c-blue.active{background:var(--blue);border-color:var(--blue)}
+  .chip.c-amber.active{background:var(--amber);border-color:var(--amber)}
   .actions{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
   .btn{border:1.5px solid var(--line);background:#fff;color:var(--ink2);padding:6px 12px;border-radius:9px;font-size:12.5px;font-weight:700;cursor:pointer;transition:.12s}
   .btn:hover{border-color:var(--gold)}
@@ -79,10 +91,14 @@
   .b-purple{background:var(--purple-bg);color:var(--purple)} .b-gray{background:var(--gray-bg);color:var(--gray)}
   .b-orange{background:var(--orange-bg);color:var(--orange)}
 
-  .section-title{font-size:14px;font-weight:800;margin:22px 4px 10px;display:flex;align-items:center;gap:9px;color:var(--ink)}
-  .section-title .dot{width:9px;height:9px;border-radius:50%}
-  .section-title .cnt{font-size:12px;font-weight:600;color:var(--muted)}
-  .section-title.unused{color:var(--muted)}
+  .section{border-radius:16px;padding:14px 14px 16px;margin-top:20px}
+  .section.sec-use{background:#edf8f1;box-shadow:inset 0 0 0 1px #d2ecdd}
+  .section.sec-unused{background:#eceff3;box-shadow:inset 0 0 0 1px #dde3ea}
+  .section-title{display:inline-flex;align-items:center;gap:8px;font-size:13.5px;font-weight:800;
+    padding:6px 15px;border-radius:999px;margin:0 0 13px;color:#fff;letter-spacing:.5px}
+  .section-title.t-use{background:var(--g)}
+  .section-title.t-unused{background:var(--gray)}
+  .section-title .cnt{font-size:12px;font-weight:600;opacity:.9}
 
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:12px}
   .card{position:relative;background:var(--card);border:1px solid var(--line);border-radius:13px;padding:13px 15px 13px 18px;box-shadow:var(--shadow);overflow:hidden;transition:.12s}
@@ -164,13 +180,13 @@
     </div>
     <div class="toolrow">
       <div class="filters" id="filters">
-        <span class="chip active" data-f="sec" data-v="all">全部区块</span>
-        <span class="chip" data-f="sec" data-v="使用中">使用中</span>
-        <span class="chip" data-f="sec" data-v="不使用">不使用</span>
-        <span class="chip" data-f="recv" data-v="on" data-cls="g">收款开 ⭕️</span>
-        <span class="chip" data-f="recv" data-v="off" data-cls="r">收款关 ❌</span>
-        <span class="chip" data-f="出款" data-v="on" data-cls="g">出款开</span>
-        <span class="chip" data-f="下发" data-v="on" data-cls="g">下发开</span>
+        <span class="chip c-neutral active" data-f="sec" data-v="all">全部区块</span>
+        <span class="chip c-green" data-f="sec" data-v="使用中">使用中</span>
+        <span class="chip c-gray" data-f="sec" data-v="不使用">不使用</span>
+        <span class="chip c-green" data-f="recv" data-v="on">收款开 ⭕️</span>
+        <span class="chip c-red" data-f="recv" data-v="off">收款关 ❌</span>
+        <span class="chip c-blue" data-f="出款" data-v="on">出款开</span>
+        <span class="chip c-amber" data-f="下发" data-v="on">下发开</span>
       </div>
       <div class="actions">
         <span class="sw" id="editSw"><span class="track"><span class="knob"></span></span><span>编辑模式</span></span>
@@ -333,10 +349,10 @@ function cardHTML(d){
 function render(){
   const rows=DATA.filter(pass);
   let html='';
-  [['使用中','#1f9d57'],['不使用','#8a939e']].forEach(([name,dot])=>{
+  [['使用中','use'],['不使用','unused']].forEach(([name,key])=>{
     const items=rows.filter(d=>d.section===name);
     if(!items.length) return;
-    html+=`<div class="section-title ${name==='不使用'?'unused':''}"><span class="dot" style="background:${dot}"></span>${name}<span class="cnt">${items.length} 条</span></div><div class="grid">${items.map(cardHTML).join('')}</div>`;
+    html+=`<div class="section sec-${key}"><div class="section-title t-${key}">${name}<span class="cnt">${items.length} 条</span></div><div class="grid">${items.map(cardHTML).join('')}</div></div>`;
   });
   document.getElementById('list').innerHTML=html;
   document.getElementById('empty').style.display=rows.length?'none':'block';
@@ -353,9 +369,9 @@ function stats(){
 /* filters */
 document.getElementById('filters').addEventListener('click',e=>{
   const chip=e.target.closest('.chip'); if(!chip)return;
-  const f=chip.dataset.f,v=chip.dataset.v,cls=chip.dataset.cls||'';
+  const f=chip.dataset.f,v=chip.dataset.v;
   if(f==='sec'){ state.sec=v; document.querySelectorAll('[data-f=sec]').forEach(c=>c.classList.remove('active')); chip.classList.add('active'); }
-  else{ const cur=state[f]===v; state[f]=cur?null:v; chip.classList.toggle('active',!cur); cur?chip.classList.remove(cls):chip.classList.add(cls); }
+  else{ const cur=state[f]===v; state[f]=cur?null:v; chip.classList.toggle('active',!cur); }
   render();
 });
 
