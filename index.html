@@ -122,6 +122,9 @@
   .meta .m .k{color:var(--muted);font-size:11px;display:block} .meta .m .v{font-weight:700}
   .note{margin-top:10px;background:#fafbfc;border:1px dashed var(--line);border-radius:8px;padding:7px 10px;font-size:12px;color:var(--ink2);line-height:1.45}
   .note .nk{color:var(--gold);font-weight:800;margin-right:5px}
+  .note-edit{width:100%;margin-top:10px;border:1.5px solid var(--line);border-radius:8px;padding:7px 10px;font-size:12.5px;font-family:inherit;color:var(--ink2);background:#fff;resize:vertical;min-height:40px;outline:none;line-height:1.45}
+  .note-edit:focus{border-color:var(--gold)}
+  .note-edit::placeholder{color:#aab2bb}
   .chg{margin-top:8px;font-size:11px;color:var(--gold);font-weight:700;display:flex;align-items:center;gap:5px}
 
   .empty{text-align:center;color:var(--muted);padding:50px 0;font-size:14px}
@@ -238,7 +241,7 @@ function eff(d){
   return {
     内部:'内部' in o?o.内部:d.内部, 外部:'外部' in o?o.外部:d.外部,
     收款:'收款' in o?o.收款:d.收款, 出款:'出款' in o?o.出款:d.出款,
-    下发:'下发' in o?o.下发:d.下发, changed:o.changed||''
+    下发:'下发' in o?o.下发:d.下发, 备注:'备注' in o?o.备注:d.备注, changed:o.changed||''
   };
 }
 function setOverride(id,field,val){
@@ -256,7 +259,7 @@ function pass(d){
   if(state.recv==='off' && recvOn(e.收款)) return false;
   if(state.出款==='on' && !isOn(e.出款)) return false;
   if(state.下发==='on' && !isOn(e.下发)) return false;
-  if(state.q){ if((d.商户+' '+d.备注).toLowerCase().indexOf(state.q.toLowerCase())<0) return false; }
+  if(state.q){ if((d.商户+' '+(e.备注||'')).toLowerCase().indexOf(state.q.toLowerCase())<0) return false; }
   return true;
 }
 function esc(s){return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
@@ -299,7 +302,10 @@ function cardHTML(d){
   let meta='';
   if(d.放置金) meta+=`<div class="m"><span class="k">放置金</span><span class="v">${esc(d.放置金)}</span></div>`;
   if(d.下发时间) meta+=`<div class="m"><span class="k">下发时间</span><span class="v">${esc(d.下发时间)}</span></div>`;
-  const note=d.备注?`<div class="note"><span class="nk">备注</span>${esc(d.备注)}</div>`:'';
+  const noteVal=e.备注||'';
+  const note=editMode
+    ? `<textarea class="note-edit" data-id="${d.id}" rows="2" placeholder="点此输入 / 修改备注…">${esc(noteVal)}</textarea>`
+    : (noteVal?`<div class="note"><span class="nk">备注</span>${esc(noteVal)}</div>`:'');
   const chg=e.changed?`<div class="chg">✎ 最后变更：${e.changed}</div>`:'';
   return `<div class="card${dim}">
     <span class="accent" style="background:${d.color||'#ccc'}"></span>
@@ -349,6 +355,10 @@ const list=document.getElementById('list');
 list.addEventListener('change',e=>{
   const s=e.target.closest('select.sel'); if(!s)return;
   setOverride(+s.dataset.id,s.dataset.field,s.value); render(); stats();
+});
+list.addEventListener('input',e=>{
+  const ta=e.target.closest('textarea.note-edit'); if(!ta)return;
+  setOverride(+ta.dataset.id,'备注',ta.value); /* 不重绘以保留游标 */
 });
 list.addEventListener('click',e=>{
   const sw=e.target.closest('.sw');
