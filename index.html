@@ -120,7 +120,7 @@
   .section-title .cnt{font-size:12px;font-weight:600;opacity:.9}
   .section-title .tick{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:50%;background:rgba(255,255,255,.25);font-size:11px;font-weight:900;line-height:1}
 
-  .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+  .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
   .card{position:relative;background:var(--card);border:1px solid var(--line);border-radius:13px;padding:13px 15px 13px 18px;box-shadow:var(--shadow);overflow:hidden;transition:.12s}
   .card:hover{box-shadow:0 4px 14px rgba(20,30,40,.10)}
   .card .accent{position:absolute;left:0;top:0;bottom:0;width:5px}
@@ -173,8 +173,8 @@
   .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:var(--nav);color:#fff;padding:9px 18px;border-radius:10px;font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:60}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
   footer{margin-top:30px;color:var(--muted);font-size:11.5px;text-align:center;line-height:1.7}
-  @media (max-width:760px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
-  @media (max-width:480px){.grid{grid-template-columns:1fr}.title{font-size:19px}.stat{min-width:calc(50% - 5px);flex:none}header.top{border-radius:0 0 16px 16px}}
+  @media (max-width:520px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.title{font-size:19px}.stat{min-width:calc(50% - 5px);flex:none}header.top{border-radius:0 0 16px 16px}}
+  @media (max-width:360px){.grid{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
