@@ -126,9 +126,9 @@
   .card .accent{position:absolute;left:0;top:0;bottom:0;width:5px}
   .card.dim{opacity:.66}
   .card.dim .accent{filter:saturate(.25)}
-  .c-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
-  .c-name{font-size:15.5px;font-weight:800;letter-spacing:.2px;cursor:pointer}
-  .c-name:hover{color:var(--gold)}
+  .c-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .c-name{flex:1;font-size:15px;font-weight:800;letter-spacing:.2px;cursor:pointer;padding:5px 11px;border-radius:9px;line-height:1.35}
+  .c-recv{flex:none}
   .recv-on{color:var(--g);font-weight:800;font-size:13px;white-space:nowrap}
   .recv-off{color:var(--red);font-weight:800;font-size:13px;white-space:nowrap}
 
@@ -366,6 +366,12 @@ function pass(d){
   return true;
 }
 function esc(s){return (s||'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+/* 商户名称配色：避开红色，用一组柔和好读的颜色，依群组底色分配（同群组同色）*/
+const NAMEPAL=['#2f7faf','#2e8b76','#7a51c4','#b3791f','#5a8f3c','#c07a2c','#4a6fa5','#1f8a8a','#9a5ba6','#8a6d3b','#3f7d9c','#6a8f2f'];
+function isGrayish(hex){const m=(hex||'').replace('#','');if(m.length<6)return true;const r=parseInt(m.slice(0,2),16),g=parseInt(m.slice(2,4),16),b=parseInt(m.slice(4,6),16);return (Math.max(r,g,b)-Math.min(r,g,b))<18;}
+const colorByGroup={};
+(function(){let i=0;DATA.forEach(d=>{const k=d.color||'';if(k&&!isGrayish(k)&&!(k in colorByGroup)){colorByGroup[k]=NAMEPAL[i%NAMEPAL.length];i++;}});})();
+function nameColor(d){ return (d.color&&colorByGroup[d.color]) ? colorByGroup[d.color] : '#5b6675'; }
 
 function optsHTML(cur){
   return STATES.map(s=>`<option value="${esc(s.v)}"${s.v===(cur||'').trim()?' selected':''}>${s.t}</option>`).join('');
@@ -422,8 +428,8 @@ function cardHTML(d){
   return `<div class="card${dim}">
     <span class="accent" style="background:${d.color||'#ccc'}"></span>
     <div class="c-head">
-      <span class="c-name" data-copy="${esc(d.商户)}">${esc(d.商户)}</span>
-      <span>${recv?'<span class="recv-on">⭕️ 收款</span>':'<span class="recv-off">❌ 停收</span>'}</span>
+      <span class="c-name" data-copy="${esc(d.商户)}" style="color:${nameColor(d)};background:${nameColor(d)}1a">${esc(d.商户)}</span>
+      <span class="c-recv">${recv?'<span class="recv-on">⭕️ 收款</span>':'<span class="recv-off">❌ 停收</span>'}</span>
     </div>
     ${body}${meta?`<div class="meta">${meta}</div>`:''}${note}${chg}</div>`;
 }
