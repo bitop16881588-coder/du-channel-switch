@@ -140,9 +140,11 @@
   /* edit controls: 内部/外部 分开 */
   .ctrl{margin-top:11px;border-top:1px dashed var(--line);padding-top:11px;display:flex;flex-direction:column;gap:8px}
   .ie{display:flex;gap:8px}
-  .ie .col{flex:1;background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:7px 9px}
-  .ie .cl{font-size:11px;color:var(--muted);font-weight:700;display:block;margin-bottom:4px;letter-spacing:.5px}
+  .ie .col{flex:1;display:flex;align-items:center;gap:9px;background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:7px 11px}
+  .ie .cl{font-size:12px;color:var(--muted);font-weight:800;letter-spacing:.5px;flex:none;margin:0}
   .ie .cl.cl-in{color:#1d566e} .ie .cl.cl-out{color:#b35e1c}
+  .ie .col .sel{flex:1;width:auto}
+  .ie .col .badge{margin-top:0}
   .sel{width:100%;appearance:none;-webkit-appearance:none;border:1.5px solid var(--line);border-radius:8px;
     padding:6px 26px 6px 10px;font-size:13px;font-weight:800;background:#fff;color:var(--ink);cursor:pointer;
     background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><path d='M1 1l4 4 4-4' fill='none' stroke='%236b7682' stroke-width='1.6'/></svg>");background-repeat:no-repeat;background-position:right 8px center}
