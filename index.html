@@ -52,8 +52,9 @@
   .viewrow{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:10px}
   .addbtn{border:1.5px solid #2e8b76;background:#2e8b76;color:#fff;padding:11px 20px;border-radius:12px;font-size:15px;font-weight:800;cursor:pointer;transition:.12s;letter-spacing:1px}
   .addbtn:hover{filter:brightness(1.06);box-shadow:0 2px 8px rgba(46,139,118,.35)}
-  .del-m{margin-left:8px;border:1.5px solid #f0c4c4;background:#fbe9e9;color:var(--red);width:24px;height:24px;border-radius:7px;font-size:12px;font-weight:800;cursor:pointer;vertical-align:middle;padding:0}
-  .del-m.armed{background:var(--red);color:#fff;border-color:var(--red)}
+  .del-merchant{width:100%;margin-top:11px;border:1.5px solid #f0c4c4;background:#fbe9e9;color:var(--red);padding:8px;border-radius:9px;font-size:13px;font-weight:800;cursor:pointer;transition:.12s}
+  .del-merchant:hover{background:#f7dada}
+  .del-merchant.armed{background:var(--red);color:#fff;border-color:var(--red)}
   .modal-bg{position:fixed;inset:0;background:rgba(17,24,33,.5);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:80;padding:18px}
   .modal-bg.show{display:flex}
   .modal{background:#fff;border-radius:16px;padding:20px;width:100%;max-width:380px;max-height:90vh;overflow:auto;box-shadow:0 12px 40px rgba(0,0,0,.3)}
@@ -148,8 +149,8 @@
   .c-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
   .c-name{flex:1;font-size:15px;font-weight:800;letter-spacing:.2px;cursor:pointer;padding:5px 11px;border-radius:9px;line-height:1.35}
   .c-recv{flex:none}
-  .drag-handle{flex:none;cursor:grab;color:var(--muted);font-size:17px;line-height:1;padding:0 4px;user-select:none;letter-spacing:-2px}
-  .drag-handle:active{cursor:grabbing}
+  .drag-handle{flex:none;cursor:grab;color:var(--muted);font-size:19px;line-height:1;padding:4px 8px;user-select:none;letter-spacing:-2px;touch-action:none;-webkit-user-select:none}
+  .drag-handle:active{cursor:grabbing;color:var(--gold)}
   .card.draggable{position:relative}
   .card.dragging{opacity:.45;outline:2px dashed var(--gold);outline-offset:-2px}
   .recv-on{color:var(--g);font-weight:800;font-size:13px;white-space:nowrap}
@@ -507,14 +508,15 @@ function cardHTML(d){
        +(n2?`<div class="note n2"><span class="nk">补充备注</span>${esc(n2)}</div>`:'');
   }
   const chg=e.changed?`<div class="chg">✎ 最后变更：${e.changed}</div>`:'';
-  return `<div class="card${dim}${editMode?' draggable':''}" data-key="${esc(d.key)}" draggable="${editMode?'true':'false'}">
+  const del=(editMode&&d.custom)?`<button class="del-merchant" data-del="${esc(d.key)}">🗑 删除此商户</button>`:'';
+  return `<div class="card${dim}${editMode?' draggable':''}" data-key="${esc(d.key)}">
     <span class="accent" style="background:${d.color||'#ccc'}"></span>
     <div class="c-head">
       ${editMode?'<span class="drag-handle" title="拖曳排序">⠿</span>':''}
       <span class="c-name" data-copy="${esc(d.商户)}" style="color:${nameColor(d)};background:${nameColor(d)}1a">${esc(d.商户)}</span>
-      <span class="c-recv">${recv?'<span class="recv-on">⭕️ 收款</span>':'<span class="recv-off">❌ 停收</span>'}${editMode&&d.custom?`<button class="del-m" data-del="${esc(d.key)}" title="删除此商户">✕</button>`:''}</span>
+      <span class="c-recv">${recv?'<span class="recv-on">⭕️ 收款</span>':'<span class="recv-off">❌ 停收</span>'}</span>
     </div>
-    ${body}${meta?`<div class="meta">${meta}</div>`:''}${note}${chg}</div>`;
+    ${body}${meta?`<div class="meta">${meta}</div>`:''}${note}${chg}${del}</div>`;
 }
 
 function viewVal(d){ return state.view==='内部'?eff(d).内部:eff(d).外部; }
@@ -610,7 +612,7 @@ list.addEventListener('click',e=>{
   const dm=e.target.closest('[data-del]');
   if(dm){
     if(dm.classList.contains('armed')){ deleteMerchant(dm.dataset.del); }
-    else { dm.classList.add('armed'); dm.textContent='删?'; setTimeout(()=>{ if(dm){dm.classList.remove('armed');dm.textContent='✕';} },2500); }
+    else { dm.classList.add('armed'); dm.textContent='⚠ 再按一次确认删除'; setTimeout(()=>{ if(dm){dm.classList.remove('armed');dm.textContent='🗑 删除此商户';} },2500); }
     return;
   }
   const sw=e.target.closest('.sw');
@@ -626,8 +628,7 @@ const editSw=document.getElementById('editSw');
 function syncEdit(){ editSw.classList.toggle('on',editMode); }
 editSw.addEventListener('click',()=>{ editMode=!editMode; persistEdit(); syncEdit(); render(); });
 
-/* ── 拖曳排序（编辑模式，从把手 ⠿ 拖动）── */
-let dragKey=null;
+/* ── 拖曳排序（编辑模式，从把手 ⠿ 拖动；支援触控与滑鼠）── */
 function getDragAfter(grid,x,y){
   const els=[...grid.querySelectorAll('.card:not(.dragging)')];
   let best=null,bestD=Infinity,before=true;
@@ -651,26 +652,41 @@ function commitOrder(){
   });
   persist(); render(); stats();
 }
-list.addEventListener('dragstart',e=>{
-  if(!editMode){ e.preventDefault(); return; }
-  const c=e.target.closest('.card');
-  if(!c || !e.target.closest('.drag-handle')){ e.preventDefault(); return; }
-  dragKey=c.dataset.key; c.classList.add('dragging');
-  e.dataTransfer.effectAllowed='move'; try{e.dataTransfer.setData('text/plain',dragKey);}catch(_){}
-});
-list.addEventListener('dragover',e=>{
-  if(!editMode||!dragKey)return;
-  const dragEl=document.querySelector('.card.dragging'); if(!dragEl)return;
-  e.preventDefault();
-  const grid=dragEl.parentElement;
-  const after=getDragAfter(grid,e.clientX,e.clientY);
-  if(after) grid.insertBefore(dragEl,after); else grid.appendChild(dragEl);
-});
-list.addEventListener('drop',e=>{ if(editMode&&dragKey)e.preventDefault(); });
-list.addEventListener('dragend',e=>{
-  const c=document.querySelector('.card.dragging'); if(c)c.classList.remove('dragging');
-  if(dragKey){ dragKey=null; commitOrder(); }
-});
+let dEl=null,dGrid=null,dKey=null;
+function dMove(e){
+  if(!dEl)return;
+  const p=e.touches?e.touches[0]:e;
+  const after=getDragAfter(dGrid,p.clientX,p.clientY);
+  if(after) dGrid.insertBefore(dEl,after); else dGrid.appendChild(dEl);
+  if(e.cancelable) e.preventDefault();
+}
+function dUp(){
+  if(!dEl)return;
+  dEl.classList.remove('dragging');
+  document.removeEventListener('pointermove',dMove);
+  document.removeEventListener('pointerup',dUp);
+  document.removeEventListener('touchmove',dMove);
+  document.removeEventListener('touchend',dUp);
+  dEl=null; dGrid=null;
+  if(dKey){ dKey=null; commitOrder(); }
+}
+function dStart(e){
+  if(!editMode)return;
+  const h=e.target.closest('.drag-handle'); if(!h)return;
+  const card=h.closest('.card'); if(!card)return;
+  if(e.cancelable) e.preventDefault();
+  dEl=card; dGrid=card.parentElement; dKey=card.dataset.key;
+  card.classList.add('dragging');
+  if(window.PointerEvent){
+    document.addEventListener('pointermove',dMove,{passive:false});
+    document.addEventListener('pointerup',dUp);
+  } else {
+    document.addEventListener('touchmove',dMove,{passive:false});
+    document.addEventListener('touchend',dUp);
+  }
+}
+list.addEventListener('pointerdown',dStart);
+list.addEventListener('touchstart',e=>{ if(!window.PointerEvent) dStart(e); },{passive:false});
 
 const toastEl=document.getElementById('toast');let tT;
 function toast(m){toastEl.textContent=m;toastEl.classList.add('show');clearTimeout(tT);tT=setTimeout(()=>toastEl.classList.remove('show'),1500);}
