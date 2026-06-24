@@ -31,10 +31,13 @@
   .sub{color:#aebbd0;font-size:12.5px;margin-top:6px;display:flex;gap:14px;flex-wrap:wrap}
   .sub b{color:var(--gold-soft);font-weight:700}
   .stats{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
-  .stat{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:9px 14px;flex:1;min-width:120px}
+  .stat{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-left:3px solid rgba(255,255,255,.3);border-radius:12px;padding:9px 14px;flex:1;min-width:120px}
   .stat .n{font-size:23px;font-weight:800;line-height:1;color:#fff}
   .stat .l{font-size:11.5px;color:#9fb0c8;margin-top:4px}
-  .stat.on .n{color:#5fe39b} .stat.off .n{color:#ff8a8a}
+  .stat.s-use{border-left-color:#5fe39b} .stat.s-use .n{color:#5fe39b}
+  .stat.s-unused{border-left-color:#aab8c8} .stat.s-unused .n{color:#c4d0de}
+  .stat.on{border-left-color:#5fe39b} .stat.on .n{color:#5fe39b}
+  .stat.off{border-left-color:#ff8a8a} .stat.off .n{color:#ff8a8a}
 
   .bar{position:sticky;top:0;z-index:20;background:rgba(238,241,245,.93);backdrop-filter:blur(8px);
     padding:12px 0 10px;margin-bottom:4px;border-bottom:1px solid var(--line)}
@@ -45,6 +48,13 @@
   .search .clr{position:absolute;right:8px;top:50%;transform:translateY(-50%);border:none;background:none;color:var(--muted);font-size:18px;cursor:pointer;padding:4px 8px;display:none}
 
   .toolrow{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:9px}
+  .viewseg{display:inline-flex;background:#e7ebf1;border-radius:15px;padding:4px;margin-top:10px;gap:4px}
+  .vbtn{display:inline-flex;align-items:center;gap:9px;border:none;background:transparent;padding:13px 44px;border-radius:12px;font-size:18px;font-weight:800;color:var(--ink2);cursor:pointer;transition:.12s;letter-spacing:3px}
+  .vbtn::before{content:"";width:11px;height:11px;border-radius:50%;background:currentColor}
+  .vbtn.v-in{color:#2f7faf} .vbtn.v-out{color:#cf7a2c}
+  .vbtn.active{color:#fff;box-shadow:0 2px 7px rgba(21,35,59,.22)}
+  .vbtn.active.v-in{background:#2f7faf} .vbtn.active.v-out{background:#cf7a2c}
+  .vbtn.active::before{background:#fff}
   .filters{display:flex;gap:7px;flex-wrap:wrap}
   .chip{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--line);background:#fff;color:var(--ink2);padding:6px 13px;border-radius:999px;font-size:13px;font-weight:700;cursor:pointer;transition:.12s;user-select:none}
   .chip::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor;opacity:.9;flex:none}
@@ -94,10 +104,11 @@
   .legend-grid .li{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--ink2)}
 
   .badge{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:7px;white-space:nowrap;line-height:1.6}
-  .b-ok{background:var(--g-bg);color:var(--g)} .b-amber{background:var(--amber-bg);color:var(--amber)}
+  .b-ok{background:#16a64f;color:#fff;font-weight:800;box-shadow:0 0 7px rgba(22,166,79,.5),0 0 0 1px rgba(22,166,79,.35)} .b-amber{background:var(--amber-bg);color:var(--amber)}
   .b-red{background:var(--red-bg);color:var(--red)} .b-blue{background:var(--blue-bg);color:var(--blue)}
   .b-purple{background:var(--purple-bg);color:var(--purple)} .b-gray{background:var(--gray-bg);color:var(--gray)}
   .b-orange{background:var(--orange-bg);color:var(--orange)}
+  .badge.big{font-size:13.5px;padding:4px 14px;margin-top:2px}
 
   .section{border-radius:16px;padding:14px 14px 16px;margin-top:20px}
   .section.sec-use{background:#edf8f1;box-shadow:inset 0 0 0 1px #d2ecdd}
@@ -107,8 +118,9 @@
   .section-title.t-use{background:var(--g)}
   .section-title.t-unused{background:var(--gray)}
   .section-title .cnt{font-size:12px;font-weight:600;opacity:.9}
+  .section-title .tick{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:50%;background:rgba(255,255,255,.25);font-size:11px;font-weight:900;line-height:1}
 
-  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:12px}
+  .grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
   .card{position:relative;background:var(--card);border:1px solid var(--line);border-radius:13px;padding:13px 15px 13px 18px;box-shadow:var(--shadow);overflow:hidden;transition:.12s}
   .card:hover{box-shadow:0 4px 14px rgba(20,30,40,.10)}
   .card .accent{position:absolute;left:0;top:0;bottom:0;width:5px}
@@ -130,6 +142,7 @@
   .ie{display:flex;gap:8px}
   .ie .col{flex:1;background:#f8fafc;border:1px solid var(--line);border-radius:10px;padding:7px 9px}
   .ie .cl{font-size:11px;color:var(--muted);font-weight:700;display:block;margin-bottom:4px;letter-spacing:.5px}
+  .ie .cl.cl-in{color:#1d566e} .ie .cl.cl-out{color:#b35e1c}
   .sel{width:100%;appearance:none;-webkit-appearance:none;border:1.5px solid var(--line);border-radius:8px;
     padding:6px 26px 6px 10px;font-size:13px;font-weight:800;background:#fff;color:var(--ink);cursor:pointer;
     background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6'><path d='M1 1l4 4 4-4' fill='none' stroke='%236b7682' stroke-width='1.6'/></svg>");background-repeat:no-repeat;background-position:right 8px center}
@@ -160,7 +173,8 @@
   .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);background:var(--nav);color:#fff;padding:9px 18px;border-radius:10px;font-size:13px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:60}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
   footer{margin-top:30px;color:var(--muted);font-size:11.5px;text-align:center;line-height:1.7}
-  @media (max-width:560px){.grid{grid-template-columns:1fr}.title{font-size:19px}.stat{min-width:calc(50% - 5px);flex:none}header.top{border-radius:0 0 16px 16px}}
+  @media (max-width:760px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+  @media (max-width:480px){.grid{grid-template-columns:1fr}.title{font-size:19px}.stat{min-width:calc(50% - 5px);flex:none}header.top{border-radius:0 0 16px 16px}}
 </style>
 </head>
 <body>
@@ -173,8 +187,8 @@
       <span>最后更新：<b id="lastUpdated"></b></span>
     </div>
     <div class="stats">
-      <div class="stat"><div class="n" id="s-use">0</div><div class="l">使用中</div></div>
-      <div class="stat"><div class="n" id="s-unused">0</div><div class="l">不使用</div></div>
+      <div class="stat s-use"><div class="n" id="s-use">0</div><div class="l">使用中</div></div>
+      <div class="stat s-unused"><div class="n" id="s-unused">0</div><div class="l">不使用</div></div>
       <div class="stat on"><div class="n" id="s-recv">0</div><div class="l">收款开启 ⭕️</div></div>
       <div class="stat off"><div class="n" id="s-recvoff">0</div><div class="l">收款关闭 ❌</div></div>
     </div>
@@ -186,10 +200,14 @@
       <input id="q" type="search" placeholder="搜寻商户名称或备注…" autocomplete="off">
       <button class="clr" id="clr">×</button>
     </div>
+    <div class="viewseg" id="viewSeg">
+      <button class="vbtn v-in active" data-view="内部">内部</button>
+      <button class="vbtn v-out" data-view="外部">外部</button>
+    </div>
     <div class="toolrow">
       <div class="filters" id="filters">
         <span class="chip c-neutral active" data-f="sec" data-v="all">全部区块</span>
-        <span class="chip c-green" data-f="sec" data-v="使用中">使用中</span>
+        <span class="chip c-green" data-f="sec" data-v="使用中">✓ 使用中</span>
         <span class="chip c-gray" data-f="sec" data-v="不使用">不使用</span>
         <span class="chip c-green" data-f="recv" data-v="on">收款开 ⭕️</span>
         <span class="chip c-red" data-f="recv" data-v="off">收款关 ❌</span>
@@ -336,7 +354,7 @@ function cloudPull(){
     .catch(()=>setSync('err'));
 }
 
-const state={sec:'all',recv:null,出款:null,下发:null,q:''};
+const state={sec:'all',recv:null,出款:null,下发:null,q:'',view:'内部'};
 function pass(d){
   const e=eff(d);
   if(state.sec!=='all' && d.section!==state.sec) return false;
@@ -359,16 +377,15 @@ function swHTML(label,on,key,field,recv){
 
 function cardHTML(d){
   const e=eff(d);
-  const recv=recvOn(e.收款), inM=stMeta(e.内部), outM=stMeta(e.外部);
+  const recv=recvOn(e.收款);
+  const vfield=state.view, vval=(vfield==='内部'?e.内部:e.外部), vm=stMeta(vval);
   const dim=d.section==='不使用'?' dim':'';
   let body;
   if(editMode){
     body=`<div class="ctrl">
       <div class="ie">
-        <div class="col"><span class="cl">内部</span>
-          <select class="sel ${inM.sel}" data-key="${esc(d.key)}" data-field="内部">${optsHTML(e.内部)}</select></div>
-        <div class="col"><span class="cl">外部</span>
-          <select class="sel ${outM.sel}" data-key="${esc(d.key)}" data-field="外部">${optsHTML(e.外部)}</select></div>
+        <div class="col"><span class="cl ${vfield==='内部'?'cl-in':'cl-out'}">${vfield}</span>
+          <select class="sel ${vm.sel}" data-key="${esc(d.key)}" data-field="${vfield}">${optsHTML(vval)}</select></div>
       </div>
       <div class="sw-row">
         ${swHTML('收款',recv,d.key,'收款',true)}
@@ -377,9 +394,10 @@ function cardHTML(d){
       </div>
     </div>`;
   } else {
-    body=`<div class="rowio">
-      <span class="io"><span class="k">内部</span><span class="badge ${inM.badge}">${inM.btxt}</span></span>
-      <span class="io"><span class="k">外部</span><span class="badge ${outM.badge}">${outM.btxt}</span></span>
+    body=`<div class="ie">
+      <div class="col"><span class="cl ${vfield==='内部'?'cl-in':'cl-out'}">${vfield}</span><span class="badge ${vm.badge} big">${vm.btxt}</span></div>
+    </div>
+    <div class="rowio">
       <span class="io"><span class="k">出款</span><span class="v ${isOn(e.出款)?'on':'off'}">${isOn(e.出款)?'✅':'✕'}</span></span>
       <span class="io"><span class="k">下发</span><span class="v ${isOn(e.下发)?'on':'off'}">${isOn(e.下发)?'✅':'✕'}</span></span>
     </div>`;
@@ -413,10 +431,10 @@ function cardHTML(d){
 function render(){
   const rows=DATA.filter(pass);
   let html='';
-  [['使用中','use'],['不使用','unused']].forEach(([name,key])=>{
+  [['使用中','use','✓'],['不使用','unused','']].forEach(([name,key,icon])=>{
     const items=rows.filter(d=>d.section===name);
     if(!items.length) return;
-    html+=`<div class="section sec-${key}"><div class="section-title t-${key}">${name}<span class="cnt">${items.length} 条</span></div><div class="grid">${items.map(cardHTML).join('')}</div></div>`;
+    html+=`<div class="section sec-${key}"><div class="section-title t-${key}">${icon?`<span class="tick">${icon}</span>`:''}${name}<span class="cnt">${items.length} 条</span></div><div class="grid">${items.map(cardHTML).join('')}</div></div>`;
   });
   document.getElementById('list').innerHTML=html;
   document.getElementById('empty').style.display=rows.length?'none':'block';
@@ -440,7 +458,13 @@ document.getElementById('filters').addEventListener('click',e=>{
 });
 
 /* search */
-const q=document.getElementById('q'),clr=document.getElementById('clr');
+document.getElementById('viewSeg').addEventListener('click',e=>{
+  const b=e.target.closest('.vbtn'); if(!b)return;
+  state.view=b.dataset.view;
+  document.querySelectorAll('#viewSeg .vbtn').forEach(x=>x.classList.remove('active'));
+  b.classList.add('active');
+  render();
+});
 q.addEventListener('input',()=>{state.q=q.value.trim();clr.style.display=q.value?'block':'none';render();});
 clr.addEventListener('click',()=>{q.value='';state.q='';clr.style.display='none';render();q.focus();});
 
