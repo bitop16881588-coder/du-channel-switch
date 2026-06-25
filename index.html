@@ -206,6 +206,7 @@
 
   .meta{display:flex;gap:14px;flex-wrap:wrap;margin-top:9px;font-size:12.5px;color:var(--ink2)}
   .meta .m .k{color:var(--muted);font-size:11px;display:block} .meta .m .v{font-weight:700}
+  .meta .m .v.on{color:var(--g)} .meta .m .v.off{color:var(--gray)}
   .meta-fold{flex:none}
   .meta-sum{list-style:none;cursor:pointer;font-size:14px;font-weight:900;color:var(--muted);padding:1px 8px;border:1px solid var(--line);border-radius:7px;background:#f1f4f8;line-height:1.2;user-select:none}
   .meta-sum::-webkit-details-marker{display:none}
@@ -540,19 +541,14 @@ function cardHTML(d){
       </div>
     </div>`;
   } else {
-    body=`<div class="ie-line">
-      <div class="ie">
-        <div class="col"><span class="cl ${vfield==='内部'?'cl-in':'cl-out'}">${vfield}</span><span class="badge ${vm.badge} big">${vm.btxt}</span></div>
-      </div>
-      <div class="rowio">
-        <span class="io"><span class="k">出款</span><span class="v ${isOn(e.出款)?'on':'off'}">${isOn(e.出款)?'✅':'✕'}</span></span>
-        <span class="io"><span class="k">下发</span><span class="v ${isOn(e.下发)?'on':'off'}">${isOn(e.下发)?'✅':'✕'}</span></span>
-      </div>
+    body=`<div class="ie">
+      <div class="col"><span class="cl ${vfield==='内部'?'cl-in':'cl-out'}">${vfield}</span><span class="badge ${vm.badge} big">${vm.btxt}</span></div>
     </div>`;
   }
   let meta='';
   if(d.放置金) meta+=`<div class="m"><span class="k">放置金</span><span class="v">${esc(d.放置金)}</span></div>`;
   if(d.下发时间) meta+=`<div class="m"><span class="k">下发时间</span><span class="v">${esc(d.下发时间)}</span></div>`;
+  const metaView=`<div class="m"><span class="k">出款</span><span class="v ${isOn(e.出款)?'on':'off'}">${isOn(e.出款)?'✅':'✕'}</span></div><div class="m"><span class="k">下发</span><span class="v ${isOn(e.下发)?'on':'off'}">${isOn(e.下发)?'✅':'✕'}</span></div>`+meta;
   const n1=e.备注||'', n2=e.备注2||'';
   let note='', noteFold='';
   if(editMode){
@@ -570,7 +566,7 @@ function cardHTML(d){
   }
   const chg=e.changed?`<div class="chg">✎ 最后变更：${e.changed}</div>`:'';
   const del=(editMode&&d.custom)?`<button class="del-merchant" data-del="${esc(d.key)}">🗑 删除此商户</button>`:'';
-  const metaFold=(!editMode&&meta)?`<details class="meta-fold"><summary class="meta-sum" title="放置金 / 下发时间">⋯</summary><div class="meta-pop"><div class="meta">${meta}</div></div></details>`:'';
+  const metaFold=(!editMode)?`<details class="meta-fold"><summary class="meta-sum" title="出款 / 下发 / 放置金 / 下发时间">⋯</summary><div class="meta-pop"><div class="meta">${metaView}</div></div></details>`:'';
   return `<div class="card${dim}${editMode?' draggable':''}" data-key="${esc(d.key)}">
     <span class="accent" style="background:${d.color||'#ccc'}"></span>
     <div class="c-head">
