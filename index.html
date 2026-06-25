@@ -230,15 +230,12 @@
   <header class="top">
     <div class="title"><span id="siteTitle"></span> <span class="tag" id="siteBadge"></span></div>
     <div class="sub">
-      <span>支付通道收款 / 出款 / 下发状态速查与开关台</span>
-      <span>共 <b id="totalN"></b> 条通道</span>
+      <span>总商户数量：<b id="totalN"></b></span>
       <span>最后更新：<b id="lastUpdated"></b></span>
     </div>
     <div class="stats">
       <div class="stat s-use"><div class="n" id="s-use">0</div><div class="l">使用中</div></div>
       <div class="stat s-unused"><div class="n" id="s-unused">0</div><div class="l">不使用</div></div>
-      <div class="stat on"><div class="n" id="s-recv">0</div><div class="l">收款开启 ⭕️</div></div>
-      <div class="stat off"><div class="n" id="s-recvoff">0</div><div class="l">收款关闭 ❌</div></div>
     </div>
   </header>
 
@@ -260,8 +257,8 @@
         <span class="chip c-neutral active" data-f="sec" data-v="all">全部区块</span>
         <span class="chip c-green" data-f="sec" data-v="使用中">✓ 使用中</span>
         <span class="chip c-gray" data-f="sec" data-v="不使用">不使用</span>
-        <span class="chip c-green" data-f="recv" data-v="on">收款开 ⭕️</span>
-        <span class="chip c-red" data-f="recv" data-v="off">收款关 ❌</span>
+        <span class="chip c-green" data-f="recv" data-v="on">可双开 ⭕️</span>
+        <span class="chip c-red" data-f="recv" data-v="off">不可双开 ❌</span>
         <span class="chip c-blue" data-f="出款" data-v="on">出款开</span>
         <span class="chip c-amber" data-f="下发" data-v="on">下发开</span>
       </div>
@@ -297,7 +294,7 @@
     <div class="mtitle">新增商户</div>
     <label>商户名称 <span class="req">*</span><input id="m-name" type="text" placeholder="例如：ABC支付宝" autocomplete="off"></label>
     <label>区块<select id="m-sec"><option value="使用中">使用中</option><option value="不使用">不使用</option></select></label>
-    <label>收款<select id="m-recv"><option value="⭕️">开 ⭕️</option><option value="❌">关 ❌</option></select></label>
+    <label>可双开<select id="m-recv"><option value="⭕️">可双开 ⭕️</option><option value="❌">不可双开 ❌</option></select></label>
     <label>内部<select id="m-in"></select></label>
     <label>外部<select id="m-out"></select></label>
     <label>放置金（可空）<input id="m-fund" type="text" autocomplete="off"></label>
@@ -539,7 +536,7 @@ function cardHTML(d){
     <div class="c-head">
       ${editMode?'<span class="drag-handle" title="拖曳排序">⠿</span>':''}
       <span class="c-name" data-copy="${esc(d.商户)}" style="color:${nameColor(d)};background:${nameColor(d)}1a">${esc(d.商户)}</span>
-      <span class="c-recv">${recv?'<span class="recv-on">⭕️ 收款</span>':'<span class="recv-off">❌ 停收</span>'}</span>
+      <span class="c-recv">${recv?'<span class="recv-on">⭕️</span>':'<span class="recv-off">❌</span>'}</span>
     </div>
     ${body}${meta?`<div class="meta">${meta}</div>`:''}${note}${chg}${del}</div>`;
 }
@@ -565,11 +562,8 @@ function render(){
   document.getElementById('empty').style.display=rows.length?'none':'block';
 }
 function stats(){
-  const on=DATA.filter(d=>recvOn(eff(d).收款)).length;
   document.getElementById('s-use').textContent=DATA.filter(d=>d.section==='使用中').length;
   document.getElementById('s-unused').textContent=DATA.filter(d=>d.section==='不使用').length;
-  document.getElementById('s-recv').textContent=on;
-  document.getElementById('s-recvoff').textContent=DATA.length-on;
   document.getElementById('totalN').textContent=DATA.length;
 }
 
@@ -578,6 +572,7 @@ document.getElementById('filters').addEventListener('click',e=>{
   const chip=e.target.closest('.chip'); if(!chip)return;
   const f=chip.dataset.f,v=chip.dataset.v;
   if(f==='sec'){ state.sec=v; document.querySelectorAll('[data-f=sec]').forEach(c=>c.classList.remove('active')); chip.classList.add('active'); }
+  else if(f==='recv'){ const cur=state.recv===v; document.querySelectorAll('[data-f=recv]').forEach(c=>c.classList.remove('active')); state.recv=cur?null:v; if(!cur) chip.classList.add('active'); }
   else{ const cur=state[f]===v; state[f]=cur?null:v; chip.classList.toggle('active',!cur); }
   render();
 });
@@ -620,6 +615,7 @@ function submitAdd(){
 }
 document.getElementById('m-ok').addEventListener('click',submitAdd);
 document.getElementById('m-name').addEventListener('keydown',e=>{ if(e.key==='Enter') submitAdd(); });
+const q=document.getElementById('q'), clr=document.getElementById('clr');
 q.addEventListener('input',()=>{state.q=q.value.trim();clr.style.display=q.value?'block':'none';render();});
 clr.addEventListener('click',()=>{q.value='';state.q='';clr.style.display='none';render();q.focus();});
 
