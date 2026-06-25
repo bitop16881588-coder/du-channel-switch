@@ -44,7 +44,7 @@
   .sub b{color:var(--gold-soft);font-weight:700}
   .hd-row{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
   .hd-left{min-width:0}
-  .stats{display:flex;gap:6px;flex-shrink:0}
+  .stats{display:flex;gap:6px;flex-shrink:0;align-items:center}
   .stat{display:flex;align-items:baseline;gap:4px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-left:3px solid rgba(255,255,255,.3);border-radius:8px;padding:4px 9px}
   .stat .n{font-size:15px;font-weight:800;line-height:1;color:#fff}
   .stat .l{font-size:10.5px;color:#9fb0c8}
@@ -62,9 +62,11 @@
   .search .clr{position:absolute;right:8px;top:50%;transform:translateY(-50%);border:none;background:none;color:var(--muted);font-size:18px;cursor:pointer;padding:4px 8px;display:none}
 
   .toolrow{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:9px}
-  .viewseg{display:inline-flex;background:#e7ebf1;border-radius:15px;padding:4px;gap:4px}
-  .viewrow{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-top:10px}
-  .addbtn{border:1.5px solid #2e8b76;background:#2e8b76;color:#fff;padding:11px 20px;border-radius:12px;font-size:15px;font-weight:800;cursor:pointer;transition:.12s;letter-spacing:1px}
+  .viewseg{display:inline-flex;background:#e7ebf1;border-radius:15px;padding:4px;gap:4px;flex-shrink:0}
+  .viewrow{display:flex;align-items:center;gap:12px;flex-wrap:nowrap;margin-top:10px;overflow-x:auto}
+  .vr-right{display:flex;align-items:center;gap:11px;flex-wrap:nowrap;flex-shrink:0;margin-left:auto}
+  .vr-right>*{flex-shrink:0;white-space:nowrap}
+  .addbtn{border:1.5px solid #2e8b76;background:#2e8b76;color:#fff;padding:6px 14px;border-radius:999px;font-size:13px;font-weight:800;cursor:pointer;transition:.12s;letter-spacing:.5px}
   .addbtn:hover{filter:brightness(1.06);box-shadow:0 2px 8px rgba(46,139,118,.35)}
   .del-merchant{width:100%;margin-top:11px;border:1.5px solid #f0c4c4;background:#fbe9e9;color:var(--red);padding:8px;border-radius:9px;font-size:13px;font-weight:800;cursor:pointer;transition:.12s}
   .del-merchant:hover{background:#f7dada}
@@ -81,13 +83,18 @@
   .merr{color:var(--red);font-size:12.5px;font-weight:700;min-height:18px;margin-bottom:4px}
   .mbtns{display:flex;gap:10px;justify-content:flex-end;margin-top:6px}
   .btn.primary{background:#2e8b76;color:#fff;border-color:#2e8b76}
-  .vbtn{display:inline-flex;align-items:center;gap:9px;border:none;background:transparent;padding:13px 44px;border-radius:12px;font-size:18px;font-weight:800;color:var(--ink2);cursor:pointer;transition:.12s;letter-spacing:3px}
+  .vbtn{display:inline-flex;align-items:center;gap:9px;border:none;background:transparent;padding:13px 56px;border-radius:12px;font-size:18px;font-weight:800;color:var(--ink2);cursor:pointer;transition:.12s;letter-spacing:3px}
   .vbtn::before{content:"";width:11px;height:11px;border-radius:50%;background:currentColor}
   .vbtn.v-in{color:#2f7faf} .vbtn.v-out{color:#cf7a2c}
   .vbtn.active{color:#fff;box-shadow:0 2px 7px rgba(21,35,59,.22)}
   .vbtn.active.v-in{background:#2f7faf} .vbtn.active.v-out{background:#cf7a2c}
   .vbtn.active::before{background:#fff}
   .filters{display:flex;gap:7px;flex-wrap:wrap}
+  .filt-wrap{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
+  .filters.collapsed{display:none}
+  .filt-toggle{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--line);background:#fff;color:var(--ink2);padding:6px 13px;border-radius:999px;font-size:13px;font-weight:700;cursor:pointer;user-select:none}
+  .filt-toggle .fchev{display:inline-block;transition:transform .15s;font-size:10px}
+  .filt-toggle.open .fchev{transform:rotate(90deg)}
   .chip{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--line);background:#fff;color:var(--ink2);padding:6px 13px;border-radius:999px;font-size:13px;font-weight:700;cursor:pointer;transition:.12s;user-select:none}
   .chip::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor;opacity:.9;flex:none}
   .chip:hover{filter:brightness(.97);box-shadow:0 0 0 2px rgba(199,154,58,.25)}
@@ -117,7 +124,7 @@
   .sw.on .track{background:var(--g)}
   .sw.on .knob{transform:translateX(17px)}
   .sw.sw-recv:not(.on) .track{background:var(--red)}
-  .toolrow .sw{background:#fff;border:1.5px solid var(--line);border-radius:9px;padding:5px 11px}
+  .toolrow .sw,.viewrow .sw{background:#fff;border:1.5px solid var(--line);border-radius:9px;padding:7px 13px;flex-shrink:0}
   .sync{display:inline-flex;align-items:center;gap:7px;cursor:pointer;background:#fff;border:1.5px solid var(--line);border-radius:9px;padding:5px 11px;font-size:12.5px;font-weight:700;color:var(--ink2);user-select:none;transition:.12s}
   .sync:hover{box-shadow:0 0 0 2px rgba(199,154,58,.25)}
   .sync .sdot{width:8px;height:8px;border-radius:50%;background:var(--gray);flex:none}
@@ -127,13 +134,10 @@
   .sync.err{color:var(--red);border-color:#f0c4c4} .sync.err .sdot{background:var(--red)}
   @keyframes syncpulse{0%,100%{opacity:1}50%{opacity:.25}}
 
-  details.legend{background:var(--card);border:1px solid var(--line);border-radius:12px;margin:12px 0 4px;box-shadow:var(--shadow)}
-  details.legend summary{cursor:pointer;padding:11px 15px;font-weight:700;font-size:13.5px;list-style:none;display:flex;align-items:center;gap:8px}
-  details.legend summary::-webkit-details-marker{display:none}
-  details.legend summary::before{content:"▸";color:var(--gold);transition:.15s}
-  details.legend[open] summary::before{transform:rotate(90deg)}
-  .legend-grid{display:flex;flex-wrap:wrap;gap:8px;padding:4px 15px 15px}
-  .legend-grid .li{display:flex;align-items:center;gap:7px;font-size:12.5px;color:var(--ink2)}
+  .legend{background:var(--card);border:1px solid var(--line);border-radius:12px;margin:10px 0 4px;box-shadow:var(--shadow)}
+  .legend.collapsed{display:none}
+  .legend-grid{display:flex;flex-wrap:wrap;gap:7px;padding:11px 14px}
+  .legend-grid .li{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink2)}
 
   .badge{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:7px;white-space:nowrap;line-height:1.6}
   .b-ok{background:#16a64f;color:#fff;font-weight:800;box-shadow:0 0 7px rgba(22,166,79,.5),0 0 0 1px rgba(22,166,79,.35)} .b-amber{background:var(--amber-bg);color:var(--amber)}
@@ -241,6 +245,7 @@
       <div class="stats">
         <div class="stat s-use"><div class="n" id="s-use">0</div><div class="l">使用中</div></div>
         <div class="stat s-unused"><div class="n" id="s-unused">0</div><div class="l">不使用</div></div>
+        <span class="sync off" id="syncStat" title="点击立即与云端同步"><span class="sdot"></span><span id="syncTxt">仅本机</span></span>
       </div>
     </div>
   </header>
@@ -256,10 +261,16 @@
         <button class="vbtn v-in active" data-view="内部">内部</button>
         <button class="vbtn v-out" data-view="外部">外部</button>
       </div>
-      <button class="addbtn" id="addBtn">＋ 新增商户</button>
+      <span class="sw" id="editSw"><span class="track"><span class="knob"></span></span><span>编辑模式</span></span>
+      <div class="vr-right">
+        <button class="addbtn" id="addBtn">＋ 新增商户</button>
+        <button class="filt-toggle" id="filtToggle"><span class="fchev">▸</span>分类筛选</button>
+        <button class="filt-toggle" id="legendToggle"><span class="fchev">▸</span>状态说明</button>
+      </div>
     </div>
     <div class="toolrow">
-      <div class="filters" id="filters">
+      <div class="filt-wrap">
+        <div class="filters collapsed" id="filters">
         <span class="chip c-neutral active" data-f="sec" data-v="all">全部区块</span>
         <span class="chip c-green" data-f="sec" data-v="使用中">✓ 使用中</span>
         <span class="chip c-gray" data-f="sec" data-v="不使用">不使用</span>
@@ -267,16 +278,12 @@
         <span class="chip c-red" data-f="recv" data-v="off">不可双开 ❌</span>
         <span class="chip c-blue" data-f="出款" data-v="on">出款开</span>
         <span class="chip c-amber" data-f="下发" data-v="on">下发开</span>
-      </div>
-      <div class="actions">
-        <span class="sw" id="editSw"><span class="track"><span class="knob"></span></span><span>编辑模式</span></span>
-        <span class="sync off" id="syncStat" title="点击立即与云端同步"><span class="sdot"></span><span id="syncTxt">仅本机</span></span>
+        </div>
       </div>
     </div>
   </div>
 
-  <details class="legend">
-    <summary>状态说明（内部 / 外部 栏位）</summary>
+  <div class="legend collapsed" id="legendPanel">
     <div class="legend-grid">
       <span class="li"><span class="badge b-ok">正常</span>栏位空白＝开启正常</span>
       <span class="li"><span class="badge b-amber">日切</span>非营业时间</span>
@@ -289,7 +296,7 @@
       <span class="li"><span class="badge b-gray">停用</span>停用 / 不开启</span>
       <span class="li"><span class="badge b-gray">X</span>无 or 不开启</span>
     </div>
-  </details>
+  </div>
 
   <div id="list"></div>
   <div class="empty" id="empty" style="display:none">找不到符合的通道</div>
@@ -572,6 +579,13 @@ function stats(){
   document.getElementById('s-unused').textContent=DATA.filter(d=>d.section==='不使用').length;
   document.getElementById('totalN').textContent=DATA.length;
 }
+
+/* 分类筛选 折叠 */
+(function(){ const f=document.getElementById('filters'), b=document.getElementById('filtToggle');
+  b.addEventListener('click',()=>{ const c=f.classList.toggle('collapsed'); b.classList.toggle('open',!c); });
+  const lp=document.getElementById('legendPanel'), lb=document.getElementById('legendToggle');
+  lb.addEventListener('click',()=>{ const c=lp.classList.toggle('collapsed'); lb.classList.toggle('open',!c); });
+})();
 
 /* filters */
 document.getElementById('filters').addEventListener('click',e=>{
