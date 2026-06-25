@@ -176,6 +176,10 @@
 
   /* view badges */
   .rowio{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
+  .ie-line{display:flex;align-items:center;gap:8px}
+  .ie-line .ie{flex:1;min-width:0}
+  .ie-line .rowio{margin-top:0;flex-wrap:nowrap;flex-shrink:0}
+  .ie-line .io{font-size:10.5px;padding:2px 7px;gap:3px}
   .io{display:flex;align-items:center;gap:5px;background:#f7f9fb;border:1px solid var(--line);border-radius:8px;padding:3px 9px;font-size:12px;font-weight:600}
   .io .k{color:var(--muted)} .io .v.on{color:var(--g)} .io .v.off{color:var(--gray)}
 
@@ -518,12 +522,14 @@ function cardHTML(d){
       </div>
     </div>`;
   } else {
-    body=`<div class="ie">
-      <div class="col"><span class="cl ${vfield==='内部'?'cl-in':'cl-out'}">${vfield}</span><span class="badge ${vm.badge} big">${vm.btxt}</span></div>
-    </div>
-    <div class="rowio">
-      <span class="io"><span class="k">出款</span><span class="v ${isOn(e.出款)?'on':'off'}">${isOn(e.出款)?'✅':'✕'}</span></span>
-      <span class="io"><span class="k">下发</span><span class="v ${isOn(e.下发)?'on':'off'}">${isOn(e.下发)?'✅':'✕'}</span></span>
+    body=`<div class="ie-line">
+      <div class="ie">
+        <div class="col"><span class="cl ${vfield==='内部'?'cl-in':'cl-out'}">${vfield}</span><span class="badge ${vm.badge} big">${vm.btxt}</span></div>
+      </div>
+      <div class="rowio">
+        <span class="io"><span class="k">出款</span><span class="v ${isOn(e.出款)?'on':'off'}">${isOn(e.出款)?'✅':'✕'}</span></span>
+        <span class="io"><span class="k">下发</span><span class="v ${isOn(e.下发)?'on':'off'}">${isOn(e.下发)?'✅':'✕'}</span></span>
+      </div>
     </div>`;
   }
   let meta='';
