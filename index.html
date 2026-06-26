@@ -153,6 +153,7 @@
   .badge{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:7px;white-space:nowrap;line-height:1.6}
   .b-ok{background:#16a64f;color:#fff;font-weight:800;box-shadow:0 0 7px rgba(22,166,79,.5),0 0 0 1px rgba(22,166,79,.35)} .b-amber{background:var(--amber-bg);color:var(--amber)}
   .b-red{background:var(--red-bg);color:var(--red)} .b-blue{background:var(--blue-bg);color:var(--blue)}
+  .b-blue-lit{background:#1f6fd6;color:#fff;font-weight:800;box-shadow:0 0 7px rgba(31,111,214,.5),0 0 0 1px rgba(31,111,214,.35)}
   .b-purple{background:var(--purple-bg);color:var(--purple)} .b-gray{background:var(--gray-bg);color:var(--gray)}
   .b-orange{background:var(--orange-bg);color:var(--orange)}
   .badge.big{font-size:13.5px;padding:4px 14px;margin-top:2px}
@@ -181,6 +182,7 @@
   .c-name-txt{cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
   .c-row2{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px}
   .r2-note{flex:1;min-width:0;font-size:11px;color:var(--blue);line-height:1.35;white-space:pre-wrap;word-break:break-word}
+  .dayvol{flex:none;font-size:12px;font-weight:800;color:#8a6500;background:#fff6d6;border:1px solid #f0dd9a;border-radius:7px;padding:3px 9px;white-space:nowrap}
   .c-r2-right{display:flex;align-items:center;gap:9px;flex:none}
   .solo-tag{font-size:11px;font-weight:800;padding:2px 8px;border-radius:6px;line-height:1.4}
   .solo-tag.solo-in{background:#e3effa;color:#2f7faf;border:1px solid #c4dcf0}
@@ -325,7 +327,7 @@
   <div class="legend collapsed" id="legendPanel">
     <div class="legend-grid">
       <span class="li"><span class="badge b-ok">正常</span>开启正常</span>
-      <span class="li"><span class="badge b-amber">日切</span>非营业时间</span>
+      <span class="li"><span class="badge b-blue-lit">日切</span>非营业时间</span>
       <span class="li"><span class="badge b-red">维护</span>渠道维护中</span>
       <span class="li"><span class="badge b-red">额满，充值关</span>额满且充值已关</span>
       <span class="li"><span class="badge b-amber">额满，充值没关</span>额满但充值未关</span>
@@ -394,7 +396,7 @@ function prepData(){
 
 const STATES=[
   {v:'',         t:'正常',     sel:'sel-ok',    badge:'b-ok',     btxt:'正常'},
-  {v:'日切',      t:'日切',     sel:'sel-amber', badge:'b-amber',  btxt:'日切'},
+  {v:'日切',      t:'日切',     sel:'sel-blue', badge:'b-blue-lit',  btxt:'日切'},
   {v:'维护',      t:'维护',     sel:'sel-red',   badge:'b-red',    btxt:'维护'},
   {v:'额满，充值关',  t:'额满，充值关',   sel:'sel-red',    badge:'b-red',    btxt:'额满，充值关'},
   {v:'额满，充值没关',t:'额满，充值没关', sel:'sel-amber',  badge:'b-amber',  btxt:'额满，充值没关'},
@@ -560,6 +562,20 @@ function swHTML(label,on,key,field,recv){
 
 const SHARED_IO=['TKpay支付宝','XPAY支付宝','KW支付宝','KW支付宝-TOMMY','宝诺支付宝UID『8084』'];
 function isShared(d){ return SHARED_IO.indexOf(d.商户)>=0; }
+const DAYVOL_RE=/日量[：:\s]*(内\d+外\d+|内\d+|外\d+|\d+\s*[Aa]|无限制|\d+)/;
+function pullDayVol(text){
+  if(!text) return {vol:'',rest:text||''};
+  let vol=''; const out=[];
+  text.split('\n').forEach(ln=>{
+    const m=ln.match(DAYVOL_RE);
+    if(m && !vol){
+      vol=m[1].replace(/\s+/g,'');
+      let rest=ln.replace(DAYVOL_RE,'').replace(/^[，,、：:\s]+|[，,、：:\s]+$/g,'').trim();
+      if(rest) out.push(rest);
+    } else out.push(ln);
+  });
+  return {vol, rest:out.join('\n')};
+}
 function cardHTML(d){
   const e=eff(d);
   const recv=recvOn(e.收款);
@@ -569,6 +585,9 @@ function cardHTML(d){
   const vval=(vfield==='内部'?e.内部:e.外部), vm=stMeta(vval);
   const clCls=shared?'cl-both':(state.view==='内部'?'cl-in':'cl-out');
   const dim=d.section==='不使用'?' dim':'';
+  const n1=e.备注||'', n2=e.备注2||'', n3=e.商户备注||'';
+  const dvol=editMode?{vol:'',rest:n1}:pullDayVol(n1);
+  const dayVol=dvol.vol, n1view=dvol.rest;
   let body;
   if(editMode){
     body=`<div class="ctrl">
@@ -592,7 +611,6 @@ function cardHTML(d){
   if(d.放置金) meta+=`<div class="m"><span class="k">放置金</span><span class="v">${esc(d.放置金)}</span></div>`;
   if(d.下发时间) meta+=`<div class="m"><span class="k">下发时间</span><span class="v">${esc(d.下发时间)}</span></div>`;
   const metaView=`<div class="m"><span class="k">出款</span><span class="v ${isOn(e.出款)?'on':'off'}">${isOn(e.出款)?'✅':'✕'}</span></div><div class="m"><span class="k">下发</span><span class="v ${isOn(e.下发)?'on':'off'}">${isOn(e.下发)?'✅':'✕'}</span></div>`+meta;
-  const n1=e.备注||'', n2=e.备注2||'', n3=e.商户备注||'';
   let note='', noteFold='';
   if(editMode){
     note=`<div class="note-wrap"><span class="ncl">原始备注</span>`
@@ -602,8 +620,8 @@ function cardHTML(d){
       +`<div class="note-wrap"><span class="ncl ncl3">商户备注</span>`
       +`<textarea class="note-edit" data-key="${esc(d.key)}" data-field="商户备注" rows="3" placeholder="商户备注…">${esc(n3)}</textarea></div>`;
   } else {
-    noteFold=((n1.trim()||n3.trim())?`<details class="note-fold"><summary class="note-sum"></summary><div class="note-pop">`
-       +(n1.trim()?`<div class="note"><span class="nk">原始备注</span>${esc(n1)}</div>`:'')
+    noteFold=((n1view.trim()||n3.trim())?`<details class="note-fold"><summary class="note-sum"></summary><div class="note-pop">`
+       +(n1view.trim()?`<div class="note"><span class="nk">原始备注</span>${esc(n1view)}</div>`:'')
        +(n3.trim()?`<div class="note n3"><span class="nk">商户备注</span>${esc(n3)}</div>`:'')
        +`</div></details>`:'');
   }
@@ -616,7 +634,7 @@ function cardHTML(d){
       ${editMode?'<span class="drag-handle" title="拖曳排序">⠿</span>':''}
       <span class="c-name" style="color:${nameColor(d)};background:${nameColor(d)}1a"><span class="c-name-txt" data-copy="${esc(d.商户)}" title="${esc(d.商户)}">${esc(d.商户)}</span>${noteFold}</span>
     </div>
-    <div class="c-row2">${body}<div class="c-r2-right">${metaFold}<span class="c-recv">${recv?'<span class="recv-on">⭕️</span>':'<span class="recv-off">❌</span>'}</span></div></div>
+    <div class="c-row2">${body}${dayVol?`<span class="dayvol">日量 ${esc(dayVol)}</span>`:''}<div class="c-r2-right">${metaFold}<span class="c-recv">${recv?'<span class="recv-on">⭕️</span>':'<span class="recv-off">❌</span>'}</span></div></div>
     ${(editMode&&meta)?`<div class="meta">${meta}</div>`:''}${note}${chg}${del}</div>`;
 }
 
