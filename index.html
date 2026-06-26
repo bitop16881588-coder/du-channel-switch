@@ -172,6 +172,7 @@
   .card:hover{box-shadow:0 4px 14px rgba(20,30,40,.10)}
   .card .accent{position:absolute;left:0;top:0;bottom:0;width:5px;border-radius:13px 0 0 13px}
   .card.dim{opacity:.66}
+  .card.dim:has(details[open]){opacity:1}
   .card.dim .accent{filter:saturate(.25)}
   .c-head{display:flex;align-items:center;gap:8px}
   .c-name{flex:1;min-width:0;display:flex;align-items:center;justify-content:center;gap:4px;font-size:18px;font-weight:900;letter-spacing:.2px;padding:6px 11px;border-radius:9px;line-height:1.3}
