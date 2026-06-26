@@ -584,7 +584,7 @@ function cardHTML(d){
     </div>`;
   } else {
     body=`<div class="ie">
-      <div class="col"><span class="cl ${clCls}">${vlabel}</span><span class="badge ${vm.badge} big">${vm.btxt}</span>${e.备注2?`<details class="note-fold supp-fold"><summary class="note-sum"></summary><div class="note-pop"><div class="note n2"><span class="nk">补充备注</span>${esc(e.备注2)}</div></div></details>`:''}</div>
+      <div class="col"><span class="cl ${clCls}">${vlabel}</span><span class="badge ${vm.badge} big">${vm.btxt}</span>${(e.备注2&&e.备注2.trim())?`<details class="note-fold supp-fold"><summary class="note-sum"></summary><div class="note-pop"><div class="note n2"><span class="nk">补充备注</span>${esc(e.备注2)}</div></div></details>`:''}</div>
     </div>`;
   }
   let meta='';
@@ -601,9 +601,9 @@ function cardHTML(d){
       +`<div class="note-wrap"><span class="ncl ncl3">商户备注</span>`
       +`<textarea class="note-edit" data-key="${esc(d.key)}" data-field="商户备注" rows="3" placeholder="商户备注…">${esc(n3)}</textarea></div>`;
   } else {
-    noteFold=((n1||n3)?`<details class="note-fold"><summary class="note-sum"></summary><div class="note-pop">`
-       +(n1?`<div class="note"><span class="nk">原始备注</span>${esc(n1)}</div>`:'')
-       +(n3?`<div class="note n3"><span class="nk">商户备注</span>${esc(n3)}</div>`:'')
+    noteFold=((n1.trim()||n3.trim())?`<details class="note-fold"><summary class="note-sum"></summary><div class="note-pop">`
+       +(n1.trim()?`<div class="note"><span class="nk">原始备注</span>${esc(n1)}</div>`:'')
+       +(n3.trim()?`<div class="note n3"><span class="nk">商户备注</span>${esc(n3)}</div>`:'')
        +`</div></details>`:'');
   }
   const chg='';
