@@ -178,11 +178,14 @@
   .card.dim:has(details[open]){opacity:1}
   .card.dim .accent{filter:saturate(.25)}
   .c-head{display:flex;align-items:center;gap:8px}
-  .c-name{flex:1;min-width:0;display:flex;align-items:center;justify-content:center;gap:4px;font-size:18px;font-weight:900;letter-spacing:.2px;padding:6px 11px;border-radius:9px;line-height:1.3}
+  .c-name{flex:1;min-width:0;position:relative;display:flex;align-items:center;justify-content:center;gap:4px;font-size:18px;font-weight:900;letter-spacing:.2px;padding:6px 30px;border-radius:9px;line-height:1.3}
+  .name-recv{position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:15px;line-height:1}
   .c-name-txt{cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
   .c-row2{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px}
   .r2-note{flex:1;min-width:0;font-size:11px;color:var(--blue);line-height:1.35;white-space:pre-wrap;word-break:break-word}
   .dayvol{flex:none;font-size:12px;font-weight:800;color:#8a6500;background:#fff6d6;border:1px solid #f0dd9a;border-radius:7px;padding:3px 9px;white-space:nowrap}
+  .dv-stack{display:flex;flex-direction:column;gap:4px;align-items:flex-start;flex:none}
+  .dayvol.fund{color:#5b4b8a;background:#efeafa;border-color:#d6ccf0}
   .c-r2-right{display:flex;align-items:center;gap:9px;flex:none}
   .solo-tag{font-size:11px;font-weight:800;padding:2px 8px;border-radius:6px;line-height:1.4}
   .solo-tag.solo-in{background:#e3effa;color:#2f7faf;border:1px solid #c4dcf0}
@@ -607,10 +610,10 @@ function cardHTML(d){
       <div class="col"><span class="cl ${clCls}">${vlabel}</span><span class="badge ${vm.badge} big">${vm.btxt}</span>${(e.备注2&&e.备注2.trim())?`<details class="note-fold supp-fold"><summary class="note-sum"></summary><div class="note-pop"><div class="note n2"><span class="nk">补充备注</span>${esc(e.备注2)}</div></div></details>`:''}</div>
     </div>`;
   }
-  let meta='';
-  if(d.放置金) meta+=`<div class="m"><span class="k">放置金</span><span class="v">${esc(d.放置金)}</span></div>`;
-  if(d.下发时间) meta+=`<div class="m"><span class="k">下发时间</span><span class="v">${esc(d.下发时间)}</span></div>`;
-  const metaView=`<div class="m"><span class="k">出款</span><span class="v ${isOn(e.出款)?'on':'off'}">${isOn(e.出款)?'✅':'✕'}</span></div><div class="m"><span class="k">下发</span><span class="v ${isOn(e.下发)?'on':'off'}">${isOn(e.下发)?'✅':'✕'}</span></div>`+meta;
+  let metaTime = d.下发时间?`<div class="m"><span class="k">下发时间</span><span class="v">${esc(d.下发时间)}</span></div>`:'';
+  let metaFund = d.放置金?`<div class="m"><span class="k">放置金</span><span class="v">${esc(d.放置金)}</span></div>`:'';
+  const meta = metaFund + metaTime;
+  const metaView=`<div class="m"><span class="k">出款</span><span class="v ${isOn(e.出款)?'on':'off'}">${isOn(e.出款)?'✅':'✕'}</span></div><div class="m"><span class="k">下发</span><span class="v ${isOn(e.下发)?'on':'off'}">${isOn(e.下发)?'✅':'✕'}</span></div>`+metaTime;
   let note='', noteFold='';
   if(editMode){
     note=`<div class="note-wrap"><span class="ncl">原始备注</span>`
@@ -632,9 +635,9 @@ function cardHTML(d){
     <span class="accent" style="background:${d.color||'#ccc'}"></span>
     <div class="c-head">
       ${editMode?'<span class="drag-handle" title="拖曳排序">⠿</span>':''}
-      <span class="c-name" style="color:${nameColor(d)};background:${nameColor(d)}1a"><span class="c-name-txt" data-copy="${esc(d.商户)}" title="${esc(d.商户)}">${esc(d.商户)}</span>${noteFold}</span>
+      <span class="c-name" style="color:${nameColor(d)};background:${nameColor(d)}1a"><span class="c-recv name-recv">${recv?'<span class="recv-on">⭕️</span>':'<span class="recv-off">❌</span>'}</span><span class="c-name-txt" data-copy="${esc(d.商户)}" title="${esc(d.商户)}">${esc(d.商户)}</span>${noteFold}</span>
     </div>
-    <div class="c-row2">${body}${dayVol?`<span class="dayvol">日量 ${esc(dayVol)}</span>`:''}<div class="c-r2-right">${metaFold}<span class="c-recv">${recv?'<span class="recv-on">⭕️</span>':'<span class="recv-off">❌</span>'}</span></div></div>
+    <div class="c-row2">${body}${(!editMode&&(dayVol||d.放置金))?`<div class="dv-stack">${dayVol?`<span class="dayvol">日量 ${esc(dayVol)}</span>`:''}${d.放置金?`<span class="dayvol fund">放置金 ${esc(d.放置金)}</span>`:''}</div>`:''}<div class="c-r2-right">${metaFold}</div></div>
     ${(editMode&&meta)?`<div class="meta">${meta}</div>`:''}${note}${chg}${del}</div>`;
 }
 
