@@ -149,6 +149,7 @@
   .legend.collapsed{display:none}
   .legend-grid{display:flex;flex-wrap:wrap;gap:7px;padding:11px 14px}
   .legend-grid .li{display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--ink2)}
+  .io-leg{font-weight:900;font-size:13px} .io-leg.on{color:#16a64f} .io-leg.off{color:var(--red)}
 
   .badge{display:inline-flex;align-items:center;gap:4px;font-size:11.5px;font-weight:700;padding:2px 8px;border-radius:7px;white-space:nowrap;line-height:1.6}
   .b-ok{background:#16a64f;color:#fff;font-weight:800;box-shadow:0 0 7px rgba(22,166,79,.5),0 0 0 1px rgba(22,166,79,.35)} .b-amber{background:var(--amber-bg);color:var(--amber)}
@@ -180,7 +181,7 @@
   .c-head{display:flex;align-items:center;gap:8px}
   .c-name{flex:1;min-width:0;position:relative;display:flex;align-items:center;justify-content:center;gap:4px;font-size:18px;font-weight:900;letter-spacing:.2px;padding:5px 28px;border-radius:9px;line-height:1.3}
   .name-recv{position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:15px;line-height:1}
-  .name-io{position:absolute;right:6px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:2px;font-size:9.5px;font-weight:800;line-height:1.1}
+  .name-io{position:absolute;right:7px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:1px;font-size:11.5px;font-weight:900;line-height:1.1}
   .name-io .nio.on{color:#16a64f} .name-io .nio.off{color:var(--red)}
   .dayvol.time{color:#0f6e6e;background:#e0f5f4;border-color:#bce5e2;white-space:normal;word-break:break-word}
   .c-name-txt{cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
@@ -332,6 +333,8 @@
 
   <div class="legend collapsed" id="legendPanel">
     <div class="legend-grid">
+      <span class="li"><span class="io-leg on">✓</span>可出款</span>
+      <span class="li"><span class="io-leg off">✕</span>不可下发</span>
       <span class="li"><span class="badge b-ok">正常</span>开启正常</span>
       <span class="li"><span class="badge b-blue-lit">日切</span>非营业时间</span>
       <span class="li"><span class="badge b-red">维护</span>渠道维护中</span>
@@ -638,7 +641,7 @@ function cardHTML(d){
     <span class="accent" style="background:${d.color||'#ccc'}"></span>
     <div class="c-head">
       ${editMode?'<span class="drag-handle" title="拖曳排序">⠿</span>':''}
-      <span class="c-name" style="color:${nameColor(d)};background:${nameColor(d)}1a"><span class="c-recv name-recv">${recv?'<span class="recv-on">⭕️</span>':'<span class="recv-off">❌</span>'}</span><span class="c-name-txt" data-copy="${esc(d.商户)}" title="${esc(d.商户)}">${esc(d.商户)}</span>${noteFold}<span class="name-io"><span class="nio ${isOn(e.出款)?'on':'off'}">出${isOn(e.出款)?'✓':'✕'}</span><span class="nio ${isOn(e.下发)?'on':'off'}">发${isOn(e.下发)?'✓':'✕'}</span></span></span>
+      <span class="c-name" style="color:${nameColor(d)};background:${nameColor(d)}1a"><span class="c-recv name-recv">${recv?'<span class="recv-on">⭕️</span>':'<span class="recv-off">❌</span>'}</span><span class="c-name-txt" data-copy="${esc(d.商户)}" title="${esc(d.商户)}">${esc(d.商户)}</span>${noteFold}<span class="name-io"><span class="nio ${isOn(e.出款)?'on':'off'}">${isOn(e.出款)?'✓':'✕'}</span><span class="nio ${isOn(e.下发)?'on':'off'}">${isOn(e.下发)?'✓':'✕'}</span></span></span>
     </div>
     <div class="c-row2">${body}${(!editMode&&(dayVol||d.放置金||e.下发时间))?`<div class="dv-stack">${dayVol?`<span class="dayvol">日量 ${esc(dayVol)}</span>`:''}${d.放置金?`<span class="dayvol fund">放置金 ${esc(d.放置金)}</span>`:''}${e.下发时间?`<span class="dayvol time">${esc(e.下发时间)}</span>`:''}</div>`:''}</div>
     ${(editMode&&meta)?`<div class="meta">${meta}</div>`:''}${note}${chg}${del}</div>`;
