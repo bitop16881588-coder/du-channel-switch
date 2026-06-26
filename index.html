@@ -132,6 +132,7 @@
   .sw.on .track{background:var(--g)}
   .sw.on .knob{transform:translateX(17px)}
   .sw.sw-recv:not(.on) .track{background:var(--red)}
+  .sw.sw-recv.on .track{background:#ff2424;box-shadow:0 0 8px rgba(255,36,36,.7)}
   .toolrow .sw,.viewrow .sw{background:#fff;border:1.5px solid var(--line);border-radius:9px;padding:7px 13px;flex-shrink:0}
   .sync{display:inline-flex;align-items:center;gap:7px;cursor:pointer;background:#fff;border:1.5px solid var(--line);border-radius:9px;padding:5px 11px;font-size:12.5px;font-weight:700;color:var(--ink2);user-select:none;transition:.12s}
   .sync:hover{box-shadow:0 0 0 2px rgba(199,154,58,.25)}
@@ -573,7 +574,6 @@ function cardHTML(d){
           <select class="sel ${vm.sel}" data-key="${esc(d.key)}" data-field="${vfield}">${optsHTML(vval)}</select></div>
       </div>
       <div class="sw-row">
-        ${swHTML('收款',recv,d.key,'收款',true)}
         ${swHTML('出款',isOn(e.出款),d.key,'出款')}
         ${swHTML('下发',isOn(e.下发),d.key,'下发')}
       </div>
