@@ -54,7 +54,7 @@
   .stat.off{border-left-color:#ff8a8a} .stat.off .n{color:#ff8a8a}
 
   .bar{position:sticky;top:0;z-index:20;background:rgba(238,241,245,.93);backdrop-filter:blur(8px);
-    padding:12px 0 10px;margin-bottom:4px;border-bottom:1px solid var(--line)}
+    padding:8px 0 7px;margin-bottom:2px;border-bottom:1px solid var(--line)}
   .search{position:relative}
   .search input{width:100%;padding:11px 38px 11px 38px;border:1.5px solid var(--line);border-radius:11px;font-size:15px;background:#fff;color:var(--ink);outline:none;transition:border .15s}
   .search input:focus{border-color:var(--gold)}
@@ -63,6 +63,8 @@
   .sec-head .section-title{margin-bottom:0}
   .sec-head .list-search{margin:0}
   #searchHome:empty{display:none}
+  #searchGroup{display:inline-flex;align-items:center;gap:10px}
+  #searchGroup .sw{background:#fff;border:1.5px solid var(--line);border-radius:9px;padding:6px 12px;flex-shrink:0}
   .list-search input{padding:6px 30px;font-size:14px;border-radius:9px}
   .list-search .ic{font-size:14px;left:10px}
   .list-search .clr{right:4px;font-size:16px}
@@ -71,7 +73,7 @@
 
   .toolrow{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:9px}
   .viewseg{display:inline-flex;background:#e7ebf1;border-radius:13px;padding:3px;gap:4px;flex-shrink:0;margin:0 auto}
-  .viewrow{display:flex;align-items:center;gap:12px;flex-wrap:nowrap;margin-top:10px;overflow-x:auto}
+  .viewrow{display:flex;align-items:center;gap:10px;flex-wrap:nowrap;margin-top:0;overflow-x:auto}
   .vr-right{display:flex;align-items:center;gap:11px;flex-wrap:nowrap;flex-shrink:0}
   .vr-right>*{flex-shrink:0;white-space:nowrap}
   .addbtn{border:1.5px solid #2e8b76;background:#2e8b76;color:#fff;padding:6px 14px;border-radius:999px;font-size:13px;font-weight:800;cursor:pointer;transition:.12s;letter-spacing:.5px}
@@ -299,7 +301,6 @@
 
   <div class="bar">
     <div class="viewrow">
-      <span class="sw" id="editSw"><span class="track"><span class="knob"></span></span><span>编辑模式</span></span>
       <div class="viewseg" id="viewSeg">
         <button class="vbtn v-in active" data-view="内部">内部</button>
         <button class="vbtn v-out" data-view="外部">外部</button>
@@ -336,11 +337,11 @@
     </div>
   </div>
 
-  <div id="searchHome"><div class="search list-search" id="searchBox">
+  <div id="searchHome"><div id="searchGroup"><div class="search list-search" id="searchBox">
     <span class="ic">🔍</span>
     <input id="q" type="search" placeholder="" autocomplete="off">
     <button class="clr" id="clr">×</button>
-  </div></div>
+  </div><span class="sw" id="editSw"><span class="track"><span class="knob"></span></span><span>编辑模式</span></span></div></div>
   <div id="list"></div>
   <datalist id="timePresets">
     <option value="上午9點"></option>
@@ -623,7 +624,7 @@ function viewVal(d){ return state.view==='内部'?eff(d).内部:eff(d).外部; }
 function ordVal(d){ const o=overrides[d.key]; return (o&&o.__order!=null&&o.__order!=='')?Number(o.__order):null; }
 function ordSort(a,b){ const oa=ordVal(a),ob=ordVal(b); if(oa!=null&&ob!=null)return oa-ob; if(oa!=null)return -1; if(ob!=null)return 1; return a.id-b.id; }
 function render(){
-  const sb=document.getElementById('searchBox'), home=document.getElementById('searchHome'), listEl=document.getElementById('list');
+  const sb=document.getElementById('searchGroup'), home=document.getElementById('searchHome'), listEl=document.getElementById('list');
   if(sb&&home&&listEl.contains(sb)) home.appendChild(sb);
   const rows=DATA.filter(pass);
   let html='';
