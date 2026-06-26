@@ -251,6 +251,7 @@
   .note-edit:focus{border-color:var(--gold)}
   .note-edit::placeholder{color:#aab2bb}
   .note.n2 .nk{color:var(--blue)}
+  .supp-fold .note-sum{color:var(--blue);opacity:.85}
   .note.n3 .nk{color:#7a4ec2} .ncl.ncl3{color:#7a4ec2}
   .note-wrap{margin-top:10px}
   .nw-supp{margin-top:8px}
@@ -583,7 +584,7 @@ function cardHTML(d){
     </div>`;
   } else {
     body=`<div class="ie">
-      <div class="col"><span class="cl ${clCls}">${vlabel}</span><span class="badge ${vm.badge} big">${vm.btxt}</span></div>
+      <div class="col"><span class="cl ${clCls}">${vlabel}</span><span class="badge ${vm.badge} big">${vm.btxt}</span>${e.备注2?`<details class="note-fold supp-fold"><summary class="note-sum"></summary><div class="note-pop"><div class="note n2"><span class="nk">补充备注</span>${esc(e.备注2)}</div></div></details>`:''}</div>
     </div>`;
   }
   let meta='';
@@ -605,7 +606,7 @@ function cardHTML(d){
        +(n3?`<div class="note n3"><span class="nk">商户备注</span>${esc(n3)}</div>`:'')
        +`</div></details>`:'');
   }
-  const chg=e.changed?`<div class="chg">✎ 最后变更：${e.changed}</div>`:'';
+  const chg='';
   const del=(editMode&&d.custom)?`<button class="del-merchant" data-del="${esc(d.key)}">🗑 删除此商户</button>`:'';
   const metaFold=(!editMode)?`<details class="meta-fold"><summary class="meta-sum" title="出款 / 下发 / 放置金 / 下发时间">⋯</summary><div class="meta-pop"><div class="meta">${metaView}</div></div></details>`:'';
   return `<div class="card${dim}${editMode?' draggable':''}" data-key="${esc(d.key)}">
@@ -614,7 +615,7 @@ function cardHTML(d){
       ${editMode?'<span class="drag-handle" title="拖曳排序">⠿</span>':''}
       <span class="c-name" style="color:${nameColor(d)};background:${nameColor(d)}1a"><span class="c-name-txt" data-copy="${esc(d.商户)}" title="${esc(d.商户)}">${esc(d.商户)}</span>${noteFold}</span>
     </div>
-    <div class="c-row2">${body}${n2?`<span class="r2-note">${esc(n2)}</span>`:''}<div class="c-r2-right">${metaFold}<span class="c-recv">${recv?'<span class="recv-on">⭕️</span>':'<span class="recv-off">❌</span>'}</span></div></div>
+    <div class="c-row2">${body}<div class="c-r2-right">${metaFold}<span class="c-recv">${recv?'<span class="recv-on">⭕️</span>':'<span class="recv-off">❌</span>'}</span></div></div>
     ${(editMode&&meta)?`<div class="meta">${meta}</div>`:''}${note}${chg}${del}</div>`;
 }
 
