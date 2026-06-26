@@ -180,7 +180,9 @@
   .card.dim .accent{filter:saturate(.25)}
   .c-head{display:flex;align-items:center;gap:8px}
   .c-name{flex:1;min-width:0;position:relative;display:flex;align-items:center;justify-content:center;gap:4px;font-size:13.5px;font-weight:900;letter-spacing:.2px;padding:5px 28px;border-radius:9px;line-height:1.25}
-  .name-recv{position:absolute;left:8px;top:50%;transform:translateY(-50%);font-size:15px;line-height:1}
+  .name-recv{position:absolute;right:9px;top:50%;transform:translateY(-50%);font-size:15px;line-height:1}
+  .io-note{display:flex;align-items:center;gap:12px}
+  .io-note .ion{font-weight:800} .io-note .ion.on{color:#16a64f} .io-note .ion.off{color:var(--red)}
   .name-io{position:absolute;right:7px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:1px;font-size:11.5px;font-weight:900;line-height:1.1}
   .name-io .nio.on{color:#16a64f} .name-io .nio.off{color:var(--red)}
   .dayvol.time{color:#0f6e6e;background:#e0f5f4;border-color:#bce5e2;white-space:normal;word-break:break-word}
@@ -333,8 +335,6 @@
 
   <div class="legend collapsed" id="legendPanel">
     <div class="legend-grid">
-      <span class="li"><span class="io-leg on">✓</span>可出款</span>
-      <span class="li"><span class="io-leg off">✕</span>不可下发</span>
       <span class="li"><span class="badge b-ok">正常</span>开启正常</span>
       <span class="li"><span class="badge b-blue-lit">日切</span>非营业时间</span>
       <span class="li"><span class="badge b-red">维护</span>渠道维护中</span>
@@ -572,14 +572,19 @@ function swHTML(label,on,key,field,recv){
 const SHARED_IO=['TKpay支付宝','XPAY支付宝','KW支付宝','KW支付宝-TOMMY','宝诺支付宝UID『8084』'];
 function isShared(d){ return SHARED_IO.indexOf(d.商户)>=0; }
 const DAYVOL_RE=/日量[：:\s]*(内\d+外\d+|内\d+|外\d+|\d+\s*[Aa]|无限制|\d+)/;
+const BARE_DAYVOL_RE=/(内\d+外\d+|内\d+\s*[Aa]|外\d+\s*[Aa])/;
 function pullDayVol(text){
   if(!text) return {vol:'',rest:text||''};
   let vol=''; const out=[];
   text.split('\n').forEach(ln=>{
-    const m=ln.match(DAYVOL_RE);
+    let m=(!vol)?ln.match(DAYVOL_RE):null;
+    if(!vol && !m) m=ln.match(BARE_DAYVOL_RE);
     if(m && !vol){
       vol=m[1].replace(/\s+/g,'');
-      let rest=ln.replace(DAYVOL_RE,'').replace(/^[，,、：:\s]+|[，,、：:\s]+$/g,'').trim();
+      const idx=ln.indexOf(m[0]);
+      let before=ln.slice(0,idx), after=ln.slice(idx+m[0].length);
+      before=before.replace(/(^|\s)\d{1,2}\/\d{1,2}(\/\d{1,2})?[：:]?\s*$/,'').trim();
+      let rest=(before+' '+after).replace(/^[，,、；;：:\s]+|[，,、；;：:\s]+$/g,'').replace(/\s{2,}/g,' ').trim();
       if(rest) out.push(rest);
     } else out.push(ln);
   });
@@ -629,10 +634,11 @@ function cardHTML(d){
       +`<div class="note-wrap"><span class="ncl ncl3">商户备注</span>`
       +`<textarea class="note-edit" data-key="${esc(d.key)}" data-field="商户备注" rows="3" placeholder="商户备注…">${esc(n3)}</textarea></div>`;
   } else {
-    noteFold=((n1view.trim()||n3.trim())?`<details class="note-fold"><summary class="note-sum"></summary><div class="note-pop">`
+    const ioLine=`<div class="note io-note"><span class="nk">代付状态</span><span class="ion ${isOn(e.出款)?'on':'off'}">出款 ${isOn(e.出款)?'✓':'✕'}</span><span class="ion ${isOn(e.下发)?'on':'off'}">下发 ${isOn(e.下发)?'✓':'✕'}</span></div>`;
+    noteFold=`<details class="note-fold"><summary class="note-sum"></summary><div class="note-pop">${ioLine}`
        +(n1view.trim()?`<div class="note"><span class="nk">原始备注</span>${esc(n1view)}</div>`:'')
        +(n3.trim()?`<div class="note n3"><span class="nk">商户备注</span>${esc(n3)}</div>`:'')
-       +`</div></details>`:'');
+       +`</div></details>`;
   }
   const chg='';
   const del=(editMode&&d.custom)?`<button class="del-merchant" data-del="${esc(d.key)}">🗑 删除此商户</button>`:'';
@@ -641,7 +647,7 @@ function cardHTML(d){
     <span class="accent" style="background:${d.color||'#ccc'}"></span>
     <div class="c-head">
       ${editMode?'<span class="drag-handle" title="拖曳排序">⠿</span>':''}
-      <span class="c-name" style="color:${nameColor(d)};background:${nameColor(d)}1a"><span class="c-recv name-recv">${recv?'<span class="recv-on">⭕️</span>':'<span class="recv-off">❌</span>'}</span><span class="c-name-txt" data-copy="${esc(d.商户)}" title="${esc(d.商户)}">${esc(d.商户)}</span>${noteFold}<span class="name-io"><span class="nio ${isOn(e.出款)?'on':'off'}">${isOn(e.出款)?'✓':'✕'}</span><span class="nio ${isOn(e.下发)?'on':'off'}">${isOn(e.下发)?'✓':'✕'}</span></span></span>
+      <span class="c-name" style="color:${nameColor(d)};background:${nameColor(d)}1a"><span class="c-name-txt" data-copy="${esc(d.商户)}" title="${esc(d.商户)}">${esc(d.商户)}</span>${noteFold}<span class="c-recv name-recv">${recv?'<span class="recv-on">⭕️</span>':'<span class="recv-off">❌</span>'}</span></span>
     </div>
     <div class="c-row2">${body}${(!editMode&&(dayVol||d.放置金||e.下发时间))?`<div class="dv-stack">${dayVol?`<span class="dayvol">日量 ${esc(dayVol)}</span>`:''}${d.放置金?`<span class="dayvol fund">放置金 ${esc(d.放置金)}</span>`:''}${e.下发时间?`<span class="dayvol time">${esc(e.下发时间)}</span>`:''}</div>`:''}</div>
     ${(editMode&&meta)?`<div class="meta">${meta}</div>`:''}${note}${chg}${del}</div>`;
