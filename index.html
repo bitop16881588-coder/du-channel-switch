@@ -216,6 +216,10 @@
   .sel.sel-orange{color:var(--orange);border-color:#f0d2b4;background-color:var(--orange-bg)}
   .sel.sel-gray{color:var(--gray);border-color:#d4dae0;background-color:var(--gray-bg)}
   .sw-row{display:flex;gap:14px;flex-wrap:wrap;padding-top:2px}
+  .te-row{display:flex;align-items:center;gap:8px;margin-top:8px}
+  .te-k{font-size:12px;color:var(--muted);font-weight:800;flex:none;white-space:nowrap}
+  .te-in{flex:1;min-width:0;padding:6px 10px;border:1.5px solid var(--line);border-radius:8px;font-size:13px;background:#fff;color:var(--ink);outline:none}
+  .te-in:focus{border-color:var(--gold)}
 
   .meta{display:flex;gap:14px;flex-wrap:wrap;margin-top:9px;font-size:12.5px;color:var(--ink2)}
   .meta .m .k{color:var(--muted);font-size:11px;display:block} .meta .m .v{font-weight:700}
@@ -335,6 +339,17 @@
     <button class="clr" id="clr">×</button>
   </div></div>
   <div id="list"></div>
+  <datalist id="timePresets">
+    <option value="上午9點"></option>
+    <option value="要核對"></option>
+    <option value="清空 不用核對"></option>
+    <option value="下發單間需滿人民幣2A"></option>
+    <option value="下發單間需滿5000U"></option>
+    <option value="下發單間需滿3000U"></option>
+    <option value="下發單間需滿2000U"></option>
+    <option value="下發單間需滿1500U"></option>
+    <option value="下發單間需滿1000U"></option>
+  </datalist>
   <div class="empty" id="empty" style="display:none">找不到符合的通道</div>
   <footer>资料来源：DU_四方_第三方开关记录《四方『内外部』NEW》分页 · 编辑模式可调整状态，变更会记录在本机并显示日期 · 点商户名称可复制</footer>
 </div>
@@ -347,7 +362,7 @@
     <label>内部<select id="m-in"></select></label>
     <label>外部<select id="m-out"></select></label>
     <label>放置金（可空）<input id="m-fund" type="text" autocomplete="off"></label>
-    <label>下发时间（可空）<input id="m-time" type="text" autocomplete="off"></label>
+    <label>下发时间（可空，可选预设或自行输入）<input id="m-time" type="text" list="timePresets" autocomplete="off"></label>
     <label>备注（可空）<textarea id="m-note" rows="2"></textarea></label>
     <div class="merr" id="m-err"></div>
     <div class="mbtns"><button class="btn" id="m-cancel">取消</button><button class="btn primary" id="m-ok">新增</button></div>
@@ -562,6 +577,7 @@ function cardHTML(d){
         ${swHTML('出款',isOn(e.出款),d.key,'出款')}
         ${swHTML('下发',isOn(e.下发),d.key,'下发')}
       </div>
+      <div class="te-row"><span class="te-k">下发时间</span><input class="te-in" list="timePresets" data-key="${esc(d.key)}" data-field="下发时间" value="${esc(e.下发时间||'')}" placeholder="选择预设或自行输入…" autocomplete="off"></div>
     </div>`;
   } else {
     body=`<div class="ie">
@@ -703,8 +719,10 @@ clr.addEventListener('click',()=>{q.value='';state.q='';clr.style.display='none'
 /* list interactions: select change / toggle / copy */
 const list=document.getElementById('list');
 list.addEventListener('change',e=>{
-  const s=e.target.closest('select.sel'); if(!s)return;
-  setOverride(s.dataset.key,s.dataset.field,s.value); render(); stats();
+  const s=e.target.closest('select.sel');
+  if(s){ setOverride(s.dataset.key,s.dataset.field,s.value); render(); stats(); return; }
+  const ti=e.target.closest('input.te-in');
+  if(ti){ setOverride(ti.dataset.key,ti.dataset.field,ti.value.trim()); render(); stats(); return; }
 });
 list.addEventListener('input',e=>{
   const ta=e.target.closest('textarea.note-edit'); if(!ta)return;
