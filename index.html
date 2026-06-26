@@ -156,7 +156,7 @@
   .b-blue-lit{background:#1f6fd6;color:#fff;font-weight:800;box-shadow:0 0 7px rgba(31,111,214,.5),0 0 0 1px rgba(31,111,214,.35)}
   .b-purple{background:var(--purple-bg);color:var(--purple)} .b-gray{background:var(--gray-bg);color:var(--gray)}
   .b-orange{background:var(--orange-bg);color:var(--orange)}
-  .badge.big{font-size:13.5px;padding:4px 14px;margin-top:2px}
+  .badge.big{font-size:12px;padding:2px 10px;margin-top:0}
 
   .section{border-radius:16px;padding:14px 14px 16px;margin-top:20px}
   .section.sec-use{background:#edf8f1;box-shadow:inset 0 0 0 1px #d2ecdd}
@@ -178,8 +178,11 @@
   .card.dim:has(details[open]){opacity:1}
   .card.dim .accent{filter:saturate(.25)}
   .c-head{display:flex;align-items:center;gap:8px}
-  .c-name{flex:1;min-width:0;position:relative;display:flex;align-items:center;justify-content:center;gap:4px;font-size:18px;font-weight:900;letter-spacing:.2px;padding:6px 30px;border-radius:9px;line-height:1.3}
+  .c-name{flex:1;min-width:0;position:relative;display:flex;align-items:center;justify-content:center;gap:4px;font-size:18px;font-weight:900;letter-spacing:.2px;padding:6px 46px;border-radius:9px;line-height:1.3}
   .name-recv{position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:15px;line-height:1}
+  .name-io{position:absolute;right:8px;top:50%;transform:translateY(-50%);display:flex;gap:5px;font-size:11px;font-weight:800;line-height:1}
+  .name-io .nio.on{color:#16a64f} .name-io .nio.off{color:var(--red)}
+  .dayvol.time{color:#0f6e6e;background:#e0f5f4;border-color:#bce5e2;white-space:normal;word-break:break-word}
   .c-name-txt{cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
   .c-row2{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px}
   .r2-note{flex:1;min-width:0;font-size:11px;color:var(--blue);line-height:1.35;white-space:pre-wrap;word-break:break-word}
@@ -210,7 +213,7 @@
   /* edit controls: 内部/外部 分开 */
   .ctrl{margin-top:11px;border-top:1px dashed var(--line);padding-top:11px;display:flex;flex-direction:column;gap:8px}
   .ie{display:flex;gap:8px}
-  .ie .col{flex:none;display:inline-flex;align-items:center;justify-content:flex-start;gap:8px;min-width:108px;background:#f8fafc;border:1px solid var(--line);border-radius:8px;padding:3px 12px}
+  .ie .col{flex:none;display:inline-flex;align-items:center;justify-content:flex-start;gap:6px;min-width:88px;background:#f8fafc;border:1px solid var(--line);border-radius:8px;padding:2px 8px}
   .ie .cl{font-size:12px;color:var(--muted);font-weight:800;letter-spacing:.5px;flex:none;margin:0}
   .ie .cl.cl-in{color:#1d566e} .ie .cl.cl-out{color:#b35e1c} .ie .cl.cl-both{color:#7a4ec2}
   .ie .col .sel{flex:1;width:auto}
@@ -473,7 +476,7 @@ function eff(d){
   return {
     内部:'内部' in o?o.内部:d.内部, 外部:'外部' in o?o.外部:d.外部,
     收款:'收款' in o?o.收款:d.收款, 出款:'出款' in o?o.出款:d.出款,
-    下发:'下发' in o?o.下发:d.下发, 备注:'备注' in o?o.备注:d.备注, 备注2:'备注2' in o?o.备注2:(d.备注2||''), 商户备注:'商户备注' in o?o.商户备注:(d.商户备注||''), changed:o.changed||''
+    下发:'下发' in o?o.下发:d.下发, 下发时间:'下发时间' in o?o.下发时间:(d.下发时间||''), 备注:'备注' in o?o.备注:d.备注, 备注2:'备注2' in o?o.备注2:(d.备注2||''), 商户备注:'商户备注' in o?o.商户备注:(d.商户备注||''), changed:o.changed||''
   };
 }
 /* 套用单一栏位（本机编辑或云端拉回共用）*/
@@ -630,14 +633,14 @@ function cardHTML(d){
   }
   const chg='';
   const del=(editMode&&d.custom)?`<button class="del-merchant" data-del="${esc(d.key)}">🗑 删除此商户</button>`:'';
-  const metaFold=(!editMode)?`<details class="meta-fold"><summary class="meta-sum" title="出款 / 下发 / 放置金 / 下发时间">⋯</summary><div class="meta-pop"><div class="meta">${metaView}</div></div></details>`:'';
+  const metaFold='';
   return `<div class="card${dim}${editMode?' draggable':''}" data-key="${esc(d.key)}">
     <span class="accent" style="background:${d.color||'#ccc'}"></span>
     <div class="c-head">
       ${editMode?'<span class="drag-handle" title="拖曳排序">⠿</span>':''}
-      <span class="c-name" style="color:${nameColor(d)};background:${nameColor(d)}1a"><span class="c-recv name-recv">${recv?'<span class="recv-on">⭕️</span>':'<span class="recv-off">❌</span>'}</span><span class="c-name-txt" data-copy="${esc(d.商户)}" title="${esc(d.商户)}">${esc(d.商户)}</span>${noteFold}</span>
+      <span class="c-name" style="color:${nameColor(d)};background:${nameColor(d)}1a"><span class="c-recv name-recv">${recv?'<span class="recv-on">⭕️</span>':'<span class="recv-off">❌</span>'}</span><span class="c-name-txt" data-copy="${esc(d.商户)}" title="${esc(d.商户)}">${esc(d.商户)}</span>${noteFold}<span class="name-io"><span class="nio ${isOn(e.出款)?'on':'off'}">出${isOn(e.出款)?'✓':'✕'}</span><span class="nio ${isOn(e.下发)?'on':'off'}">发${isOn(e.下发)?'✓':'✕'}</span></span></span>
     </div>
-    <div class="c-row2">${body}${(!editMode&&(dayVol||d.放置金))?`<div class="dv-stack">${dayVol?`<span class="dayvol">日量 ${esc(dayVol)}</span>`:''}${d.放置金?`<span class="dayvol fund">放置金 ${esc(d.放置金)}</span>`:''}</div>`:''}<div class="c-r2-right">${metaFold}</div></div>
+    <div class="c-row2">${body}${(!editMode&&(dayVol||d.放置金||e.下发时间))?`<div class="dv-stack">${dayVol?`<span class="dayvol">日量 ${esc(dayVol)}</span>`:''}${d.放置金?`<span class="dayvol fund">放置金 ${esc(d.放置金)}</span>`:''}${e.下发时间?`<span class="dayvol time">${esc(e.下发时间)}</span>`:''}</div>`:''}</div>
     ${(editMode&&meta)?`<div class="meta">${meta}</div>`:''}${note}${chg}${del}</div>`;
 }
 
