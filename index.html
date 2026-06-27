@@ -64,6 +64,8 @@
   .sec-head .list-search{margin:0}
   #searchHome:empty{display:none}
   #searchGroup{display:inline-flex;align-items:center;gap:10px}
+  .sec-head .filt-slot{display:inline-flex;align-items:center}
+  .sec-head .tsearch-slot{margin-left:auto;display:inline-flex;align-items:center}
   #searchGroup .sw{background:#fff;border:1.5px solid var(--line);border-radius:9px;padding:6px 12px;flex-shrink:0}
   .list-search input{padding:6px 30px;font-size:14px;border-radius:9px}
   .list-search .ic{font-size:14px;left:10px}
@@ -351,7 +353,7 @@
       </div>
       <div class="vr-right">
         <button class="addbtn" id="addBtn">＋ 新增商户</button>
-        <button class="filt-toggle" id="filtToggle"><span class="fchev">▸</span>分类筛选</button>
+        <span id="filtHome"><button class="filt-toggle" id="filtToggle"><span class="fchev">▸</span>分类筛选</button></span>
         <button class="filt-toggle" id="legendToggle"><span class="fchev">▸</span>状态说明</button>
       </div>
     </div>
@@ -697,6 +699,8 @@ function ordSort(a,b){ const oa=ordVal(a),ob=ordVal(b); if(oa!=null&&ob!=null)re
 function render(){
   const sb=document.getElementById('searchGroup'), home=document.getElementById('searchHome'), listEl=document.getElementById('list');
   if(sb&&home&&listEl.contains(sb)) home.appendChild(sb);
+  const ft=document.getElementById('filtToggle'), fthome=document.getElementById('filtHome');
+  if(ft&&fthome&&listEl.contains(ft)) fthome.appendChild(ft);
   const rows=DATA.filter(pass);
   let html='';
   const vis=rows.filter(d=>!(state.view==='外部'&&isShared(d))).sort(ordSort);
@@ -712,16 +716,16 @@ function render(){
     maint:['维护','t-maint','','sf-maint'],
     stop:['停用','t-stop','','sf-stop'],
     x:['未开放（内部专用）','t-x','','sf-x']};
-  let slotDone=false;
-  const slotTag=()=>{ if(slotDone) return ''; slotDone=true; return '<span class="tsearch-slot"></span>'; };
   const expandSec=(k)=>{ const[title,cls,icon]=META[k]; const a=grp[k];
-    html+=`<div class="section sec-${k}"><div class="sec-head"><div class="section-title ${cls}">${icon}${title}<span class="cnt">${a.length} 条</span></div>${slotTag()}</div>${a.length?`<div class="grid">${a.map(cardHTML).join('')}</div>`:''}</div>`; };
+    html+=`<div class="section sec-${k}"><div class="sec-head"><div class="section-title ${cls}">${icon}${title}<span class="cnt">${a.length} 条</span></div><span class="filt-slot"></span><span class="tsearch-slot"></span></div>${a.length?`<div class="grid">${a.map(cardHTML).join('')}</div>`:''}</div>`; };
   const foldSec=(k)=>{ const a=grp[k]; if(!a.length) return; const[title,cls,,sf]=META[k];
     html+=`<details class="secfold ${sf}"><summary class="sec-head sec-sum"><div class="section-title ${cls}">${title}<span class="cnt">${a.length} 条</span></div></summary><div class="grid">${a.map(cardHTML).join('')}</div></details>`; };
   const activeCat=(state.cat&&state.cat!=='all'&&META[state.cat])?state.cat:null;
   if(activeCat){ expandSec(activeCat); }
   else { expandSec('use'); foldSec('wait'); foldSec('maint'); foldSec('stop'); foldSec('x'); }
   document.getElementById('list').innerHTML=html;
+  const fslot=listEl.querySelector('.filt-slot');
+  if(fslot&&ft) fslot.appendChild(ft); else if(ft&&fthome&&ft.parentElement!==fthome) fthome.appendChild(ft);
   const slot=listEl.querySelector('.tsearch-slot');
   if(slot&&sb) slot.appendChild(sb); else if(sb&&home&&sb.parentElement!==home) home.appendChild(sb);
   document.getElementById('empty').style.display=rows.length?'none':'block';
