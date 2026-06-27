@@ -693,10 +693,10 @@ function fitNames(){
     const w=txt.scrollWidth;
     let fs=15;
     if(w>0){ fs=16*avail/w; fs=Math.max(10,Math.min(15,fs)); txt.style.fontSize=fs.toFixed(1)+'px'; }
-    const w2=txt.scrollWidth, spare=avail-w2;
-    if(w2>avail+1 || spare<fs){ txt.style.textAlign='left'; box.style.paddingLeft='7px'; }
+    const w2=txt.scrollWidth, n=(txt.textContent||'').length;
+    if(n>=6 || w2>avail+1){ txt.style.textAlign='left'; box.style.paddingLeft='7px'; }
     else {
-      const n=(txt.textContent||'').length;
+      const spare=avail-w2;
       if(n>1){ let ls=spare/n; ls=Math.max(0,Math.min(fs*0.5,ls)); txt.style.letterSpacing=ls.toFixed(1)+'px'; }
     }
   });
