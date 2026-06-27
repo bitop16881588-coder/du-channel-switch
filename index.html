@@ -62,6 +62,9 @@
   .sec-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:13px}
   .sec-head .section-title{margin-bottom:0}
   .sec-head .list-search{margin:0}
+  .seced{flex-shrink:0;background:#fff;border:1.5px solid var(--line);border-radius:8px;padding:5px 11px;font-size:12px;font-weight:700;color:#444;cursor:pointer;line-height:1;-webkit-tap-highlight-color:transparent}
+  .seced:active{transform:scale(.95)}
+  .seced.on{background:var(--g,#1f9d55);border-color:var(--g,#1f9d55);color:#fff}
   #searchHome:empty{display:none}
   #searchGroup{display:inline-flex;align-items:center;gap:10px}
   .sec-head .filt-slot{display:inline-flex;align-items:center}
@@ -392,7 +395,7 @@
     <span class="ic">🔍</span>
     <input id="q" type="search" placeholder="" autocomplete="off">
     <button class="clr" id="clr">×</button>
-  </div><span class="sw" id="editSw"><span class="track"><span class="knob"></span></span><span>编辑模式</span></span></div></div>
+  </div></div></div>
   <div id="list"></div>
   <datalist id="timePresets">
     <option value="上午9點"></option>
@@ -470,7 +473,7 @@ const KEY='du_channel_overrides_v2';
 let overrides={}, tsMap={}, editMode=false;
 try{ overrides=JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){ overrides={}; }
 try{ tsMap=JSON.parse(localStorage.getItem(KEY+'_ts'))||{}; }catch(e){ tsMap={}; }
-try{ editMode=localStorage.getItem(KEY+'_edit')==='1'; }catch(e){}
+/* edit no longer persisted globally */
 
 /* 载入本机已新增的自订商户 */
 let customList=[];
@@ -580,7 +583,7 @@ function cloudPull(){
 }
 
 const SOLO={'TKpay支付宝':'内','XPAY支付宝':'内','KW支付宝':'内','KW支付宝-TOMMY':'内','宝诺支付宝UID『8084』':'内'};
-const state={sec:'all',recv:null,出款:null,下发:null,q:'',view:'内部'};
+const state={sec:'all',cat:'all',recv:null,出款:null,下发:null,q:'',view:'内部',editCat:null};
 function pass(d){
   const solo=SOLO[d.商户];
   if(solo==='内' && state.view!=='内部') return false;
@@ -716,13 +719,15 @@ function render(){
     maint:['维护','t-maint','','sf-maint'],
     stop:['停用','t-stop','','sf-stop'],
     x:['未开放（内部专用）','t-x','','sf-x']};
-  const expandSec=(k)=>{ const[title,cls,icon]=META[k]; const a=grp[k];
-    html+=`<div class="section sec-${k}"><div class="sec-head"><div class="section-title ${cls}">${icon}${title}<span class="cnt">${a.length} 条</span></div><span class="filt-slot"></span><span class="tsearch-slot"></span></div>${a.length?`<div class="grid">${a.map(cardHTML).join('')}</div>`:''}</div>`; };
-  const foldSec=(k)=>{ const a=grp[k]; if(!a.length) return; const[title,cls,,sf]=META[k];
-    html+=`<details class="secfold ${sf}"><summary class="sec-head sec-sum"><div class="section-title ${cls}">${title}<span class="cnt">${a.length} 条</span></div></summary><div class="grid">${a.map(cardHTML).join('')}</div></details>`; };
+  const edBtn=(k)=>`<button class="seced${state.editCat===k?' on':''}" data-cat="${k}">${state.editCat===k?'✓ 完成':'✎ 编辑'}</button>`;
+  const expandSec=(k)=>{ const[title,cls,icon]=META[k]; const a=grp[k]; editMode=(state.editCat===k);
+    html+=`<div class="section sec-${k}"><div class="sec-head"><div class="section-title ${cls}">${icon}${title}<span class="cnt">${a.length} 条</span></div>${edBtn(k)}<span class="filt-slot"></span><span class="tsearch-slot"></span></div>${a.length?`<div class="grid">${a.map(cardHTML).join('')}</div>`:''}</div>`; };
+  const foldSec=(k)=>{ const a=grp[k]; if(!a.length) return; const[title,cls,,sf]=META[k]; editMode=(state.editCat===k);
+    html+=`<details class="secfold ${sf}"${state.editCat===k?' open':''}><summary class="sec-head sec-sum"><div class="section-title ${cls}">${title}<span class="cnt">${a.length} 条</span></div>${edBtn(k)}</summary><div class="grid">${a.map(cardHTML).join('')}</div></details>`; };
   const activeCat=(state.cat&&state.cat!=='all'&&META[state.cat])?state.cat:null;
   if(activeCat){ expandSec(activeCat); }
   else { expandSec('use'); foldSec('wait'); foldSec('maint'); foldSec('stop'); foldSec('x'); }
+  editMode=false;
   document.getElementById('list').innerHTML=html;
   const fslot=listEl.querySelector('.filt-slot');
   if(fslot&&ft) fslot.appendChild(ft); else if(ft&&fthome&&ft.parentElement!==fthome) fthome.appendChild(ft);
@@ -856,10 +861,14 @@ list.addEventListener('click',e=>{
   if(n){ const t=n.dataset.copy; (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>toast('已复制：'+t)).catch(()=>toast('已复制：'+t)); }
 });
 
-/* edit mode */
-const editSw=document.getElementById('editSw');
-function syncEdit(){ editSw.classList.toggle('on',editMode); }
-editSw.addEventListener('click',()=>{ editMode=!editMode; persistEdit(); syncEdit(); render(); });
+/* 分区编辑：每区块各自的 ✎编辑/✓完成 钮 */
+document.getElementById('list').addEventListener('click',function(e){
+  const b=e.target.closest('.seced'); if(!b) return;
+  e.preventDefault(); e.stopPropagation();
+  const k=b.dataset.cat;
+  state.editCat=(state.editCat===k)?null:k;
+  render();
+}, true);
 
 /* ── 拖曳排序（编辑模式，从把手 ⠿ 拖动；支援触控与滑鼠）── */
 function getDragAfter(grid,x,y){
@@ -904,7 +913,7 @@ function dUp(){
   if(dKey){ dKey=null; commitOrder(); }
 }
 function dStart(e){
-  if(!editMode)return;
+  if(!state.editCat)return;
   const h=e.target.closest('.drag-handle'); if(!h)return;
   const card=h.closest('.card'); if(!card)return;
   if(e.cancelable) e.preventDefault();
@@ -956,7 +965,7 @@ function start(){
     persist(); flushPush();
     setTimeout(()=>toast('已归类商户备注 ✓'),600);
   }
-  syncEdit(); stats(); render();
+  stats(); render();
   document.getElementById('syncStat').addEventListener('click',cloudPull);
   if(SYNC_URL){ cloudPull(); setInterval(cloudPull,25000); window.addEventListener('focus',cloudPull); }
   else setSync('off');
