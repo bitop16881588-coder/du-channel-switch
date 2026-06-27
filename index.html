@@ -686,13 +686,19 @@ function fitNames(){
   document.querySelectorAll('#list .c-name').forEach(box=>{
     const txt=box.querySelector('.c-name-txt'); if(!txt) return;
     const fold=box.querySelector('.note-fold');
+    txt.style.textAlign='center'; box.style.paddingLeft=''; txt.style.letterSpacing='0px';
     const avail=box.clientWidth - (28 + (fold?16:0));
-    txt.style.textAlign='center';
     if(avail<=10){ txt.style.fontSize=''; return; }
     txt.style.fontSize='16px';
     const w=txt.scrollWidth;
-    if(w>0){ let fs=16*avail/w; fs=Math.max(10,Math.min(15,fs)); txt.style.fontSize=fs.toFixed(1)+'px'; }
-    if(txt.scrollWidth>txt.clientWidth+1) txt.style.textAlign='left';
+    let fs=15;
+    if(w>0){ fs=16*avail/w; fs=Math.max(10,Math.min(15,fs)); txt.style.fontSize=fs.toFixed(1)+'px'; }
+    const w2=txt.scrollWidth;
+    if(w2>avail+1){ txt.style.textAlign='left'; box.style.paddingLeft='7px'; }
+    else {
+      const n=(txt.textContent||'').length;
+      if(n>1){ let ls=(avail-w2)/n; ls=Math.max(0,Math.min(fs,ls)); txt.style.letterSpacing=ls.toFixed(1)+'px'; }
+    }
   });
 }
 function stats(){
