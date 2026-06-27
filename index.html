@@ -114,6 +114,9 @@
   .chip.c-red{color:var(--red);border-color:#f0c4c4;background:var(--red-bg)}
   .chip.c-blue{color:var(--blue);border-color:#bcd9e6;background:var(--blue-bg)}
   .chip.c-amber{color:var(--amber);border-color:#f0dcb4;background:var(--amber-bg)}
+  .chip.c-purple{color:var(--purple);border-color:#dccdf3;background:var(--purple-bg)}
+  .chip.c-orange{color:#c2683a;border-color:#f0d2bc;background:#fbeee3}
+  .chip.c-slate{color:#5b6470;border-color:#cdd3da;background:#e9ecf0}
   .chip.active{color:#fff}
   .chip.active::before{background:#fff}
   .chip.c-neutral.active{background:var(--nav);border-color:var(--nav)}
@@ -122,6 +125,9 @@
   .chip.c-red.active{background:var(--red);border-color:var(--red)}
   .chip.c-blue.active{background:var(--blue);border-color:var(--blue)}
   .chip.c-amber.active{background:var(--amber);border-color:var(--amber)}
+  .chip.c-purple.active{background:var(--purple);border-color:var(--purple)}
+  .chip.c-orange.active{background:#c2683a;border-color:#c2683a}
+  .chip.c-slate.active{background:#5b6470;border-color:#5b6470}
   .actions{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
   .btn{border:1.5px solid var(--line);background:#fff;color:var(--ink2);padding:6px 12px;border-radius:9px;font-size:12.5px;font-weight:700;cursor:pointer;transition:.12s}
   .btn:hover{border-color:var(--gold)}
@@ -167,8 +173,34 @@
     padding:6px 15px;border-radius:999px;margin:0 0 13px;color:#fff;letter-spacing:.5px}
   .section-title.t-use{background:var(--g)}
   .section-title.t-unused{background:var(--gray)}
+  .section-title.t-maint{background:#c2683a}
+  .section-title.t-wait{background:var(--purple)}
+  .section-title.t-stop{background:#5b6470}
+  .section-title.t-x{background:#9aa3ad}
+  .section.sec-wait{background:#f3eefb;box-shadow:inset 0 0 0 1px #e3d8f5}
+  .section.sec-maint{background:#fbf1e9;box-shadow:inset 0 0 0 1px #f0ddcb}
+  .section.sec-stop{background:#eef0f3;box-shadow:inset 0 0 0 1px #dde2e8}
+  .section.sec-x{background:#eef0f3;box-shadow:inset 0 0 0 1px #dde2e8}
+  .secfold.sf-wait{background:#f3eefb;box-shadow:inset 0 0 0 1px #e3d8f5}
+  .secfold.sf-maint{background:#fbf1e9;box-shadow:inset 0 0 0 1px #f0ddcb}
+  .secfold.sf-stop{background:#eef0f3;box-shadow:inset 0 0 0 1px #dde2e8}
+  .secfold.sf-x{background:#eef0f3;box-shadow:inset 0 0 0 1px #dde2e8}
+  .secfold{margin-top:18px;border-radius:16px;padding:12px 14px;background:#eceff3;box-shadow:inset 0 0 0 1px #dde3ea}
+  .secfold>.sec-sum{cursor:pointer;list-style:none}
+  .secfold>.sec-sum::-webkit-details-marker{display:none}
+  .secfold>.sec-sum .sec-head{margin-bottom:0}
+  .secfold>.sec-sum .section-title{margin-bottom:0}
+  .secfold>.sec-sum .section-title::after{content:"▾";margin-left:5px;font-size:12px;display:inline-block;transition:.15s}
+  .secfold[open]>.sec-sum .section-title::after{transform:rotate(180deg)}
+  .secfold[open]>.grid{margin-top:12px}
   .section-title .cnt{font-size:12px;font-weight:600;opacity:.9}
   .subsep{grid-column:1/-1;margin:6px 2px 4px;font-size:12px;font-weight:800;color:var(--muted);display:flex;align-items:center;gap:10px;letter-spacing:.5px}
+  .xfold{grid-column:1/-1}
+  .xfold>.xsum{cursor:pointer;list-style:none;align-items:center}
+  .xfold>.xsum::-webkit-details-marker{display:none}
+  .xfold>.xsum::after{content:"▾";margin-left:2px;transition:.15s}
+  .xfold[open]>.xsum::after{transform:rotate(180deg)}
+  .xfold>.grid{margin-top:4px}
   .subsep::before,.subsep::after{content:"";height:1px;background:var(--line);flex:1}
   .section-title .tick{display:inline-flex;align-items:center;justify-content:center;width:17px;height:17px;border-radius:50%;background:rgba(255,255,255,.25);font-size:11px;font-weight:900;line-height:1}
 
@@ -326,9 +358,12 @@
     <div class="toolrow">
       <div class="filt-wrap">
         <div class="filters collapsed" id="filters">
-        <span class="chip c-neutral active" data-f="sec" data-v="all">全部区块</span>
-        <span class="chip c-green" data-f="sec" data-v="使用中">✓ 使用中</span>
-        <span class="chip c-gray" data-f="sec" data-v="不使用">不使用</span>
+        <span class="chip c-neutral active" data-f="cat" data-v="all">全部</span>
+        <span class="chip c-green" data-f="cat" data-v="use">✓ 使用中</span>
+        <span class="chip c-purple" data-f="cat" data-v="wait">待通知</span>
+        <span class="chip c-orange" data-f="cat" data-v="maint">维护</span>
+        <span class="chip c-slate" data-f="cat" data-v="stop">停用</span>
+        <span class="chip c-gray" data-f="cat" data-v="x">未开放</span>
         </div>
       </div>
     </div>
@@ -664,18 +699,28 @@ function render(){
   if(sb&&home&&listEl.contains(sb)) home.appendChild(sb);
   const rows=DATA.filter(pass);
   let html='';
-  [['使用中','use','✓'],['不使用','unused','']].forEach(([name,key,icon])=>{
-    const items=rows.filter(d=>d.section===name && !(state.view==='外部'&&isShared(d))).sort(ordSort);
-    if(!items.length) return;
-    const closed=v=>v==='X'||v==='停用';
-    const norm=items.filter(d=>!closed(viewVal(d)));
-    const xs=items.filter(d=>closed(viewVal(d)));
-    let inner=norm.length?`<div class="grid">${norm.map(cardHTML).join('')}</div>`:'';
-    if(xs.length){
-      inner+=`<div class="subsep">${state.view} · 未开放 / 停用 · ${xs.length} 条</div><div class="grid">${xs.map(cardHTML).join('')}</div>`;
-    }
-    html+=`<div class="section sec-${key}"><div class="sec-head"><div class="section-title t-${key}">${icon?`<span class="tick">${icon}</span>`:''}${name}<span class="cnt">${items.length} 条</span></div>${key==='use'?'<span class="tsearch-slot"></span>':''}</div>${inner}</div>`;
-  });
+  const vis=rows.filter(d=>!(state.view==='外部'&&isShared(d))).sort(ordSort);
+  const grp={
+    use:  vis.filter(d=>{const v=viewVal(d); return v!=='等组长通知开启'&&v!=='维护'&&v!=='停用'&&v!=='X';}),
+    wait: vis.filter(d=>viewVal(d)==='等组长通知开启'),
+    maint:vis.filter(d=>viewVal(d)==='维护'),
+    stop: vis.filter(d=>viewVal(d)==='停用'),
+    x:    vis.filter(d=>viewVal(d)==='X'),
+  };
+  const META={use:['使用中','t-use','<span class="tick">✓</span>',''],
+    wait:['待通知','t-wait','','sf-wait'],
+    maint:['维护','t-maint','','sf-maint'],
+    stop:['停用','t-stop','','sf-stop'],
+    x:['未开放（内部专用）','t-x','','sf-x']};
+  let slotDone=false;
+  const slotTag=()=>{ if(slotDone) return ''; slotDone=true; return '<span class="tsearch-slot"></span>'; };
+  const expandSec=(k)=>{ const[title,cls,icon]=META[k]; const a=grp[k];
+    html+=`<div class="section sec-${k}"><div class="sec-head"><div class="section-title ${cls}">${icon}${title}<span class="cnt">${a.length} 条</span></div>${slotTag()}</div>${a.length?`<div class="grid">${a.map(cardHTML).join('')}</div>`:''}</div>`; };
+  const foldSec=(k)=>{ const a=grp[k]; if(!a.length) return; const[title,cls,,sf]=META[k];
+    html+=`<details class="secfold ${sf}"><summary class="sec-head sec-sum"><div class="section-title ${cls}">${title}<span class="cnt">${a.length} 条</span></div></summary><div class="grid">${a.map(cardHTML).join('')}</div></details>`; };
+  const activeCat=(state.cat&&state.cat!=='all'&&META[state.cat])?state.cat:null;
+  if(activeCat){ expandSec(activeCat); }
+  else { expandSec('use'); foldSec('wait'); foldSec('maint'); foldSec('stop'); foldSec('x'); }
   document.getElementById('list').innerHTML=html;
   const slot=listEl.querySelector('.tsearch-slot');
   if(slot&&sb) slot.appendChild(sb); else if(sb&&home&&sb.parentElement!==home) home.appendChild(sb);
@@ -702,8 +747,10 @@ function fitNames(){
   });
 }
 function stats(){
-  document.getElementById('s-use').textContent=DATA.filter(d=>d.section==='使用中').length;
-  document.getElementById('s-unused').textContent=DATA.filter(d=>d.section==='不使用').length;
+  const open=v=>v===''||v==='日切';
+  const vis=d=>!(state.view==='外部'&&isShared(d));
+  document.getElementById('s-use').textContent=DATA.filter(d=>d.section==='使用中'&&vis(d)&&open(viewVal(d))).length;
+  document.getElementById('s-unused').textContent=DATA.filter(d=>d.section==='不使用'&&vis(d)).length;
   document.getElementById('totalN').textContent=DATA.length;
 }
 
@@ -714,12 +761,12 @@ function stats(){
   lb.addEventListener('click',()=>{ const c=lp.classList.toggle('collapsed'); lb.classList.toggle('open',!c); });
   document.getElementById('list').addEventListener('toggle',e=>{
     const d=e.target;
-    if(d.tagName==='DETAILS'&&d.open){
-      document.querySelectorAll('#list details[open]').forEach(o=>{ if(o!==d) o.open=false; });
+    if(d.tagName==='DETAILS'&&d.classList.contains('note-fold')&&d.open){
+      document.querySelectorAll('#list details.note-fold[open]').forEach(o=>{ if(o!==d) o.open=false; });
     }
   },true);
   document.addEventListener('click',e=>{
-    const op=document.querySelector('#list details[open]');
+    const op=document.querySelector('#list details.note-fold[open]');
     if(op&&!op.contains(e.target)) op.open=false;
   });
 })();
@@ -728,7 +775,8 @@ function stats(){
 document.getElementById('filters').addEventListener('click',e=>{
   const chip=e.target.closest('.chip'); if(!chip)return;
   const f=chip.dataset.f,v=chip.dataset.v;
-  if(f==='sec'){ state.sec=v; document.querySelectorAll('[data-f=sec]').forEach(c=>c.classList.remove('active')); chip.classList.add('active'); }
+  if(f==='cat'){ state.cat=v; document.querySelectorAll('[data-f=cat]').forEach(c=>c.classList.remove('active')); chip.classList.add('active'); }
+  else if(f==='sec'){ state.sec=v; document.querySelectorAll('[data-f=sec]').forEach(c=>c.classList.remove('active')); chip.classList.add('active'); }
   else if(f==='recv'){ const cur=state.recv===v; document.querySelectorAll('[data-f=recv]').forEach(c=>c.classList.remove('active')); state.recv=cur?null:v; if(!cur) chip.classList.add('active'); }
   else{ const cur=state[f]===v; state[f]=cur?null:v; chip.classList.toggle('active',!cur); }
   render();
@@ -740,7 +788,7 @@ document.getElementById('viewSeg').addEventListener('click',e=>{
   state.view=b.dataset.view;
   document.querySelectorAll('#viewSeg .vbtn').forEach(x=>x.classList.remove('active'));
   b.classList.add('active');
-  render();
+  stats(); render();
 });
 
 /* 新增商户 弹窗 */
