@@ -751,10 +751,11 @@ function fitNames(){
   });
 }
 function stats(){
-  const open=v=>v===''||v==='日切';
   const vis=d=>!(state.view==='外部'&&isShared(d));
-  document.getElementById('s-use').textContent=DATA.filter(d=>d.section==='使用中'&&vis(d)&&open(viewVal(d))).length;
-  document.getElementById('s-unused').textContent=DATA.filter(d=>d.section==='不使用'&&vis(d)).length;
+  const used=d=>{const v=viewVal(d); return v!=='等组长通知开启'&&v!=='维护'&&v!=='停用'&&v!=='X';};
+  const unused=d=>{const v=viewVal(d); return v==='维护'||v==='停用'||v==='X';};
+  document.getElementById('s-use').textContent=DATA.filter(d=>vis(d)&&used(d)).length;
+  document.getElementById('s-unused').textContent=DATA.filter(d=>vis(d)&&unused(d)).length;
   document.getElementById('totalN').textContent=DATA.length;
 }
 
