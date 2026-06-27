@@ -187,7 +187,7 @@
   .name-io{position:absolute;right:7px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:1px;font-size:11.5px;font-weight:900;line-height:1.1}
   .name-io .nio.on{color:#16a64f} .name-io .nio.off{color:var(--red)}
   .dayvol.time{color:#0f6e6e;background:#e0f5f4;border-color:#bce5e2;white-space:normal;word-break:break-word}
-  .c-name-txt{cursor:pointer;white-space:normal;word-break:break-word;text-align:center;min-width:0}
+  .c-name-txt{cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center;min-width:0;display:block}
   .c-row2{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px}
   .r2-note{flex:1;min-width:0;font-size:11px;color:var(--blue);line-height:1.35;white-space:pre-wrap;word-break:break-word}
   .dayvol{flex:none;font-size:10px;font-weight:700;color:#8a6500;background:#fff6d6;border:1px solid #f0dd9a;border-radius:6px;padding:2px 6px;white-space:nowrap;text-align:center}
@@ -680,6 +680,20 @@ function render(){
   const slot=listEl.querySelector('.tsearch-slot');
   if(slot&&sb) slot.appendChild(sb); else if(sb&&home&&sb.parentElement!==home) home.appendChild(sb);
   document.getElementById('empty').style.display=rows.length?'none':'block';
+  fitNames();
+}
+function fitNames(){
+  document.querySelectorAll('#list .c-name').forEach(box=>{
+    const txt=box.querySelector('.c-name-txt'); if(!txt) return;
+    const fold=box.querySelector('.note-fold');
+    const avail=box.clientWidth - (28 + (fold?16:0));
+    txt.style.textAlign='center';
+    if(avail<=10){ txt.style.fontSize=''; return; }
+    txt.style.fontSize='16px';
+    const w=txt.scrollWidth;
+    if(w>0){ let fs=16*avail/w; fs=Math.max(10,Math.min(15,fs)); txt.style.fontSize=fs.toFixed(1)+'px'; }
+    if(txt.scrollWidth>txt.clientWidth+1) txt.style.textAlign='left';
+  });
 }
 function stats(){
   document.getElementById('s-use').textContent=DATA.filter(d=>d.section==='使用中').length;
