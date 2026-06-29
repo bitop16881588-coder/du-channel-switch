@@ -65,6 +65,7 @@
   .seced{flex-shrink:0;background:#fff;border:1.5px solid var(--line);border-radius:8px;padding:5px 11px;font-size:12px;font-weight:700;color:#444;cursor:pointer;line-height:1;-webkit-tap-highlight-color:transparent}
   .seced:active{transform:scale(.95)}
   .seced.on{background:var(--g,#1f9d55);border-color:var(--g,#1f9d55);color:#fff}
+  .sec-head{justify-content:space-between}
   #searchHome:empty{display:none}
   #searchGroup{display:inline-flex;align-items:center;gap:10px}
   .sec-head .filt-slot{display:inline-flex;align-items:center}
@@ -78,10 +79,10 @@
 
   .toolrow{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-top:9px}
   .viewseg{display:inline-flex;background:#e7ebf1;border-radius:13px;padding:3px;gap:4px;flex-shrink:0;margin:0 auto}
-  .viewrow{display:flex;align-items:center;gap:10px;flex-wrap:nowrap;margin-top:0;overflow-x:auto}
+  .viewrow{display:flex;flex-direction:row;align-items:center;gap:8px;margin-top:0;flex-wrap:nowrap;overflow-x:auto}
   .vr-right{display:flex;align-items:center;gap:11px;flex-wrap:nowrap;flex-shrink:0}
   .vr-right>*{flex-shrink:0;white-space:nowrap}
-  .addbtn{border:1.5px solid #2e8b76;background:#2e8b76;color:#fff;padding:6px 14px;border-radius:999px;font-size:13px;font-weight:800;cursor:pointer;transition:.12s;letter-spacing:.5px}
+  .addbtn{border:1.5px solid #2e8b76;background:#2e8b76;color:#fff;padding:6px 14px;border-radius:999px;font-size:13px;font-weight:800;cursor:pointer;transition:.12s;letter-spacing:.5px;white-space:nowrap;flex-shrink:0}
   .addbtn:hover{filter:brightness(1.06);box-shadow:0 2px 8px rgba(46,139,118,.35)}
   .del-merchant{width:100%;margin-top:11px;border:1.5px solid #f0c4c4;background:#fbe9e9;color:var(--red);padding:8px;border-radius:9px;font-size:13px;font-weight:800;cursor:pointer;transition:.12s}
   .del-merchant:hover{background:#f7dada}
@@ -98,7 +99,7 @@
   .merr{color:var(--red);font-size:12.5px;font-weight:700;min-height:18px;margin-bottom:4px}
   .mbtns{display:flex;gap:10px;justify-content:flex-end;margin-top:6px}
   .btn.primary{background:#2e8b76;color:#fff;border-color:#2e8b76}
-  .vbtn{display:inline-flex;align-items:center;gap:9px;border:none;background:transparent;padding:6px 60px;border-radius:11px;font-size:16px;font-weight:800;color:var(--ink2);cursor:pointer;transition:.12s;letter-spacing:2px}
+  .vbtn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:none;background:transparent;padding:7px 22px;border-radius:11px;font-size:16px;font-weight:900;color:var(--ink2);cursor:pointer;transition:.12s;letter-spacing:1.5px}
   .vbtn::before{content:"";width:11px;height:11px;border-radius:50%;background:currentColor}
   .vbtn.v-in{color:#2f7faf} .vbtn.v-out{color:#cf7a2c}
   .vbtn.active{color:#fff;box-shadow:0 2px 7px rgba(21,35,59,.22)}
@@ -107,7 +108,7 @@
   .filters{display:flex;gap:7px;flex-wrap:wrap}
   .filt-wrap{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
   .filters.collapsed{display:none}
-  .filt-toggle{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--line);background:#fff;color:var(--ink2);padding:6px 13px;border-radius:999px;font-size:13px;font-weight:700;cursor:pointer;user-select:none}
+  .filt-toggle{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--line);background:#fff;color:var(--ink2);padding:6px 13px;border-radius:999px;font-size:13px;font-weight:700;cursor:pointer;user-select:none;white-space:nowrap;flex-shrink:0}
   .filt-toggle .fchev{display:inline-block;transition:transform .15s;font-size:10px}
   .filt-toggle.open .fchev{transform:rotate(90deg)}
   .chip{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--line);background:#fff;color:var(--ink2);padding:6px 13px;border-radius:999px;font-size:13px;font-weight:700;cursor:pointer;transition:.12s;user-select:none}
@@ -186,6 +187,7 @@
   .section.sec-maint{background:#fbf1e9;box-shadow:inset 0 0 0 1px #f0ddcb}
   .section.sec-stop{background:#eef0f3;box-shadow:inset 0 0 0 1px #dde2e8}
   .section.sec-x{background:#eef0f3;box-shadow:inset 0 0 0 1px #dde2e8}
+  .secfold.sf-use{background:#edf8f1;box-shadow:inset 0 0 0 1px #d2ecdd}
   .secfold.sf-wait{background:#f3eefb;box-shadow:inset 0 0 0 1px #e3d8f5}
   .secfold.sf-maint{background:#fbf1e9;box-shadow:inset 0 0 0 1px #f0ddcb}
   .secfold.sf-stop{background:#eef0f3;box-shadow:inset 0 0 0 1px #dde2e8}
@@ -350,12 +352,12 @@
 
   <div class="bar">
     <div class="viewrow">
+      <button class="addbtn" id="addBtn">＋ 新增商户</button>
       <div class="viewseg" id="viewSeg">
         <button class="vbtn v-in active" data-view="内部">内部</button>
         <button class="vbtn v-out" data-view="外部">外部</button>
       </div>
       <div class="vr-right">
-        <button class="addbtn" id="addBtn">＋ 新增商户</button>
         <span id="filtHome"><button class="filt-toggle" id="filtToggle"><span class="fchev">▸</span>分类筛选</button></span>
         <button class="filt-toggle" id="legendToggle"><span class="fchev">▸</span>状态说明</button>
       </div>
@@ -390,12 +392,6 @@
       <span class="li"><span class="recv-leg">⭕️</span>双开</span>
     </div>
   </div>
-
-  <div id="searchHome"><div id="searchGroup"><div class="search list-search" id="searchBox">
-    <span class="ic">🔍</span>
-    <input id="q" type="search" placeholder="" autocomplete="off">
-    <button class="clr" id="clr">×</button>
-  </div></div></div>
   <div id="list"></div>
   <datalist id="timePresets">
     <option value="上午9點"></option>
@@ -473,7 +469,7 @@ const KEY='du_channel_overrides_v2';
 let overrides={}, tsMap={}, editMode=false;
 try{ overrides=JSON.parse(localStorage.getItem(KEY))||{}; }catch(e){ overrides={}; }
 try{ tsMap=JSON.parse(localStorage.getItem(KEY+'_ts'))||{}; }catch(e){ tsMap={}; }
-/* edit no longer persisted globally */
+try{ editMode=localStorage.getItem(KEY+'_edit')==='1'; }catch(e){}
 
 /* 载入本机已新增的自订商户 */
 let customList=[];
@@ -634,6 +630,7 @@ function pullDayVol(text){
   return {vol, rest:out.join('\n')};
 }
 function cardHTML(d){
+  const ed=editMode;
   const e=eff(d);
   const recv=recvOn(e.收款);
   const shared=isShared(d);
@@ -643,10 +640,10 @@ function cardHTML(d){
   const clCls=shared?'cl-both':(state.view==='内部'?'cl-in':'cl-out');
   const dim=d.section==='不使用'?' dim':'';
   const n1=e.备注||'', n2=e.备注2||'', n3=e.商户备注||'';
-  const dvol=editMode?{vol:'',rest:n1}:pullDayVol(n1);
+  const dvol=ed?{vol:'',rest:n1}:pullDayVol(n1);
   const dayVol=dvol.vol, n1view=dvol.rest;
   let body;
-  if(editMode){
+  if(ed){
     body=`<div class="ctrl">
       <div class="ie">
         <div class="col"><span class="cl ${clCls}">${vlabel}</span>
@@ -669,7 +666,7 @@ function cardHTML(d){
   const meta = metaFund + metaTime;
   const metaView=`<div class="m"><span class="k">出款</span><span class="v ${isOn(e.出款)?'on':'off'}">${isOn(e.出款)?'✅':'✕'}</span></div><div class="m"><span class="k">下发</span><span class="v ${isOn(e.下发)?'on':'off'}">${isOn(e.下发)?'✅':'✕'}</span></div>`+metaTime;
   let note='', noteFold='';
-  if(editMode){
+  if(ed){
     note=`<div class="note-wrap"><span class="ncl">原始备注</span>`
       +`<textarea class="note-edit" data-key="${esc(d.key)}" data-field="备注" rows="2" placeholder="点此输入 / 修改原始备注…">${esc(n1)}</textarea>`
       +((d.备注 && d.备注!==n1)?`<div class="srctip">原文：${esc(d.备注)}</div>`:'')
@@ -684,26 +681,23 @@ function cardHTML(d){
        +`</div></details>`;
   }
   const chg='';
-  const del=(editMode&&d.custom)?`<button class="del-merchant" data-del="${esc(d.key)}">🗑 删除此商户</button>`:'';
+  const del=(ed&&d.custom)?`<button class="del-merchant" data-del="${esc(d.key)}">🗑 删除此商户</button>`:'';
   const metaFold='';
-  return `<div class="card${dim}${editMode?' draggable':''}" data-key="${esc(d.key)}">
+  return `<div class="card${dim}${ed?' draggable':''}" data-key="${esc(d.key)}">
     <span class="accent" style="background:${d.color||'#ccc'}"></span>
     <div class="c-head">
-      ${editMode?'<span class="drag-handle" title="拖曳排序">⠿</span>':''}
+      ${ed?'<span class="drag-handle" title="拖曳排序">⠿</span>':''}
       <span class="c-name" style="color:${nameColor(d)};background:${nameColor(d)}1a"><span class="c-name-txt" data-copy="${esc(d.商户)}" title="${esc(d.商户)}">${esc(d.商户)}</span>${noteFold}<span class="c-recv name-recv">${recv?'<span class="recv-on">⭕️</span>':'<span class="recv-off">❌</span>'}</span></span>
     </div>
-    <div class="c-row2">${body}${(!editMode&&(dayVol||d.放置金||e.下发时间))?`<div class="dv-stack">${dayVol?`<span class="dayvol">日量 ${esc(dayVol)}</span>`:''}${d.放置金?`<span class="dayvol fund">放置金 ${esc(d.放置金)}</span>`:''}${e.下发时间?`<span class="dayvol time">${esc(e.下发时间)}</span>`:''}</div>`:''}</div>
-    ${(editMode&&meta)?`<div class="meta">${meta}</div>`:''}${note}${chg}${del}</div>`;
+    <div class="c-row2">${body}${(!ed&&(dayVol||d.放置金||e.下发时间))?`<div class="dv-stack">${dayVol?`<span class="dayvol">日量 ${esc(dayVol)}</span>`:''}${d.放置金?`<span class="dayvol fund">放置金 ${esc(d.放置金)}</span>`:''}${e.下发时间?`<span class="dayvol time">${esc(e.下发时间)}</span>`:''}</div>`:''}</div>
+    ${(ed&&meta)?`<div class="meta">${meta}</div>`:''}${note}${chg}${del}</div>`;
 }
 
 function viewVal(d){ return state.view==='内部'?eff(d).内部:eff(d).外部; }
 function ordVal(d){ const o=overrides[d.key]; return (o&&o.__order!=null&&o.__order!=='')?Number(o.__order):null; }
 function ordSort(a,b){ const oa=ordVal(a),ob=ordVal(b); if(oa!=null&&ob!=null)return oa-ob; if(oa!=null)return -1; if(ob!=null)return 1; return a.id-b.id; }
 function render(){
-  const sb=document.getElementById('searchGroup'), home=document.getElementById('searchHome'), listEl=document.getElementById('list');
-  if(sb&&home&&listEl.contains(sb)) home.appendChild(sb);
-  const ft=document.getElementById('filtToggle'), fthome=document.getElementById('filtHome');
-  if(ft&&fthome&&listEl.contains(ft)) fthome.appendChild(ft);
+  const listEl=document.getElementById('list');
   const rows=DATA.filter(pass);
   let html='';
   const vis=rows.filter(d=>!(state.view==='外部'&&isShared(d))).sort(ordSort);
@@ -714,25 +708,21 @@ function render(){
     stop: vis.filter(d=>viewVal(d)==='停用'),
     x:    vis.filter(d=>viewVal(d)==='X'),
   };
-  const META={use:['使用中','t-use','<span class="tick">✓</span>',''],
+  const META={use:['使用中','t-use','<span class="tick">✓</span>','sf-use'],
     wait:['待通知','t-wait','','sf-wait'],
     maint:['维护','t-maint','','sf-maint'],
     stop:['停用','t-stop','','sf-stop'],
     x:['未开放（内部专用）','t-x','','sf-x']};
   const edBtn=(k)=>`<button class="seced${state.editCat===k?' on':''}" data-cat="${k}">${state.editCat===k?'✓ 完成':'✎ 编辑'}</button>`;
   const expandSec=(k)=>{ const[title,cls,icon]=META[k]; const a=grp[k]; editMode=(state.editCat===k);
-    html+=`<div class="section sec-${k}"><div class="sec-head"><div class="section-title ${cls}">${icon}${title}<span class="cnt">${a.length} 条</span></div>${edBtn(k)}<span class="filt-slot"></span><span class="tsearch-slot"></span></div>${a.length?`<div class="grid">${a.map(cardHTML).join('')}</div>`:''}</div>`; };
-  const foldSec=(k)=>{ const a=grp[k]; if(!a.length) return; const[title,cls,,sf]=META[k]; editMode=(state.editCat===k);
-    html+=`<details class="secfold ${sf}"${state.editCat===k?' open':''}><summary class="sec-head sec-sum"><div class="section-title ${cls}">${title}<span class="cnt">${a.length} 条</span></div>${edBtn(k)}</summary><div class="grid">${a.map(cardHTML).join('')}</div></details>`; };
+    html+=`<div class="section sec-${k}"><div class="sec-head"><div class="section-title ${cls}">${icon}${title}<span class="cnt">${a.length} 条</span></div>${edBtn(k)}</div>${a.length?`<div class="grid">${a.map(cardHTML).join('')}</div>`:''}</div>`; };
+  const foldSec=(k,op)=>{ const a=grp[k]; if(!a.length) return; const[title,cls,icon,sf]=META[k]; editMode=(state.editCat===k);
+    html+=`<details class="secfold ${sf}"${(op||state.editCat===k)?' open':''}><summary class="sec-head sec-sum"><div class="section-title ${cls}">${icon}${title}<span class="cnt">${a.length} 条</span></div>${edBtn(k)}</summary><div class="grid">${a.map(cardHTML).join('')}</div></details>`; };
   const activeCat=(state.cat&&state.cat!=='all'&&META[state.cat])?state.cat:null;
   if(activeCat){ expandSec(activeCat); }
-  else { expandSec('use'); foldSec('wait'); foldSec('maint'); foldSec('stop'); foldSec('x'); }
+  else { foldSec('use',true); foldSec('wait'); foldSec('maint'); foldSec('stop'); foldSec('x'); }
   editMode=false;
   document.getElementById('list').innerHTML=html;
-  const fslot=listEl.querySelector('.filt-slot');
-  if(fslot&&ft) fslot.appendChild(ft); else if(ft&&fthome&&ft.parentElement!==fthome) fthome.appendChild(ft);
-  const slot=listEl.querySelector('.tsearch-slot');
-  if(slot&&sb) slot.appendChild(sb); else if(sb&&home&&sb.parentElement!==home) home.appendChild(sb);
   document.getElementById('empty').style.display=rows.length?'none':'block';
   fitNames();
 }
@@ -830,9 +820,6 @@ function submitAdd(){
 }
 document.getElementById('m-ok').addEventListener('click',submitAdd);
 document.getElementById('m-name').addEventListener('keydown',e=>{ if(e.key==='Enter') submitAdd(); });
-const q=document.getElementById('q'), clr=document.getElementById('clr');
-q.addEventListener('input',()=>{state.q=q.value.trim();clr.style.display=q.value?'block':'none';render();});
-clr.addEventListener('click',()=>{q.value='';state.q='';clr.style.display='none';render();q.focus();});
 
 /* list interactions: select change / toggle / copy */
 const list=document.getElementById('list');
@@ -861,7 +848,8 @@ list.addEventListener('click',e=>{
   if(n){ const t=n.dataset.copy; (navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>toast('已复制：'+t)).catch(()=>toast('已复制：'+t)); }
 });
 
-/* 分区编辑：每区块各自的 ✎编辑/✓完成 钮 */
+/* edit mode */
+/* 分区编辑：每区块各自的 ✎编辑 / ✓完成 钮 */
 document.getElementById('list').addEventListener('click',function(e){
   const b=e.target.closest('.seced'); if(!b) return;
   e.preventDefault(); e.stopPropagation();
