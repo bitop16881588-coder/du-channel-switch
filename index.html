@@ -59,6 +59,7 @@
   .search input{width:100%;padding:11px 38px 11px 38px;border:1.5px solid var(--line);border-radius:11px;font-size:15px;background:#fff;color:var(--ink);outline:none;transition:border .15s}
   .search input:focus{border-color:var(--gold)}
   .list-search{max-width:170px;margin:0 0 4px}
+  .vr-right .list-search{margin:0;flex-shrink:0;max-width:150px}
   .sec-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:13px}
   .sec-head .section-title{margin-bottom:0}
   .sec-head .list-search{margin:0}
@@ -358,20 +359,12 @@
         <button class="vbtn v-out" data-view="外部">外部</button>
       </div>
       <div class="vr-right">
-        <span id="filtHome"><button class="filt-toggle" id="filtToggle"><span class="fchev">▸</span>分类筛选</button></span>
-        <button class="filt-toggle" id="legendToggle"><span class="fchev">▸</span>状态说明</button>
-      </div>
-    </div>
-    <div class="toolrow">
-      <div class="filt-wrap">
-        <div class="filters collapsed" id="filters">
-        <span class="chip c-neutral active" data-f="cat" data-v="all">全部</span>
-        <span class="chip c-green" data-f="cat" data-v="use">✓ 使用中</span>
-        <span class="chip c-purple" data-f="cat" data-v="wait">待通知</span>
-        <span class="chip c-orange" data-f="cat" data-v="maint">维护</span>
-        <span class="chip c-slate" data-f="cat" data-v="stop">停用</span>
-        <span class="chip c-gray" data-f="cat" data-v="x">未开放</span>
+        <div class="search list-search" id="searchBox">
+          <span class="ic">🔍</span>
+          <input id="q" type="search" placeholder="搜寻商户…" autocomplete="off">
+          <button class="clr" id="clr">×</button>
         </div>
+        <button class="filt-toggle" id="legendToggle"><span class="fchev">▸</span>状态说明</button>
       </div>
     </div>
   </div>
@@ -755,8 +748,7 @@ function stats(){
 }
 
 /* 分类筛选 折叠 */
-(function(){ const f=document.getElementById('filters'), b=document.getElementById('filtToggle');
-  b.addEventListener('click',()=>{ const c=f.classList.toggle('collapsed'); b.classList.toggle('open',!c); });
+(function(){
   const lp=document.getElementById('legendPanel'), lb=document.getElementById('legendToggle');
   lb.addEventListener('click',()=>{ const c=lp.classList.toggle('collapsed'); lb.classList.toggle('open',!c); });
   document.getElementById('list').addEventListener('toggle',e=>{
@@ -771,18 +763,7 @@ function stats(){
   });
 })();
 
-/* filters */
-document.getElementById('filters').addEventListener('click',e=>{
-  const chip=e.target.closest('.chip'); if(!chip)return;
-  const f=chip.dataset.f,v=chip.dataset.v;
-  if(f==='cat'){ state.cat=v; document.querySelectorAll('[data-f=cat]').forEach(c=>c.classList.remove('active')); chip.classList.add('active'); }
-  else if(f==='sec'){ state.sec=v; document.querySelectorAll('[data-f=sec]').forEach(c=>c.classList.remove('active')); chip.classList.add('active'); }
-  else if(f==='recv'){ const cur=state.recv===v; document.querySelectorAll('[data-f=recv]').forEach(c=>c.classList.remove('active')); state.recv=cur?null:v; if(!cur) chip.classList.add('active'); }
-  else{ const cur=state[f]===v; state[f]=cur?null:v; chip.classList.toggle('active',!cur); }
-  render();
-});
-
-/* search */
+/* view switch */
 document.getElementById('viewSeg').addEventListener('click',e=>{
   const b=e.target.closest('.vbtn'); if(!b)return;
   state.view=b.dataset.view;
@@ -820,6 +801,9 @@ function submitAdd(){
 }
 document.getElementById('m-ok').addEventListener('click',submitAdd);
 document.getElementById('m-name').addEventListener('keydown',e=>{ if(e.key==='Enter') submitAdd(); });
+const q=document.getElementById('q'), clr=document.getElementById('clr');
+q.addEventListener('input',()=>{state.q=q.value.trim();clr.style.display=q.value?'block':'none';render();});
+clr.addEventListener('click',()=>{q.value='';state.q='';clr.style.display='none';render();q.focus();});
 
 /* list interactions: select change / toggle / copy */
 const list=document.getElementById('list');
