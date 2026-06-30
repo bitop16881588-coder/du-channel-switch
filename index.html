@@ -422,7 +422,7 @@
     <div class="mtitle">新增商户</div>
     <label>商户名称 <span class="req">*</span><input id="m-name" type="text" placeholder="例如：ABC支付宝" autocomplete="off"></label>
     <label>区块<select id="m-sec"><option value="使用中">使用中</option><option value="不使用">不使用</option></select></label>
-    <label>归类显示<select id="m-class"><option value="">一般（内/外各自）</option><option value="内部">内部专用</option><option value="外部">外部专用</option><option value="共用">内外共用</option></select></label>
+    <label>归类显示<select id="m-class"><option value="" selected disabled hidden>请选择</option><option value="内部">内部专用</option><option value="外部">外部专用</option><option value="共用">内外共用</option></select></label>
     <label>可双开<select id="m-recv"><option value="⭕️">可双开 ⭕️</option><option value="❌">不可双开 ❌</option></select></label>
     <label>内部<select id="m-in"></select></label>
     <label>外部<select id="m-out"></select></label>
@@ -602,8 +602,8 @@ function clsOf(d){
   return '';
 }
 function soloOf(d){ const c=clsOf(d); return c==='内部'?'内':c==='外部'?'外':c==='共用'?'内':null; }
-const CLS_OPTS=[['','一般（内/外各自）'],['内部','内部专用'],['外部','外部专用'],['共用','内外共用']];
-function clsOptsHTML(cur){ return CLS_OPTS.map(([v,t])=>`<option value="${v}"${v===(cur||'')?' selected':''}>${t}</option>`).join(''); }
+const CLS_OPTS=[['内部','内部专用'],['外部','外部专用'],['共用','内外共用']];
+function clsOptsHTML(cur){ const has=CLS_OPTS.some(([v])=>v===cur); return (has?'':`<option value="" selected disabled hidden>未分类</option>`)+CLS_OPTS.map(([v,t])=>`<option value="${v}"${v===(cur||'')?' selected':''}>${t}</option>`).join(''); }
 const state={sec:'all',cat:'all',recv:null,出款:null,下发:null,q:'',view:'内部',editCat:null};
 function pass(d){
   const solo=soloOf(d);
