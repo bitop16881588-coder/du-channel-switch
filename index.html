@@ -260,6 +260,12 @@
   .ie .col{flex:none;display:inline-flex;align-items:center;justify-content:flex-start;gap:6px;min-width:88px;background:#f8fafc;border:1px solid var(--line);border-radius:8px;padding:2px 8px}
   .ie .cl{font-size:12px;color:var(--muted);font-weight:800;letter-spacing:.5px;flex:none;margin:0}
   .ie .cl.cl-in{color:#1d566e} .ie .cl.cl-out{color:#b35e1c} .ie .cl.cl-both{color:#7a4ec2}
+  .ie-edit2{flex-direction:column;gap:6px}
+  .ie-edit2 .col{min-width:0;width:100%}
+  .ie-edit2 .col select{flex:1}
+  .cls-row{display:flex;align-items:center;gap:7px;margin-top:7px}
+  .cls-row .ncl{flex:none}
+  .cls-row .sel-cls{flex:1;border:1.5px solid var(--line);border-radius:8px;padding:5px 8px;font-size:13px;background:#fff}
   .ie-both{flex-direction:column;gap:5px;width:100%}
   .ie-both .col2{display:flex;align-items:center;gap:7px;background:#f8fafc;border:1px solid var(--line);border-radius:8px;padding:3px 9px}
   .ie-both .col2 .cl{font-size:12px;font-weight:800;flex:none;min-width:14px}
@@ -416,6 +422,7 @@
     <div class="mtitle">新增商户</div>
     <label>商户名称 <span class="req">*</span><input id="m-name" type="text" placeholder="例如：ABC支付宝" autocomplete="off"></label>
     <label>区块<select id="m-sec"><option value="使用中">使用中</option><option value="不使用">不使用</option></select></label>
+    <label>归类显示<select id="m-class"><option value="">一般（内/外各自）</option><option value="内部">内部专用</option><option value="外部">外部专用</option><option value="共用">内外共用</option></select></label>
     <label>可双开<select id="m-recv"><option value="⭕️">可双开 ⭕️</option><option value="❌">不可双开 ❌</option></select></label>
     <label>内部<select id="m-in"></select></label>
     <label>外部<select id="m-out"></select></label>
@@ -479,21 +486,21 @@ try{ editMode=localStorage.getItem(KEY+'_edit')==='1'; }catch(e){}
 let customList=[];
 try{ customList=JSON.parse(localStorage.getItem(KEY+'_custom'))||[]; }catch(e){ customList=[]; }
 function loadCustom(){ customList.forEach(c=>{ if(c&&c.商户&&!KMAP[c.key]){
-  const rec={id:DATA.length,key:c.key,商户:c.商户,section:c.section||'使用中',内部:'',外部:'',收款:c.收款||'⭕️',出款:'✅',下发:'✅',放置金:c.放置金||'',下发时间:c.下发时间||'',备注:'',color:'',custom:true};
+  const rec={id:DATA.length,key:c.key,商户:c.商户,section:c.section||'使用中',内部:'',外部:'',收款:c.收款||'⭕️',出款:'✅',下发:'✅',放置金:c.放置金||'',下发时间:c.下发时间||'',备注:'',color:'',归类:c.归类||'',custom:true};
   DATA.push(rec); KMAP[c.key]=rec;
 }}); }
-function saveCustom(){ try{ localStorage.setItem(KEY+'_custom', JSON.stringify(DATA.filter(d=>d.custom).map(d=>({商户:d.商户,key:d.key,section:d.section,收款:d.收款,放置金:d.放置金,下发时间:d.下发时间})))); }catch(e){} }
+function saveCustom(){ try{ localStorage.setItem(KEY+'_custom', JSON.stringify(DATA.filter(d=>d.custom).map(d=>({商户:d.商户,key:d.key,section:d.section,收款:d.收款,放置金:d.放置金,下发时间:d.下发时间,归类:d.归类||''})))); }catch(e){} }
 function buildKey(name){ let k=name,n=1; while(KMAP[k]){ n++; k=name+'#'+n; } return k; }
 function addMerchant(info){
   if(!info.商户) return;
   const key=buildKey(info.商户);
-  const rec={id:DATA.length,key:key,商户:info.商户,section:info.section||'使用中',内部:'',外部:'',收款:info.收款||'⭕️',出款:'✅',下发:'✅',放置金:info.放置金||'',下发时间:info.下发时间||'',备注:'',color:'',custom:true};
+  const rec={id:DATA.length,key:key,商户:info.商户,section:info.section||'使用中',内部:'',外部:'',收款:info.收款||'⭕️',出款:'✅',下发:'✅',放置金:info.放置金||'',下发时间:info.下发时间||'',备注:'',color:'',归类:info.归类||'',custom:true};
   DATA.push(rec); KMAP[key]=rec;
   const ts=Date.now();
-  const payload=JSON.stringify({商户:rec.商户,section:rec.section,收款:rec.收款,放置金:rec.放置金,下发时间:rec.下发时间});
+  const payload=JSON.stringify({商户:rec.商户,section:rec.section,收款:rec.收款,放置金:rec.放置金,下发时间:rec.下发时间,归类:rec.归类});
   overrides[key]=overrides[key]||{}; overrides[key].__new=payload;
   tsMap[key+'|__new']=ts; queuePush(key,'__new',payload,ts);
-  [['内部',info.内部],['外部',info.外部],['备注',info.备注]].forEach(([f,v])=>{
+  [['内部',info.内部],['外部',info.外部],['备注',info.备注],['归类',info.归类]].forEach(([f,v])=>{
     if(v){ applyCell(key,f,v,ts); queuePush(key,f,v,ts); }
   });
   saveCustom(); persist(); render(); stats(); toast('已新增：'+rec.商户);
@@ -508,7 +515,7 @@ function deleteMerchant(key){
 function handleNewCell(c){
   if(c.v && c.v!==''){
     if(!KMAP[c.i]){ try{ const info=JSON.parse(c.v);
-      const rec={id:DATA.length,key:c.i,商户:info.商户||c.i,section:info.section||'使用中',内部:'',外部:'',收款:info.收款||'⭕️',出款:'✅',下发:'✅',放置金:info.放置金||'',下发时间:info.下发时间||'',备注:'',color:'',custom:true};
+      const rec={id:DATA.length,key:c.i,商户:info.商户||c.i,section:info.section||'使用中',内部:'',外部:'',收款:info.收款||'⭕️',出款:'✅',下发:'✅',放置金:info.放置金||'',下发时间:info.下发时间||'',备注:'',color:'',归类:info.归类||'',custom:true};
       DATA.push(rec); KMAP[c.i]=rec; saveCustom(); }catch(_){}}
   } else if(KMAP[c.i]&&KMAP[c.i].custom){ removeFromData(c.i); saveCustom(); }
 }
@@ -522,7 +529,7 @@ function eff(d){
   return {
     内部:'内部' in o?o.内部:d.内部, 外部:'外部' in o?o.外部:d.外部,
     收款:'收款' in o?o.收款:d.收款, 出款:'出款' in o?o.出款:d.出款,
-    下发:'下发' in o?o.下发:d.下发, 下发时间:'下发时间' in o?o.下发时间:(d.下发时间||''), 备注:'备注' in o?o.备注:d.备注, 备注2:'备注2' in o?o.备注2:(d.备注2||''), 商户备注:'商户备注' in o?o.商户备注:(d.商户备注||''), changed:o.changed||''
+    下发:'下发' in o?o.下发:d.下发, 下发时间:'下发时间' in o?o.下发时间:(d.下发时间||''), 备注:'备注' in o?o.备注:d.备注, 备注2:'备注2' in o?o.备注2:(d.备注2||''), 商户备注:'商户备注' in o?o.商户备注:(d.商户备注||''), 归类:'归类' in o?o.归类:(d.归类||''), changed:o.changed||''
   };
 }
 /* 套用单一栏位（本机编辑或云端拉回共用）*/
@@ -583,9 +590,23 @@ function cloudPull(){
 }
 
 const SOLO={'TKpay支付宝':'内','XPAY支付宝':'内','KW支付宝':'内','KW支付宝-TOMMY':'内','宝诺支付宝UID『8084』':'内'};
+const SHARED_DEF=['TKpay支付宝','XPAY支付宝','KW支付宝','KW支付宝-TOMMY','宝诺支付宝UID『8084』'];
+/* 归类：'内部'(内部专用) / '外部'(外部专用) / '共用'(内外共用) / ''(一般) */
+function clsOf(d){
+  const o=overrides[d.key]||{};
+  if('归类' in o) return o.归类||'';
+  if(d.归类) return d.归类;
+  if(SHARED_DEF.indexOf(d.商户)>=0) return '共用';
+  if(SOLO[d.商户]==='内') return '内部';
+  if(SOLO[d.商户]==='外') return '外部';
+  return '';
+}
+function soloOf(d){ const c=clsOf(d); return c==='内部'?'内':c==='外部'?'外':c==='共用'?'内':null; }
+const CLS_OPTS=[['','一般（内/外各自）'],['内部','内部专用'],['外部','外部专用'],['共用','内外共用']];
+function clsOptsHTML(cur){ return CLS_OPTS.map(([v,t])=>`<option value="${v}"${v===(cur||'')?' selected':''}>${t}</option>`).join(''); }
 const state={sec:'all',cat:'all',recv:null,出款:null,下发:null,q:'',view:'内部',editCat:null};
 function pass(d){
-  const solo=SOLO[d.商户];
+  const solo=soloOf(d);
   if(solo==='内' && state.view==='外部') return false;
   if(solo==='外' && state.view==='内部') return false;
   const e=eff(d);
@@ -613,7 +634,7 @@ function swHTML(label,on,key,field,recv){
 }
 
 const SHARED_IO=['TKpay支付宝','XPAY支付宝','KW支付宝','KW支付宝-TOMMY','宝诺支付宝UID『8084』'];
-function isShared(d){ return SHARED_IO.indexOf(d.商户)>=0; }
+function isShared(d){ return clsOf(d)==='共用'; }
 const DAYVOL_RE=/日量[：:\s]*(内\d+外\d+|内\d+|外\d+|\d+\s*[Aa]|无限制|\d+)/;
 const BARE_DAYVOL_RE=/(内\d+外\d+|内\d+\s*[Aa]|外\d+\s*[Aa])/;
 function pullDayVol(text){
@@ -650,11 +671,16 @@ function cardHTML(d){
   const dayVol=dvol.vol, n1view=dvol.rest;
   let body;
   if(ed){
+    const cls=clsOf(d);
+    const statusSel = shared
+      ? `<div class="col"><span class="cl cl-in">内</span><select class="sel ${stMeta(e.内部).sel}" data-key="${esc(d.key)}" data-field="内部">${optsHTML(e.内部)}</select></div>
+         <div class="col"><span class="cl cl-out">外</span><select class="sel ${stMeta(e.外部).sel}" data-key="${esc(d.key)}" data-field="外部">${optsHTML(e.外部)}</select></div>`
+      : `<div class="col"><span class="cl ${clCls}">${vlabel}</span><select class="sel ${vm.sel}" data-key="${esc(d.key)}" data-field="${vfield}">${optsHTML(vval)}</select></div>`;
     body=`<div class="ctrl">
-      <div class="ie">
-        <div class="col"><span class="cl ${clCls}">${vlabel}</span>
-          <select class="sel ${vm.sel}" data-key="${esc(d.key)}" data-field="${vfield}">${optsHTML(vval)}</select></div>
+      <div class="ie${shared?' ie-edit2':''}">
+        ${statusSel}
       </div>
+      <div class="cls-row"><span class="ncl">归类显示</span><select class="sel sel-cls" data-key="${esc(d.key)}" data-field="归类">${clsOptsHTML(cls)}</select></div>
       <div class="note-wrap nw-supp"><span class="ncl">补充备注</span><textarea class="note-edit" data-key="${esc(d.key)}" data-field="备注2" rows="2" placeholder="点此输入补充备注…">${esc(e.备注2||'')}</textarea></div>
       <div class="sw-row">
         ${swHTML('出款',isOn(e.出款),d.key,'出款')}
@@ -813,6 +839,7 @@ document.getElementById('addBtn').addEventListener('click',()=>{
   document.getElementById('m-in').innerHTML=optsHTML('');
   document.getElementById('m-out').innerHTML=optsHTML('');
   document.getElementById('m-sec').value=(state.sec==='不使用')?'不使用':'使用中';
+  document.getElementById('m-class').value='';
   document.getElementById('m-recv').value='⭕️';
   document.getElementById('m-err').textContent='';
   addBg.classList.add('show');
@@ -824,7 +851,7 @@ function submitAdd(){
   const name=document.getElementById('m-name').value.trim();
   if(!name){ document.getElementById('m-err').textContent='请输入商户名称'; return; }
   addMerchant({商户:name, section:document.getElementById('m-sec').value, 收款:document.getElementById('m-recv').value,
-    内部:document.getElementById('m-in').value, 外部:document.getElementById('m-out').value,
+    内部:document.getElementById('m-in').value, 外部:document.getElementById('m-out').value, 归类:document.getElementById('m-class').value,
     放置金:document.getElementById('m-fund').value.trim(), 下发时间:document.getElementById('m-time').value.trim(),
     备注:document.getElementById('m-note').value.trim()});
   closeAdd();
