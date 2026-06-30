@@ -611,7 +611,7 @@ function cloudPull(){
 }
 
 const SOLO={'TKpay支付宝':'内','XPAY支付宝':'内','KW支付宝':'内','KW支付宝-TOMMY':'内','宝诺支付宝UID『8084』':'内'};
-const SHARED_DEF=['TKpay支付宝','XPAY支付宝','KW支付宝','KW支付宝-TOMMY','宝诺支付宝UID『8084』'];
+const SHARED_DEF=['TKpay支付宝','XPAY支付宝','KW支付宝','KW支付宝-TOMMY','宝诺支付宝UID『8084』','新宝支付宝'];
 /* 归类：'内部'(内部专用) / '外部'(外部专用) / '共用'(内外共用) / ''(一般) */
 function clsOf(d){
   const o=overrides[d.key]||{};
@@ -622,7 +622,7 @@ function clsOf(d){
   if(SOLO[d.商户]==='外') return '外部';
   return '';
 }
-function soloOf(d){ const c=clsOf(d); return c==='内部'?'内':c==='外部'?'外':c==='共用'?'内':null; }
+function soloOf(d){ const c=clsOf(d); return c==='内部'?'内':c==='外部'?'外':null; }
 const CLS_OPTS=[['内部','内部专用'],['外部','外部专用'],['共用','内外共用']];
 function clsOptsHTML(cur){ const has=CLS_OPTS.some(([v])=>v===cur); return (has?'':`<option value="" selected disabled hidden>未分类</option>`)+CLS_OPTS.map(([v,t])=>`<option value="${v}"${v===(cur||'')?' selected':''}>${t}</option>`).join(''); }
 const state={sec:'all',cat:'all',recv:null,出款:null,下发:null,q:'',view:'内部',editCat:null,delKey:null};
@@ -710,9 +710,26 @@ function cardHTML(d){
       <div class="te-row"><span class="te-k">下发时间</span><input class="te-in" list="timePresets" data-key="${esc(d.key)}" data-field="下发时间" value="${esc(e.下发时间||'')}" placeholder="选择预设或自行输入…" autocomplete="off"></div>
     </div>`;
   } else {
-    if(allView||shared){
+    if(allView){
+      const c=clsOf(d);
       const u=v=>{v=(v||'').trim();return v!=='等组长通知开启'&&v!=='维护'&&v!=='停用'&&v!=='X';};
-      const repV=u(e.内部)?e.内部:(u(e.外部)?e.外部:e.内部);
+      const mkSel=(fld,val)=>`<select class="sel ${stMeta(val).sel} sel-surf" data-key="${esc(d.key)}" data-field="${fld}">${optsHTML(val)}</select>`;
+      let inner;
+      if(c==='共用'){
+        inner=`<span class="cl cl-both">内/外</span><select class="sel ${stMeta(e.内部).sel} sel-surf" data-key="${esc(d.key)}" data-field="内外">${optsHTML(e.内部)}</select>`;
+      } else if(c==='内部'){
+        inner=`<span class="cl cl-in">内</span>${mkSel('内部',e.内部)}`;
+      } else if(c==='外部'){
+        inner=`<span class="cl cl-out">外</span>${mkSel('外部',e.外部)}`;
+      } else {
+        const parts=[];
+        if(u(e.内部)) parts.push(`<span class="cl cl-in">内</span>${mkSel('内部',e.内部)}`);
+        if(u(e.外部)) parts.push(`<span class="cl cl-out">外</span>${mkSel('外部',e.外部)}`);
+        inner=parts.join('<span class="io-sep">/</span>');
+      }
+      body=`<div class="ie"><div class="col col-surf">${inner}</div></div>`;
+    } else if(shared){
+      const repV=e.内部;
       const sm=stMeta(repV);
       body=`<div class="ie"><div class="col col-surf"><span class="cl cl-both">内/外</span><select class="sel ${sm.sel} sel-surf" data-key="${esc(d.key)}" data-field="内外">${optsHTML(repV)}</select></div></div>`;
     } else {
@@ -755,20 +772,21 @@ function cardHTML(d){
 }
 
 function viewVal(d){ return state.view==='外部'?eff(d).外部:eff(d).内部; }
+function grpVal(d){ return clsOf(d)==='共用'?eff(d).内部:viewVal(d); }
 function ordVal(d){ const o=overrides[d.key]; return (o&&o.__order!=null&&o.__order!=='')?Number(o.__order):null; }
 function ordSort(a,b){ const oa=ordVal(a),ob=ordVal(b); if(oa!=null&&ob!=null)return oa-ob; if(oa!=null)return -1; if(ob!=null)return 1; return a.id-b.id; }
 function render(){
   const listEl=document.getElementById('list');
   const rows=DATA.filter(pass);
   let html='';
-  const vis=rows.filter(d=>!(state.view==='外部'&&isShared(d))).sort(ordSort);
+  const vis=rows.sort(ordSort);
   const grp={
-    use:  vis.filter(d=>{const v=viewVal(d); return v!=='等组长通知开启'&&v!=='维护'&&v!=='停用'&&v!=='X';}),
-    wait: vis.filter(d=>viewVal(d)==='等组长通知开启'),
-    maint:vis.filter(d=>viewVal(d)==='维护'),
-    stop: vis.filter(d=>viewVal(d)==='停用'),
-    x:    vis.filter(d=>viewVal(d)==='X'),
-    all:  vis.filter(d=>{const ev=eff(d);const ok=v=>{v=(v||'').trim();return v===''||v==='日切';};return ok(ev.内部)||ok(ev.外部);}),
+    use:  vis.filter(d=>{const v=grpVal(d); return v!=='等组长通知开启'&&v!=='维护'&&v!=='停用'&&v!=='X';}),
+    wait: vis.filter(d=>grpVal(d)==='等组长通知开启'),
+    maint:vis.filter(d=>grpVal(d)==='维护'),
+    stop: vis.filter(d=>grpVal(d)==='停用'),
+    x:    vis.filter(d=>grpVal(d)==='X'),
+    all:  vis.filter(d=>{const ev=eff(d);const ok=v=>{v=(v||'').trim();return v===''||v==='日切';};return clsOf(d)==='共用'?ok(ev.内部):(ok(ev.内部)||ok(ev.外部));}),
   };
   const META={use:['使用中','t-use','<span class="tick">✓</span>','sf-use'],
     wait:['待通知','t-wait','','sf-wait'],
@@ -803,11 +821,10 @@ function fitNames(){
   });
 }
 function stats(){
-  const vis=d=>!(state.view==='外部'&&isShared(d));
-  const used=d=>{const v=viewVal(d); return v!=='等组长通知开启'&&v!=='维护'&&v!=='停用'&&v!=='X';};
-  const unused=d=>{const v=viewVal(d); return v==='维护'||v==='停用'||v==='X';};
-  document.getElementById('s-use').textContent=DATA.filter(d=>vis(d)&&used(d)).length;
-  document.getElementById('s-unused').textContent=DATA.filter(d=>vis(d)&&unused(d)).length;
+  const used=d=>{const v=grpVal(d); return v!=='等组长通知开启'&&v!=='维护'&&v!=='停用'&&v!=='X';};
+  const unused=d=>{const v=grpVal(d); return v==='维护'||v==='停用'||v==='X';};
+  document.getElementById('s-use').textContent=DATA.filter(d=>used(d)).length;
+  document.getElementById('s-unused').textContent=DATA.filter(d=>unused(d)).length;
   document.getElementById('totalN').textContent=DATA.length;
 }
 
@@ -874,7 +891,7 @@ clr.addEventListener('click',()=>{q.value='';state.q='';clr.style.display='none'
 const list=document.getElementById('list');
 list.addEventListener('change',e=>{
   const s=e.target.closest('select.sel');
-  if(s){ if(s.dataset.field==='内外'){ const dd=KMAP[s.dataset.key],ev=eff(dd),uu=v=>{v=(v||'').trim();return v!=='等组长通知开启'&&v!=='维护'&&v!=='停用'&&v!=='X';};const iu=uu(ev.内部),ou=uu(ev.外部); if(iu||(!iu&&!ou)) setOverride(s.dataset.key,'内部',s.value); if(ou) setOverride(s.dataset.key,'外部',s.value); } else { setOverride(s.dataset.key,s.dataset.field,s.value); } render(); stats(); return; }
+  if(s){ if(s.dataset.field==='内外'){ setOverride(s.dataset.key,'内部',s.value); setOverride(s.dataset.key,'外部',s.value); } else { setOverride(s.dataset.key,s.dataset.field,s.value); } render(); stats(); return; }
   const ti=e.target.closest('input.te-in');
   if(ti){ setOverride(ti.dataset.key,ti.dataset.field,ti.value.trim()); render(); stats(); return; }
   const sta=e.target.closest('textarea.supp-ta');
