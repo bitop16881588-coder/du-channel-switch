@@ -731,9 +731,7 @@ function cardHTML(d){
        +`</div></details>`;
   }
   const chg='';
-  const del=(ed&&d.custom)?(state.delKey===d.key
-    ? `<div class="del-confirm"><button class="del-yes" data-delyes="${esc(d.key)}">✓ 确认删除</button><button class="del-no" data-delno="1">取消</button></div>`
-    : `<button class="del-merchant" data-del="${esc(d.key)}">🗑 删除此商户</button>`):'';
+  const del=(ed&&d.custom)?`<button class="del-merchant" data-del="${esc(d.key)}">🗑 删除此商户</button>`:'';
   const metaFold='';
   return `<div class="card${dim}${ed?' draggable':''}" data-key="${esc(d.key)}">
     <span class="accent" style="background:${d.color||'#ccc'}"></span>
@@ -881,12 +879,10 @@ list.addEventListener('input',e=>{
   setOverride(ta.dataset.key,ta.dataset.field,ta.value); /* 不重绘以保留游标 */
 });
 list.addEventListener('click',e=>{
-  const dy=e.target.closest('[data-delyes]');
-  if(dy){ const k=dy.dataset.delyes; state.delKey=null; deleteMerchant(k); return; }
-  const dn=e.target.closest('[data-delno]');
-  if(dn){ state.delKey=null; render(); return; }
   const dm=e.target.closest('[data-del]');
-  if(dm){ state.delKey=dm.dataset.del; render(); return; }
+  if(dm){ const k=dm.dataset.del, rec=KMAP[k];
+    if(rec && (typeof confirm!=='function' || confirm('确定删除商户「'+rec.商户+'」？\n此操作无法复原。'))){ deleteMerchant(k); }
+    return; }
   const sw=e.target.closest('.sw');
   if(sw){ const k=sw.dataset.key,f=sw.dataset.field,cur=eff(KMAP[k])[f];
     let nv; if(f==='收款') nv=recvOn(cur)?'❌':'⭕️'; else nv=isOn(cur)?'X':'✅';
