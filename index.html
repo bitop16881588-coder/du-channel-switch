@@ -234,8 +234,10 @@
   .c-name-txt{cursor:pointer;white-space:normal;overflow:visible;text-overflow:clip;word-break:break-word;text-align:center;min-width:0;display:block;line-height:1.2}
   .c-row2{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px}
   .r2-note{flex:1;min-width:0;font-size:11px;color:var(--blue);line-height:1.35;white-space:pre-wrap;word-break:break-word}
-  .dayvol{flex:none;font-size:11px;font-weight:800;color:#8a6500;background:none;border:none;padding:0;white-space:nowrap;text-align:right;line-height:1.3}
+  .dayvol{flex:none;font-size:11px;font-weight:800;color:#8a6500;background:none;border:none;padding:0;white-space:nowrap;text-align:left;line-height:1.3}
   .dv-stack{display:flex;flex-direction:column;gap:1px;align-items:flex-end;flex:none}
+  .dv-row{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;margin-top:6px;padding-left:2px}
+  .dv-row .dayvol.time{white-space:nowrap}
   .dayvol.fund{color:#5b4b8a}
   .c-r2-right{display:flex;align-items:center;gap:9px;flex:none}
   .solo-tag{font-size:11px;font-weight:800;padding:2px 8px;border-radius:6px;line-height:1.4}
@@ -293,7 +295,7 @@
   .sel.sel-orange{color:var(--orange);border-color:#f0d2b4;background-color:var(--orange-bg)}
   .sel.sel-gray{color:var(--gray);border-color:#d4dae0;background-color:var(--gray-bg)}
   .col-surf{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap}
-  .col-surf .sel-surf{flex:none;width:auto;min-width:72px;padding:4px 24px 4px 9px}
+  .col-surf .sel-surf{flex:none;width:auto;min-width:56px;padding:3px 20px 3px 7px;font-size:12px;background-position:right 6px center}
   .supp-surf{margin-top:7px}
   .supp-surf .supp-in{width:100%;box-sizing:border-box;border:none;border-radius:0;margin:0;padding:3px 2px;font-size:12.5px;line-height:1.35;background:transparent;color:var(--ink);resize:none;min-height:22px;font-family:inherit}
   .supp-surf .supp-in:focus{border:none;outline:none;background:transparent}
@@ -707,14 +709,9 @@ function cardHTML(d){
   } else {
     if(allView){
       const u=v=>{v=(v||'').trim();return v!=='等组长通知开启'&&v!=='维护'&&v!=='停用'&&v!=='X';};
-      const inSel=`<select class="sel ${stMeta(e.内部).sel} sel-surf" data-key="${esc(d.key)}" data-field="内部">${optsHTML(e.内部)}</select>`;
-      const outSel=`<select class="sel ${stMeta(e.外部).sel} sel-surf" data-key="${esc(d.key)}" data-field="外部">${optsHTML(e.外部)}</select>`;
-      if(shared){
-        body=`<div class="ie"><div class="col col-surf"><span class="cl cl-both">内/外</span>${inSel}${outSel}</div></div>`;
-      } else {
-        const oU=u(e.外部);
-        body=`<div class="ie"><div class="col col-surf"><span class="cl cl-in">内</span>${inSel}${oU?`<span class="io-sep">/</span><span class="cl cl-out">外</span>${outSel}`:''}</div></div>`;
-      }
+      const repV=u(e.内部)?e.内部:(u(e.外部)?e.外部:e.内部);
+      const sm=stMeta(repV);
+      body=`<div class="ie"><div class="col col-surf"><span class="cl cl-both">内/外</span><select class="sel ${sm.sel} sel-surf" data-key="${esc(d.key)}" data-field="内外">${optsHTML(repV)}</select></div></div>`;
     } else if(shared){
       body=`<div class="ie"><div class="col col-surf"><span class="cl cl-both">内/外</span>
         <select class="sel ${stMeta(e.内部).sel} sel-surf" data-key="${esc(d.key)}" data-field="内部">${optsHTML(e.内部)}</select>
@@ -753,7 +750,8 @@ function cardHTML(d){
       ${ed?'<span class="drag-handle" title="拖曳排序">⠿</span>':''}
       <span class="c-name" style="color:${nameColor(d)};background:${nameColor(d)}1a">${suppLeft}<span class="c-name-txt" data-copy="${esc(d.商户)}" title="${esc(d.商户)}">${esc(d.商户)}</span>${noteFold}<span class="c-recv name-recv">${recv?'<span class="recv-on">⭕️</span>':'<span class="recv-off">❌</span>'}</span></span>
     </div>
-    <div class="c-row2">${body}${(!ed&&(dayVol||d.放置金||e.下发时间))?`<div class="dv-stack">${dayVol?`<span class="dayvol">日量 ${esc(dayVol)}</span>`:''}${d.放置金?`<span class="dayvol fund">放置金 ${esc(d.放置金)}</span>`:''}${e.下发时间?`<span class="dayvol time">${esc(e.下发时间)}</span>`:''}</div>`:''}</div>
+    <div class="c-row2">${body}</div>
+    ${(!ed&&(dayVol||d.放置金||e.下发时间))?`<div class="dv-row">${dayVol?`<span class="dayvol">日量 ${esc(dayVol)}</span>`:''}${d.放置金?`<span class="dayvol fund">放置金 ${esc(d.放置金)}</span>`:''}${e.下发时间?`<span class="dayvol time">${esc(e.下发时间)}</span>`:''}</div>`:''}
     ${(ed&&meta)?`<div class="meta">${meta}</div>`:''}${note}${chg}${del}</div>`;
 }
 
@@ -872,7 +870,7 @@ clr.addEventListener('click',()=>{q.value='';state.q='';clr.style.display='none'
 const list=document.getElementById('list');
 list.addEventListener('change',e=>{
   const s=e.target.closest('select.sel');
-  if(s){ setOverride(s.dataset.key,s.dataset.field,s.value); render(); stats(); return; }
+  if(s){ if(s.dataset.field==='内外'){ setOverride(s.dataset.key,'内部',s.value); setOverride(s.dataset.key,'外部',s.value); } else { setOverride(s.dataset.key,s.dataset.field,s.value); } render(); stats(); return; }
   const ti=e.target.closest('input.te-in');
   if(ti){ setOverride(ti.dataset.key,ti.dataset.field,ti.value.trim()); render(); stats(); return; }
   const sta=e.target.closest('textarea.supp-ta');
