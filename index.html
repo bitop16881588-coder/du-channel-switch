@@ -231,7 +231,7 @@
   .name-io{position:absolute;right:7px;top:50%;transform:translateY(-50%);display:flex;flex-direction:column;gap:1px;font-size:11.5px;font-weight:900;line-height:1.1}
   .name-io .nio.on{color:#16a64f} .name-io .nio.off{color:var(--red)}
   .dayvol.time{color:#0f6e6e;background:none;border:none;white-space:normal;word-break:break-word}
-  .c-name-txt{cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center;min-width:0;display:block}
+  .c-name-txt{cursor:pointer;white-space:normal;overflow:visible;text-overflow:clip;word-break:break-word;text-align:center;min-width:0;display:block;line-height:1.2}
   .c-row2{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px}
   .r2-note{flex:1;min-width:0;font-size:11px;color:var(--blue);line-height:1.35;white-space:pre-wrap;word-break:break-word}
   .dayvol{flex:none;font-size:11px;font-weight:800;color:#8a6500;background:none;border:none;padding:0;white-space:nowrap;text-align:right;line-height:1.3}
@@ -292,6 +292,12 @@
   .sel.sel-purple{color:var(--purple);border-color:#d6c5f0;background-color:var(--purple-bg)}
   .sel.sel-orange{color:var(--orange);border-color:#f0d2b4;background-color:var(--orange-bg)}
   .sel.sel-gray{color:var(--gray);border-color:#d4dae0;background-color:var(--gray-bg)}
+  .col-surf{display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .col-surf .sel-surf{flex:none;width:auto;min-width:72px;padding:4px 24px 4px 9px}
+  .supp-surf{margin-top:7px}
+  .supp-surf .supp-in{width:100%;box-sizing:border-box;border:none;border-radius:0;margin:0;padding:3px 2px;font-size:12.5px;line-height:1.35;background:transparent;color:var(--ink);resize:none;min-height:22px;font-family:inherit}
+  .supp-surf .supp-in:focus{border:none;outline:none;background:transparent}
+  .supp-surf .supp-in::placeholder{color:#bcc3cb;font-weight:600}
   .sw-row{display:flex;gap:14px;flex-wrap:wrap;padding-top:2px}
   .te-row{display:flex;align-items:center;gap:8px;margin-top:8px}
   .te-k{font-size:12px;color:var(--muted);font-weight:800;flex:none;white-space:nowrap}
@@ -693,22 +699,22 @@ function cardHTML(d){
       <div class="te-row"><span class="te-k">下发时间</span><input class="te-in" list="timePresets" data-key="${esc(d.key)}" data-field="下发时间" value="${esc(e.下发时间||'')}" placeholder="选择预设或自行输入…" autocomplete="off"></div>
     </div>`;
   } else {
-    const suppFold=(e.备注2&&e.备注2.trim())?`<details class="note-fold supp-fold"><summary class="note-sum"></summary><div class="note-pop"><div class="note n2"><span class="nk">补充备注</span>${esc(e.备注2)}</div></div></details>`:'';
     if(allView){
-      const im=stMeta(e.内部);
       const u=v=>{v=(v||'').trim();return v!=='等组长通知开启'&&v!=='维护'&&v!=='停用'&&v!=='X';};
+      const inSel=`<select class="sel ${stMeta(e.内部).sel} sel-surf" data-key="${esc(d.key)}" data-field="内部">${optsHTML(e.内部)}</select>`;
+      const outSel=`<select class="sel ${stMeta(e.外部).sel} sel-surf" data-key="${esc(d.key)}" data-field="外部">${optsHTML(e.外部)}</select>`;
       if(shared){
-        const sm=stMeta(u(e.内部)?e.内部:(u(e.外部)?e.外部:e.内部));
-        body=`<div class="ie ie-io"><div class="col col-io"><span class="cl cl-both">内/外</span><span class="badge ${sm.badge}">${sm.btxt||'正常'}</span>${suppFold}</div></div>`;
+        body=`<div class="ie"><div class="col col-surf"><span class="cl cl-both">内/外</span>${inSel}${outSel}</div></div>`;
       } else {
         const oU=u(e.外部);
-        const om=stMeta(e.外部);
-        body=`<div class="ie ie-io"><div class="col col-io"><span class="cl cl-in">内</span><span class="badge ${im.badge}">${im.btxt||'正常'}</span>${oU?`<span class="io-sep">/</span><span class="cl cl-out">外</span><span class="badge ${om.badge}">${om.btxt||'正常'}</span>`:''}${suppFold}</div></div>`;
+        body=`<div class="ie"><div class="col col-surf"><span class="cl cl-in">内</span>${inSel}${oU?`<span class="io-sep">/</span><span class="cl cl-out">外</span>${outSel}`:''}</div></div>`;
       }
+    } else if(shared){
+      body=`<div class="ie"><div class="col col-surf"><span class="cl cl-both">内/外</span>
+        <select class="sel ${stMeta(e.内部).sel} sel-surf" data-key="${esc(d.key)}" data-field="内部">${optsHTML(e.内部)}</select>
+        <select class="sel ${stMeta(e.外部).sel} sel-surf" data-key="${esc(d.key)}" data-field="外部">${optsHTML(e.外部)}</select></div></div>`;
     } else {
-      body=`<div class="ie">
-        <div class="col"><span class="cl ${clCls}">${vlabel}</span><span class="badge ${vm.badge} big">${vm.btxt}</span>${suppFold}</div>
-      </div>`;
+      body=`<div class="ie"><div class="col col-surf"><span class="cl ${clCls}">${vlabel}</span><select class="sel ${vm.sel} sel-surf" data-key="${esc(d.key)}" data-field="${vfield}">${optsHTML(vval)}</select></div></div>`;
     }
   }
   let metaTime = d.下发时间?`<div class="m"><span class="k">下发时间</span><span class="v">${esc(d.下发时间)}</span></div>`:'';
@@ -740,6 +746,7 @@ function cardHTML(d){
       <span class="c-name" style="color:${nameColor(d)};background:${nameColor(d)}1a"><span class="c-name-txt" data-copy="${esc(d.商户)}" title="${esc(d.商户)}">${esc(d.商户)}</span>${noteFold}<span class="c-recv name-recv">${recv?'<span class="recv-on">⭕️</span>':'<span class="recv-off">❌</span>'}</span></span>
     </div>
     <div class="c-row2">${body}${(!ed&&(dayVol||d.放置金||e.下发时间))?`<div class="dv-stack">${dayVol?`<span class="dayvol">日量 ${esc(dayVol)}</span>`:''}${d.放置金?`<span class="dayvol fund">放置金 ${esc(d.放置金)}</span>`:''}${e.下发时间?`<span class="dayvol time">${esc(e.下发时间)}</span>`:''}</div>`:''}</div>
+    ${!ed?`<div class="supp-surf"><textarea class="note-edit supp-in" rows="1" data-key="${esc(d.key)}" data-field="备注2" placeholder="＋">${esc(e.备注2||'')}</textarea></div>`:''}
     ${(ed&&meta)?`<div class="meta">${meta}</div>`:''}${note}${chg}${del}</div>`;
 }
 
@@ -782,20 +789,8 @@ function render(){
 function fitNames(){
   document.querySelectorAll('#list .c-name').forEach(box=>{
     const txt=box.querySelector('.c-name-txt'); if(!txt) return;
-    const fold=box.querySelector('.note-fold');
     txt.style.textAlign='center'; box.style.paddingLeft=''; txt.style.letterSpacing='0px';
-    const avail=box.clientWidth - (28 + (fold?16:0));
-    if(avail<=10){ txt.style.fontSize=''; return; }
-    txt.style.fontSize='16px';
-    const w=txt.scrollWidth;
-    let fs=15;
-    if(w>0){ fs=16*avail/w; fs=Math.max(10,Math.min(15,fs)); txt.style.fontSize=fs.toFixed(1)+'px'; }
-    const w2=txt.scrollWidth, n=(txt.textContent||'').length;
-    if(n>=6 || w2>avail+1){ txt.style.textAlign='left'; box.style.paddingLeft='7px'; }
-    else {
-      const spare=avail-w2;
-      if(n>1){ let ls=spare/n; ls=Math.max(0,Math.min(fs*0.5,ls)); txt.style.letterSpacing=ls.toFixed(1)+'px'; }
-    }
+    txt.style.fontSize='14px';
   });
 }
 function stats(){
