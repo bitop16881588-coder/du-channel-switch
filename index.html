@@ -100,11 +100,11 @@
   .merr{color:var(--red);font-size:12.5px;font-weight:700;min-height:18px;margin-bottom:4px}
   .mbtns{display:flex;gap:10px;justify-content:flex-end;margin-top:6px}
   .btn.primary{background:#2e8b76;color:#fff;border-color:#2e8b76}
-  .vbtn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:none;background:transparent;padding:7px 22px;border-radius:11px;font-size:16px;font-weight:900;color:var(--ink2);cursor:pointer;transition:.12s;letter-spacing:1.5px}
+  .vbtn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:none;background:transparent;padding:7px 13px;border-radius:11px;font-size:15px;font-weight:900;color:var(--ink2);cursor:pointer;transition:.12s;letter-spacing:1px;white-space:nowrap}
   .vbtn::before{content:"";width:11px;height:11px;border-radius:50%;background:currentColor}
-  .vbtn.v-in{color:#2f7faf} .vbtn.v-out{color:#cf7a2c}
+  .vbtn.v-in{color:#2f7faf} .vbtn.v-out{color:#cf7a2c} .vbtn.v-all{color:#2e8b76}
   .vbtn.active{color:#fff;box-shadow:0 2px 7px rgba(21,35,59,.22)}
-  .vbtn.active.v-in{background:#2f7faf} .vbtn.active.v-out{background:#cf7a2c}
+  .vbtn.active.v-in{background:#2f7faf} .vbtn.active.v-out{background:#cf7a2c} .vbtn.active.v-all{background:#2e8b76}
   .vbtn.active::before{background:#fff}
   .filters{display:flex;gap:7px;flex-wrap:wrap}
   .filt-wrap{display:flex;gap:7px;flex-wrap:wrap;align-items:center}
@@ -260,6 +260,16 @@
   .ie .col{flex:none;display:inline-flex;align-items:center;justify-content:flex-start;gap:6px;min-width:88px;background:#f8fafc;border:1px solid var(--line);border-radius:8px;padding:2px 8px}
   .ie .cl{font-size:12px;color:var(--muted);font-weight:800;letter-spacing:.5px;flex:none;margin:0}
   .ie .cl.cl-in{color:#1d566e} .ie .cl.cl-out{color:#b35e1c} .ie .cl.cl-both{color:#7a4ec2}
+  .ie-both{flex-direction:column;gap:5px;width:100%}
+  .ie-both .col2{display:flex;align-items:center;gap:7px;background:#f8fafc;border:1px solid var(--line);border-radius:8px;padding:3px 9px}
+  .ie-both .col2 .cl{font-size:12px;font-weight:800;flex:none;min-width:14px}
+  .ie-both .col2 .cl.cl-in{color:#1d566e} .ie-both .col2 .cl.cl-out{color:#b35e1c}
+  .ie-both .badge{margin:0}
+  .ie-io .col-io{display:flex;align-items:center;flex-wrap:wrap;gap:5px 6px;min-width:0}
+  .ie-io .cl{font-size:12px;font-weight:800;flex:none}
+  .ie-io .cl.cl-in{color:#1d566e} .ie-io .cl.cl-out{color:#b35e1c} .ie-io .cl.cl-both{color:#7a4ec2}
+  .ie-io .io-sep{color:var(--muted);font-weight:800;margin:0 1px}
+  .ie-io .badge{margin:0}
   .ie .col .sel{flex:1;width:auto}
   .ie .col .badge{margin-top:0}
   .sel{width:100%;appearance:none;-webkit-appearance:none;border:1.5px solid var(--line);border-radius:8px;
@@ -355,6 +365,7 @@
     <div class="viewrow">
       <button class="addbtn" id="addBtn">＋ 新增商户</button>
       <div class="viewseg" id="viewSeg">
+        <button class="vbtn v-all" data-view="全部使用中">全部使用中</button>
         <button class="vbtn v-in active" data-view="内部">内部</button>
         <button class="vbtn v-out" data-view="外部">外部</button>
       </div>
@@ -575,8 +586,8 @@ const SOLO={'TKpay支付宝':'内','XPAY支付宝':'内','KW支付宝':'内','KW
 const state={sec:'all',cat:'all',recv:null,出款:null,下发:null,q:'',view:'内部',editCat:null};
 function pass(d){
   const solo=SOLO[d.商户];
-  if(solo==='内' && state.view!=='内部') return false;
-  if(solo==='外' && state.view!=='外部') return false;
+  if(solo==='内' && state.view==='外部') return false;
+  if(solo==='外' && state.view==='内部') return false;
   const e=eff(d);
   if(state.sec!=='all' && d.section!==state.sec) return false;
   if(state.recv==='on' && !recvOn(e.收款)) return false;
@@ -627,10 +638,12 @@ function cardHTML(d){
   const e=eff(d);
   const recv=recvOn(e.收款);
   const shared=isShared(d);
-  const vlabel=shared?'内/外':state.view;
-  const vfield=shared?'内部':state.view;
+  const fld=state.view==='外部'?'外部':'内部';
+  const allView=state.view==='全部使用中';
+  const vlabel=shared?'内/外':(state.view==='外部'?'外部':'内部');
+  const vfield=shared?'内部':fld;
   const vval=(vfield==='内部'?e.内部:e.外部), vm=stMeta(vval);
-  const clCls=shared?'cl-both':(state.view==='内部'?'cl-in':'cl-out');
+  const clCls=shared?'cl-both':(fld==='内部'?'cl-in':'cl-out');
   const dim=d.section==='不使用'?' dim':'';
   const n1=e.备注||'', n2=e.备注2||'', n3=e.商户备注||'';
   const dvol=ed?{vol:'',rest:n1}:pullDayVol(n1);
@@ -650,9 +663,23 @@ function cardHTML(d){
       <div class="te-row"><span class="te-k">下发时间</span><input class="te-in" list="timePresets" data-key="${esc(d.key)}" data-field="下发时间" value="${esc(e.下发时间||'')}" placeholder="选择预设或自行输入…" autocomplete="off"></div>
     </div>`;
   } else {
-    body=`<div class="ie">
-      <div class="col"><span class="cl ${clCls}">${vlabel}</span><span class="badge ${vm.badge} big">${vm.btxt}</span>${(e.备注2&&e.备注2.trim())?`<details class="note-fold supp-fold"><summary class="note-sum"></summary><div class="note-pop"><div class="note n2"><span class="nk">补充备注</span>${esc(e.备注2)}</div></div></details>`:''}</div>
-    </div>`;
+    const suppFold=(e.备注2&&e.备注2.trim())?`<details class="note-fold supp-fold"><summary class="note-sum"></summary><div class="note-pop"><div class="note n2"><span class="nk">补充备注</span>${esc(e.备注2)}</div></div></details>`:'';
+    if(allView){
+      const im=stMeta(e.内部);
+      const u=v=>{v=(v||'').trim();return v!=='等组长通知开启'&&v!=='维护'&&v!=='停用'&&v!=='X';};
+      if(shared){
+        const sm=stMeta(u(e.内部)?e.内部:(u(e.外部)?e.外部:e.内部));
+        body=`<div class="ie ie-io"><div class="col col-io"><span class="cl cl-both">内/外</span><span class="badge ${sm.badge}">${sm.btxt||'正常'}</span>${suppFold}</div></div>`;
+      } else {
+        const oU=u(e.外部);
+        const om=stMeta(e.外部);
+        body=`<div class="ie ie-io"><div class="col col-io"><span class="cl cl-in">内</span><span class="badge ${im.badge}">${im.btxt||'正常'}</span>${oU?`<span class="io-sep">/</span><span class="cl cl-out">外</span><span class="badge ${om.badge}">${om.btxt||'正常'}</span>`:''}${suppFold}</div></div>`;
+      }
+    } else {
+      body=`<div class="ie">
+        <div class="col"><span class="cl ${clCls}">${vlabel}</span><span class="badge ${vm.badge} big">${vm.btxt}</span>${suppFold}</div>
+      </div>`;
+    }
   }
   let metaTime = d.下发时间?`<div class="m"><span class="k">下发时间</span><span class="v">${esc(d.下发时间)}</span></div>`:'';
   let metaFund = d.放置金?`<div class="m"><span class="k">放置金</span><span class="v">${esc(d.放置金)}</span></div>`:'';
@@ -686,7 +713,7 @@ function cardHTML(d){
     ${(ed&&meta)?`<div class="meta">${meta}</div>`:''}${note}${chg}${del}</div>`;
 }
 
-function viewVal(d){ return state.view==='内部'?eff(d).内部:eff(d).外部; }
+function viewVal(d){ return state.view==='外部'?eff(d).外部:eff(d).内部; }
 function ordVal(d){ const o=overrides[d.key]; return (o&&o.__order!=null&&o.__order!=='')?Number(o.__order):null; }
 function ordSort(a,b){ const oa=ordVal(a),ob=ordVal(b); if(oa!=null&&ob!=null)return oa-ob; if(oa!=null)return -1; if(ob!=null)return 1; return a.id-b.id; }
 function render(){
@@ -700,19 +727,22 @@ function render(){
     maint:vis.filter(d=>viewVal(d)==='维护'),
     stop: vis.filter(d=>viewVal(d)==='停用'),
     x:    vis.filter(d=>viewVal(d)==='X'),
+    all:  vis.filter(d=>{const ev=eff(d);const ok=v=>{v=(v||'').trim();return v===''||v==='日切';};return ok(ev.内部)||ok(ev.外部);}),
   };
   const META={use:['使用中','t-use','<span class="tick">✓</span>','sf-use'],
     wait:['待通知','t-wait','','sf-wait'],
     maint:['维护','t-maint','','sf-maint'],
     stop:['停用','t-stop','','sf-stop'],
-    x:['未开放（内部专用）','t-x','','sf-x']};
+    x:['未开放（内部专用）','t-x','','sf-x'],
+    all:['全部使用中','t-use','<span class="tick">✓</span>','sf-use']};
   const edBtn=(k)=>`<button class="seced${state.editCat===k?' on':''}" data-cat="${k}">${state.editCat===k?'✓ 完成':'✎ 编辑'}</button>`;
   const expandSec=(k)=>{ const[title,cls,icon]=META[k]; const a=grp[k]; editMode=(state.editCat===k);
     html+=`<div class="section sec-${k}"><div class="sec-head"><div class="section-title ${cls}">${icon}${title}<span class="cnt">${a.length} 条</span></div>${edBtn(k)}</div>${a.length?`<div class="grid">${a.map(cardHTML).join('')}</div>`:''}</div>`; };
   const foldSec=(k,op)=>{ const a=grp[k]; if(!a.length) return; const[title,cls,icon,sf]=META[k]; editMode=(state.editCat===k);
     html+=`<details class="secfold ${sf}"${(op||state.editCat===k)?' open':''}><summary class="sec-head sec-sum"><div class="section-title ${cls}">${icon}${title}<span class="cnt">${a.length} 条</span></div>${edBtn(k)}</summary><div class="grid">${a.map(cardHTML).join('')}</div></details>`; };
   const activeCat=(state.cat&&state.cat!=='all'&&META[state.cat])?state.cat:null;
-  if(activeCat){ expandSec(activeCat); }
+  if(state.view==='全部使用中'){ foldSec('all',true); }
+  else if(activeCat){ expandSec(activeCat); }
   else { foldSec('use',true); foldSec('wait'); foldSec('maint'); foldSec('stop'); foldSec('x'); }
   editMode=false;
   document.getElementById('list').innerHTML=html;
