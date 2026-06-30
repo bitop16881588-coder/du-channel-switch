@@ -336,8 +336,8 @@
   .supp-left .supp-sum{font-size:13px;font-weight:900;opacity:.45;padding:2px 4px;color:inherit}
   .supp-left .supp-sum::after{content:"" !important}
   .supp-left.has .supp-sum{opacity:.95;color:var(--blue)}
-  .supp-left .supp-pop{padding:8px}
-  .supp-left .supp-pop textarea{margin:0}
+  .supp-left .supp-pop{padding:10px;left:0;right:auto;width:240px;max-width:80vw}
+  .supp-left .supp-pop textarea{margin:0;width:100%;box-sizing:border-box;min-height:96px;font-size:13px;line-height:1.5;resize:vertical}
   .note.n3 .nk{color:#7a4ec2} .ncl.ncl3{color:#7a4ec2}
   .note-wrap{margin-top:10px}
   .nw-supp{margin-top:8px}
@@ -746,7 +746,7 @@ function cardHTML(d){
   const del=(ed&&d.custom)?`<button class="del-merchant" data-del="${esc(d.key)}">🗑 删除此商户</button>`:'';
   const metaFold='';
   const hasSupp=!!(e.备注2&&e.备注2.trim());
-  const suppLeft=ed?'':`<details class="note-fold supp-left${hasSupp?' has':''}"><summary class="note-sum supp-sum">${hasSupp?'✎':'＋'}</summary><div class="note-pop supp-pop"><textarea class="note-edit supp-ta" data-key="${esc(d.key)}" data-field="备注2" rows="3" placeholder="补充备注…">${esc(e.备注2||'')}</textarea></div></details>`;
+  const suppLeft=ed?'':`<details class="note-fold supp-left${hasSupp?' has':''}"><summary class="note-sum supp-sum">${hasSupp?'✎':'＋'}</summary><div class="note-pop supp-pop"><textarea class="note-edit supp-ta" data-key="${esc(d.key)}" data-field="备注2" rows="4" placeholder="补充备注…">${esc(e.备注2||'')}</textarea></div></details>`;
   return `<div class="card${dim}${ed?' draggable':''}" data-key="${esc(d.key)}">
     <span class="accent" style="background:${d.color||'#ccc'}"></span>
     <div class="c-head">
