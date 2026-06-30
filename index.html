@@ -234,10 +234,11 @@
   .c-name-txt{cursor:pointer;white-space:normal;overflow:visible;text-overflow:clip;word-break:break-word;text-align:center;min-width:0;display:block;line-height:1.2}
   .c-row2{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:8px}
   .r2-note{flex:1;min-width:0;font-size:11px;color:var(--blue);line-height:1.35;white-space:pre-wrap;word-break:break-word}
-  .dayvol{flex:none;font-size:11px;font-weight:800;color:#8a6500;background:none;border:none;padding:0;white-space:nowrap;text-align:left;line-height:1.3}
+  .dayvol{flex:none;font-size:inherit;font-weight:800;color:#8a6500;background:none;border:none;padding:0;white-space:nowrap;text-align:left;line-height:1.3}
   .dv-stack{display:flex;flex-direction:column;gap:1px;align-items:flex-end;flex:none}
-  .dv-row{display:flex;flex-wrap:wrap;align-items:center;gap:4px 12px;margin-top:6px;padding-left:2px}
-  .dv-row .dayvol.time{white-space:nowrap}
+  .dv-row{display:flex;flex-wrap:nowrap;align-items:center;gap:0 10px;margin-top:6px;padding-left:2px;font-size:11px;overflow:hidden;min-width:0}
+  .dv-row .dayvol{white-space:nowrap}
+  .dayvol.time{white-space:nowrap}
   .dayvol.fund{color:#5b4b8a}
   .c-r2-right{display:flex;align-items:center;gap:9px;flex:none}
   .solo-tag{font-size:11px;font-weight:800;padding:2px 8px;border-radius:6px;line-height:1.4}
@@ -707,15 +708,11 @@ function cardHTML(d){
       <div class="te-row"><span class="te-k">下发时间</span><input class="te-in" list="timePresets" data-key="${esc(d.key)}" data-field="下发时间" value="${esc(e.下发时间||'')}" placeholder="选择预设或自行输入…" autocomplete="off"></div>
     </div>`;
   } else {
-    if(allView){
+    if(allView||shared){
       const u=v=>{v=(v||'').trim();return v!=='等组长通知开启'&&v!=='维护'&&v!=='停用'&&v!=='X';};
       const repV=u(e.内部)?e.内部:(u(e.外部)?e.外部:e.内部);
       const sm=stMeta(repV);
       body=`<div class="ie"><div class="col col-surf"><span class="cl cl-both">内/外</span><select class="sel ${sm.sel} sel-surf" data-key="${esc(d.key)}" data-field="内外">${optsHTML(repV)}</select></div></div>`;
-    } else if(shared){
-      body=`<div class="ie"><div class="col col-surf"><span class="cl cl-both">内/外</span>
-        <select class="sel ${stMeta(e.内部).sel} sel-surf" data-key="${esc(d.key)}" data-field="内部">${optsHTML(e.内部)}</select>
-        <select class="sel ${stMeta(e.外部).sel} sel-surf" data-key="${esc(d.key)}" data-field="外部">${optsHTML(e.外部)}</select></div></div>`;
     } else {
       body=`<div class="ie"><div class="col col-surf"><span class="cl ${clCls}">${vlabel}</span><select class="sel ${vm.sel} sel-surf" data-key="${esc(d.key)}" data-field="${vfield}">${optsHTML(vval)}</select></div></div>`;
     }
@@ -797,6 +794,11 @@ function fitNames(){
     txt.style.textAlign='center'; box.style.paddingLeft=''; txt.style.letterSpacing='0px';
     txt.style.fontSize='14px';
   });
+  document.querySelectorAll('#list .dv-row').forEach(row=>{
+    let fs=11; row.style.fontSize=fs+'px';
+    let guard=0;
+    while(row.scrollWidth>row.clientWidth+1 && fs>7.5 && guard<14){ fs-=0.5; row.style.fontSize=fs.toFixed(1)+'px'; guard++; }
+  });
 }
 function stats(){
   const vis=d=>!(state.view==='外部'&&isShared(d));
@@ -870,7 +872,7 @@ clr.addEventListener('click',()=>{q.value='';state.q='';clr.style.display='none'
 const list=document.getElementById('list');
 list.addEventListener('change',e=>{
   const s=e.target.closest('select.sel');
-  if(s){ if(s.dataset.field==='内外'){ setOverride(s.dataset.key,'内部',s.value); setOverride(s.dataset.key,'外部',s.value); } else { setOverride(s.dataset.key,s.dataset.field,s.value); } render(); stats(); return; }
+  if(s){ if(s.dataset.field==='内外'){ const dd=KMAP[s.dataset.key],ev=eff(dd),uu=v=>{v=(v||'').trim();return v!=='等组长通知开启'&&v!=='维护'&&v!=='停用'&&v!=='X';};const iu=uu(ev.内部),ou=uu(ev.外部); if(iu||(!iu&&!ou)) setOverride(s.dataset.key,'内部',s.value); if(ou) setOverride(s.dataset.key,'外部',s.value); } else { setOverride(s.dataset.key,s.dataset.field,s.value); } render(); stats(); return; }
   const ti=e.target.closest('input.te-in');
   if(ti){ setOverride(ti.dataset.key,ti.dataset.field,ti.value.trim()); render(); stats(); return; }
   const sta=e.target.closest('textarea.supp-ta');
