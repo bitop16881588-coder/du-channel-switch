@@ -88,6 +88,10 @@
   .del-merchant{width:100%;margin-top:11px;border:1.5px solid #f0c4c4;background:#fbe9e9;color:var(--red);padding:8px;border-radius:9px;font-size:13px;font-weight:800;cursor:pointer;transition:.12s}
   .del-merchant:hover{background:#f7dada}
   .del-merchant.armed{background:var(--red);color:#fff;border-color:var(--red)}
+  .del-confirm{display:flex;gap:8px;margin-top:11px}
+  .del-yes{flex:1;border:none;background:var(--red);color:#fff;padding:9px;border-radius:9px;font-size:13px;font-weight:800;cursor:pointer}
+  .del-yes:active{filter:brightness(.92)}
+  .del-no{flex:none;border:1.5px solid var(--line);background:#fff;color:#555;padding:9px 14px;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer}
   .modal-bg{position:fixed;inset:0;background:rgba(17,24,33,.5);backdrop-filter:blur(3px);display:none;align-items:center;justify-content:center;z-index:80;padding:18px}
   .modal-bg.show{display:flex}
   .modal{background:#fff;border-radius:16px;padding:20px;width:100%;max-width:380px;max-height:90vh;overflow:auto;box-shadow:0 12px 40px rgba(0,0,0,.3)}
@@ -604,7 +608,7 @@ function clsOf(d){
 function soloOf(d){ const c=clsOf(d); return c==='内部'?'内':c==='外部'?'外':c==='共用'?'内':null; }
 const CLS_OPTS=[['内部','内部专用'],['外部','外部专用'],['共用','内外共用']];
 function clsOptsHTML(cur){ const has=CLS_OPTS.some(([v])=>v===cur); return (has?'':`<option value="" selected disabled hidden>未分类</option>`)+CLS_OPTS.map(([v,t])=>`<option value="${v}"${v===(cur||'')?' selected':''}>${t}</option>`).join(''); }
-const state={sec:'all',cat:'all',recv:null,出款:null,下发:null,q:'',view:'内部',editCat:null};
+const state={sec:'all',cat:'all',recv:null,出款:null,下发:null,q:'',view:'内部',editCat:null,delKey:null};
 function pass(d){
   const solo=soloOf(d);
   if(solo==='内' && state.view==='外部') return false;
@@ -727,7 +731,9 @@ function cardHTML(d){
        +`</div></details>`;
   }
   const chg='';
-  const del=(ed&&d.custom)?`<button class="del-merchant" data-del="${esc(d.key)}">🗑 删除此商户</button>`:'';
+  const del=(ed&&d.custom)?(state.delKey===d.key
+    ? `<div class="del-confirm"><button class="del-yes" data-delyes="${esc(d.key)}">✓ 确认删除</button><button class="del-no" data-delno="1">取消</button></div>`
+    : `<button class="del-merchant" data-del="${esc(d.key)}">🗑 删除此商户</button>`):'';
   const metaFold='';
   return `<div class="card${dim}${ed?' draggable':''}" data-key="${esc(d.key)}">
     <span class="accent" style="background:${d.color||'#ccc'}"></span>
@@ -875,12 +881,12 @@ list.addEventListener('input',e=>{
   setOverride(ta.dataset.key,ta.dataset.field,ta.value); /* 不重绘以保留游标 */
 });
 list.addEventListener('click',e=>{
+  const dy=e.target.closest('[data-delyes]');
+  if(dy){ const k=dy.dataset.delyes; state.delKey=null; deleteMerchant(k); return; }
+  const dn=e.target.closest('[data-delno]');
+  if(dn){ state.delKey=null; render(); return; }
   const dm=e.target.closest('[data-del]');
-  if(dm){
-    if(dm.classList.contains('armed')){ deleteMerchant(dm.dataset.del); }
-    else { dm.classList.add('armed'); dm.textContent='⚠ 再按一次确认删除'; setTimeout(()=>{ if(dm){dm.classList.remove('armed');dm.textContent='🗑 删除此商户';} },2500); }
-    return;
-  }
+  if(dm){ state.delKey=dm.dataset.del; render(); return; }
   const sw=e.target.closest('.sw');
   if(sw){ const k=sw.dataset.key,f=sw.dataset.field,cur=eff(KMAP[k])[f];
     let nv; if(f==='收款') nv=recvOn(cur)?'❌':'⭕️'; else nv=isOn(cur)?'X':'✅';
