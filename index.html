@@ -390,15 +390,37 @@
   .st-del:hover{opacity:1}
   .st-lock{cursor:default;opacity:.45}
   .st-ctl{grid-area:ctl;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-  .st-ctl .st-color,.st-ctl .st-group{border:1.5px solid var(--line);border-radius:7px;padding:5px 4px;font-size:12px;background:#fff;color:var(--ink)}
+  .st-ctl .st-color,.st-ctl .st-group{border:1.5px solid var(--line);border-radius:7px;padding:5px 6px;font-size:12px;background:#fff;color:var(--ink);min-width:78px}
   .st-open{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:700;color:var(--ink2);white-space:nowrap;cursor:pointer}
-  .st-add{border-top:1px dashed var(--line);padding-top:10px;margin-top:4px}
-  .st-add-row{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
-  .st-add-row #st-newname{flex:1;min-width:110px;border:1.5px solid var(--line);border-radius:7px;padding:6px 8px;font-size:13px;font-family:inherit;outline:none}
-  .st-add-row #st-newname:focus{border-color:var(--gold)}
-  .st-add-row select{border:1.5px solid var(--line);border-radius:7px;padding:5px 5px;font-size:12px;background:#fff;color:var(--ink)}
+  .st-add{border-top:1px dashed var(--line);padding-top:12px;margin-top:6px}
+  .st-add-title{font-size:12.5px;font-weight:800;color:var(--ink2);margin-bottom:9px}
+  .st-add-name{width:100%;box-sizing:border-box;border:1.5px solid var(--line);border-radius:8px;padding:8px 10px;font-size:13px;font-family:inherit;color:var(--ink);outline:none;margin-bottom:10px}
+  .st-add-name:focus{border-color:var(--gold)}
+  .st-add-opts{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:11px}
+  .st-fld{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;color:var(--ink2)}
+  .st-fld select{border:1.5px solid var(--line);border-radius:7px;padding:6px 8px;font-size:12.5px;background:#fff;color:var(--ink);min-width:76px}
+  .st-add-btn{width:100%}
   #status-reset{border-color:#f0c4c4;color:var(--red)}
   #status-reset:hover{background:#fbe9e9}
+  /* 归类管理 */
+  #manageGroupBtn{margin:0 0 12px}
+  .stg-builtin{font-size:11.5px;color:var(--muted);margin:2px 0 10px;line-height:1.5}
+  #groupList{max-height:34vh;overflow:auto;margin:2px 0 8px}
+  .stg-empty{font-size:12px;color:var(--muted);padding:8px 2px}
+  .stg-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--line)}
+  .stg-prev{flex:none;max-width:96px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#fff;font-weight:800;font-size:11.5px;padding:3px 10px;border-radius:7px}
+  .stg-name{flex:1;min-width:0;border:1.5px solid var(--line);border-radius:7px;padding:5px 7px;font-size:12.5px;font-family:inherit;color:var(--ink);outline:none}
+  .stg-name:focus{border-color:var(--gold)}
+  .stg-color{flex:none;border:1.5px solid var(--line);border-radius:7px;padding:5px 6px;font-size:12px;background:#fff;color:var(--ink);min-width:64px}
+  /* 设定分页 */
+  .set-tabs{display:flex;gap:4px;margin-bottom:14px;border-bottom:1px solid var(--line)}
+  .set-tab{flex:1;border:none;background:transparent;padding:9px 6px;font-size:14px;font-weight:800;color:var(--muted);cursor:pointer;border-bottom:2.5px solid transparent;margin-bottom:-1px;-webkit-tap-highlight-color:transparent}
+  .set-tab.on{color:var(--ink);border-bottom-color:var(--gold)}
+  .grp-fold{border-top:1px dashed var(--line);margin-top:12px;padding-top:4px}
+  .grp-fold>.grp-sum{cursor:pointer;list-style:none;font-size:12.5px;font-weight:800;color:var(--ink2);padding:7px 0}
+  .grp-fold>.grp-sum::-webkit-details-marker{display:none}
+  .grp-fold>.grp-sum::before{content:"▸ ";color:var(--muted)}
+  .grp-fold[open]>.grp-sum::before{content:"▾ "}
 </style>
 </head>
 <body>
@@ -445,8 +467,7 @@
           <input id="q" type="search" placeholder="搜寻商户…" autocomplete="off">
           <button class="clr" id="clr">×</button>
         </div>
-        <button class="filt-toggle" id="themeBtn" title="变换网页配色">🎨 配色</button>
-        <button class="filt-toggle" id="statusBtn" title="管理状态项目">🏷 状态</button>
+        <button class="filt-toggle" id="settingsBtn" title="外观设定：配色 / 状态 / 归类">🎨 外观/状态</button>
         <button class="filt-toggle" id="legendToggle"><span class="fchev">▸</span>状态说明</button>
       </div>
     </div>
@@ -499,38 +520,52 @@
     <div class="mbtns"><button class="btn" id="m-cancel">取消</button><button class="btn primary" id="m-ok">新增</button></div>
   </div>
 </div>
-<div class="modal-bg" id="statusBg">
+<div class="modal-bg" id="settingsBg">
   <div class="modal theme-modal">
-    <div class="mtitle">🏷 状态项目</div>
-    <div class="tc-title">改名称・换颜色・调归类；「营业」＝是否列入「全部使用中」。即时生效・本机保存</div>
-    <div id="statusList"></div>
-    <div class="st-add">
-      <div class="st-add-row">
-        <input id="st-newname" placeholder="新状态名称" autocomplete="off">
-        <select id="st-newcolor"></select>
-        <select id="st-newgroup"></select>
-        <label class="st-open"><input type="checkbox" id="st-newopen">营业</label>
-        <button class="btn primary" id="status-add">＋ 新增</button>
-      </div>
-      <div class="merr" id="st-newerr"></div>
+    <div class="set-tabs">
+      <button class="set-tab on" data-tab="color">🎨 配色</button>
+      <button class="set-tab" data-tab="status">🏷 状态 / 归类</button>
     </div>
-    <div class="mbtns" style="justify-content:space-between">
-      <button class="btn" id="status-reset">↺ 还原预设</button>
-      <button class="btn" id="status-close">关闭</button>
+    <div id="tab-color">
+      <div class="tc-title">快速套用整套</div>
+      <div class="theme-grid" id="themeGrid"></div>
+      <div class="tc-title">逐项微调（即时预览・自动保存・仅本机）</div>
+      <div id="themeVars"></div>
+      <div class="mbtns" style="justify-content:flex-start"><button class="btn" id="theme-reset">↺ 重置配色</button></div>
     </div>
-  </div>
-</div>
-<div class="modal-bg" id="themeBg">
-  <div class="modal theme-modal">
-    <div class="mtitle">🎨 网页配色</div>
-    <div class="tc-title">快速套用整套</div>
-    <div class="theme-grid" id="themeGrid"></div>
-    <div class="tc-title">逐项微调（即时预览・自动保存）</div>
-    <div id="themeVars"></div>
-    <div class="mbtns" style="justify-content:space-between">
-      <button class="btn" id="theme-reset">↺ 重置全部</button>
-      <button class="btn" id="theme-close">关闭</button>
+    <div id="tab-status" style="display:none">
+      <div class="tc-title">改名称・换颜色・调归类；「营业」＝是否列入「全部使用中」。变更会同步云端</div>
+      <div id="statusList"></div>
+      <details class="grp-fold">
+        <summary class="grp-sum">新增自订状态</summary>
+        <div class="st-add" style="border-top:none;padding-top:2px;margin-top:0">
+          <input id="st-newname" class="st-add-name" placeholder="状态名称，例如：限额中" autocomplete="off">
+          <div class="st-add-opts">
+            <label class="st-fld"><span>颜色</span><select id="st-newcolor"></select></label>
+            <label class="st-fld"><span>归类</span><select id="st-newgroup"></select></label>
+            <label class="st-open"><input type="checkbox" id="st-newopen">营业</label>
+          </div>
+          <button class="btn primary st-add-btn" id="status-add">＋ 新增状态</button>
+          <div class="merr" id="st-newerr"></div>
+        </div>
+      </details>
+      <details class="grp-fold">
+        <summary class="grp-sum">自订归类 / 分区（先在此新增分区，再於上方指派给状态）</summary>
+        <div class="stg-builtin">内建固定 5 区：使用中・待通知・维护・停用・未开放</div>
+        <div id="groupList"></div>
+        <div class="st-add" style="border-top:none;padding-top:2px;margin-top:0">
+          <div class="st-add-title">新增自订归类</div>
+          <input id="g-newname" class="st-add-name" placeholder="分区名称，例如：限额区" autocomplete="off">
+          <div class="st-add-opts">
+            <label class="st-fld"><span>颜色</span><select id="g-newcolor"></select></label>
+          </div>
+          <button class="btn primary st-add-btn" id="group-add">＋ 新增归类</button>
+          <div class="merr" id="g-newerr"></div>
+        </div>
+      </details>
+      <div class="mbtns" style="justify-content:flex-start"><button class="btn" id="status-reset">↺ 还原内建外观</button></div>
     </div>
+    <div class="mbtns"><button class="btn" id="settings-close">关闭</button></div>
   </div>
 </div>
 <div class="sync-banner" id="syncBanner">⚠ 有变更尚未存到云端 — 点此立即重试</div>
@@ -616,12 +651,6 @@ function renderThemeVars(){
 }
 (function initTheme(){
   applyTheme(loadTheme());
-  const themeBg=document.getElementById('themeBg');
-  document.getElementById('themeBtn').addEventListener('click',()=>{
-    renderThemeGrid(); renderThemeVars(); themeBg.classList.add('show');
-  });
-  themeBg.addEventListener('click',e=>{ if(e.target===themeBg) themeBg.classList.remove('show'); });
-  document.getElementById('theme-close').addEventListener('click',()=>themeBg.classList.remove('show'));
   document.getElementById('theme-reset').addEventListener('click',resetTheme);
   document.getElementById('themeGrid').addEventListener('click',e=>{
     const b=e.target.closest('.theme-sw'); if(!b)return;
@@ -687,6 +716,108 @@ function stMeta(v){
   return {v:v,t:v,btxt:v,sel:'sel-gray',badge:'b-gray',group:'stop',open:false};
 }
 /* ════════ 状态项目管理 ════════ */
+/* ── 归类 / 分区（内建 5 区 + 自订，本机保存）── */
+const GROUPS_KEY='du_groups';
+const GROUP_PALETTE={
+  green:{name:'绿',solid:'#1f9d57',tint:'#edf8f1',line:'#d2ecdd'},
+  teal:{name:'青',solid:'#1f8a8a',tint:'#e7f4f4',line:'#c5e5e5'},
+  blue:{name:'蓝',solid:'#2f6f8f',tint:'#eaf2f6',line:'#cfe0e9'},
+  indigo:{name:'靛',solid:'#4a5fb0',tint:'#eef0fa',line:'#d6dcf2'},
+  purple:{name:'紫',solid:'#7a51c4',tint:'#f3eefb',line:'#e3d8f5'},
+  pink:{name:'粉',solid:'#c2568f',tint:'#fbeef5',line:'#f0d3e3'},
+  red:{name:'红',solid:'#cf3b3b',tint:'#fbeceb',line:'#f0cfcf'},
+  orange:{name:'橙',solid:'#c2683a',tint:'#fbf1e9',line:'#f0ddcb'},
+  amber:{name:'黄',solid:'#c9871a',tint:'#fdf5e6',line:'#f0e0bc'},
+  gray:{name:'灰',solid:'#5b6470',tint:'#eef0f3',line:'#dde2e8'}
+};
+const BUILTIN_META={
+  use:  {title:'使用中', icon:'<span class="tick">✓</span>', tcls:'t-use',  fcls:'sf-use',  scls:'sec-use'},
+  wait: {title:'待通知', icon:'', tcls:'t-wait', fcls:'sf-wait', scls:'sec-wait'},
+  maint:{title:'维护',   icon:'', tcls:'t-maint',fcls:'sf-maint',scls:'sec-maint'},
+  stop: {title:'停用',   icon:'', tcls:'t-stop', fcls:'sf-stop', scls:'sec-stop'},
+  x:    {title:'未开放（内部专用）', icon:'', tcls:'t-x', fcls:'sf-x', scls:'sec-x'},
+  all:  {title:'全部使用中', icon:'<span class="tick">✓</span>', tcls:'t-use', fcls:'sf-use', scls:'sec-use'}
+};
+function loadGroups(){ try{ const a=JSON.parse(localStorage.getItem(GROUPS_KEY)); if(Array.isArray(a)) return a; }catch(e){} return []; }
+function saveGroups(){ try{ localStorage.setItem(GROUPS_KEY,JSON.stringify(CUSTOM_GROUPS)); }catch(e){} }
+/* ── 状态 / 归类 云端同步（颜色不同步，各存一格设定）── */
+function syncConfig(field,obj){
+  if(!SYNC_URL) return;
+  const v=JSON.stringify(obj), ts=Date.now();
+  overrides['__cfg']=overrides['__cfg']||{}; overrides['__cfg'][field]=v;
+  tsMap['__cfg|'+field]=ts; persist(); queuePush('__cfg',field,v,ts);
+}
+function syncStates(){ syncConfig('states',STATES.filter(s=>s.custom)); }
+function syncGroups(){ syncConfig('groups',CUSTOM_GROUPS); }
+function builtinGroupMap(){ const def={}; STATES_DEFAULT.forEach(function(s){def[s.v]=s.group;}); const m={}; STATES.forEach(function(s){ if(!s.custom && def[s.v]!==undefined && s.group!==def[s.v]) m[s.v]=s.group; }); return m; }
+function syncBiGroups(){ syncConfig('bigroups',builtinGroupMap()); }
+function applyConfigCell(field,v){
+  try{ const o=JSON.parse(v);
+    if(field==='states'&&Array.isArray(o)){ STATES=STATES.filter(s=>!s.custom).concat(o); saveStates(); return true; }
+    if(field==='groups'&&Array.isArray(o)){ CUSTOM_GROUPS=o; saveGroups(); return true; }
+    if(field==='bigroups'&&o&&typeof o==='object'){ const def={}; STATES_DEFAULT.forEach(function(s){def[s.v]=s.group;}); STATES.forEach(function(s){ if(!s.custom && def[s.v]!==undefined){ s.group = Object.prototype.hasOwnProperty.call(o,s.v)? o[s.v] : def[s.v]; } }); saveStates(); return true; }
+  }catch(e){}
+  return false;
+}
+let CUSTOM_GROUPS=loadGroups();
+function allGroups(){ return ['use','wait','maint','stop','x'].map(id=>({id,builtin:true})).concat(CUSTOM_GROUPS.map(g=>({id:g.id,builtin:false}))); }
+function grpMeta(id){
+  const m=BUILTIN_META[id];
+  if(m) return {title:m.title,icon:m.icon,tcls:m.tcls,fcls:m.fcls,scls:m.scls,tstyle:'',fstyle:''};
+  const g=CUSTOM_GROUPS.find(x=>x.id===id), p=GROUP_PALETTE[(g&&g.color)]||GROUP_PALETTE.gray;
+  const tint=`background:${p.tint};box-shadow:inset 0 0 0 1px ${p.line}`;
+  return {title:g?esc(g.name):id,icon:'',tcls:'',fcls:'',scls:'',tstyle:`background:${p.solid}`,fstyle:tint};
+}
+function gColorOptsHTML(cur){ return Object.keys(GROUP_PALETTE).map(k=>`<option value="${k}"${k===cur?' selected':''}>${GROUP_PALETTE[k].name}</option>`).join(''); }
+function refreshGroupSelects(){ const ng=document.getElementById('st-newgroup'); if(ng) ng.innerHTML=groupOptsHTML('use'); renderStatusList(); }
+function gAfterEdit(){ saveGroups(); render(); stats(); renderGroupList(); refreshGroupSelects(); syncGroups(); syncStates(); syncBiGroups(); }
+function renderGroupList(){
+  const box=document.getElementById('groupList'); if(!box) return;
+  if(!CUSTOM_GROUPS.length){ box.innerHTML='<div class="stg-empty">尚无自订归类，於下方新增。</div>'; return; }
+  box.innerHTML=CUSTOM_GROUPS.map((g,i)=>{
+    const p=GROUP_PALETTE[g.color]||GROUP_PALETTE.gray;
+    return `<div class="stg-row" data-i="${i}">
+      <span class="stg-prev" style="background:${p.solid}">${esc(g.name||'（空）')}</span>
+      <input class="stg-name" data-i="${i}" value="${esc(g.name)}" placeholder="分区名称" autocomplete="off">
+      <select class="stg-color" data-i="${i}">${gColorOptsHTML(g.color)}</select>
+      <span class="st-del" data-gdel="${i}" title="删除">🗑</span>
+    </div>`;
+  }).join('');
+}
+(function initGroups(){
+  document.getElementById('g-newcolor').innerHTML=gColorOptsHTML('blue');
+  const list=document.getElementById('groupList');
+  list.addEventListener('input',e=>{
+    const el=e.target,i=+el.dataset.i; if(isNaN(i)||!CUSTOM_GROUPS[i])return;
+    if(el.classList.contains('stg-name')){ CUSTOM_GROUPS[i].name=el.value; saveGroups();
+      const p=el.closest('.stg-row').querySelector('.stg-prev'); if(p) p.textContent=el.value||'（空）'; }
+  });
+  list.addEventListener('change',e=>{
+    const el=e.target,i=+el.dataset.i; if(isNaN(i)||!CUSTOM_GROUPS[i])return;
+    if(el.classList.contains('stg-color')) CUSTOM_GROUPS[i].color=el.value;
+    else if(el.classList.contains('stg-name')) CUSTOM_GROUPS[i].name=el.value;
+    else return;
+    gAfterEdit();
+  });
+  list.addEventListener('click',e=>{
+    const d=e.target.closest('[data-gdel]'); if(!d)return;
+    const i=+d.dataset.gdel, g=CUSTOM_GROUPS[i]; if(!g)return;
+    const cnt=STATES.filter(s=>s.group===g.id).length;
+    const msg='删除归类「'+g.name+'」？'+(cnt?('\n有 '+cnt+' 个状态归在此分区，删除后会改归到「使用中」。'):'');
+    if(typeof confirm==='function' && !confirm(msg)) return;
+    STATES.forEach(s=>{ if(s.group===g.id) s.group='use'; }); saveStates();
+    CUSTOM_GROUPS.splice(i,1); gAfterEdit(); buildLegend(); toast('已删除归类');
+  });
+  document.getElementById('group-add').addEventListener('click',()=>{
+    const name=(document.getElementById('g-newname').value||'').trim(), err=document.getElementById('g-newerr');
+    if(!name){ err.textContent='请输入名称'; return; }
+    const id='g'+Date.now().toString(36)+Math.floor(Math.random()*1000);
+    CUSTOM_GROUPS.push({id,name,color:document.getElementById('g-newcolor').value});
+    document.getElementById('g-newname').value=''; err.textContent='';
+    gAfterEdit(); toast('已新增归类：'+name);
+  });
+})();
+
 const ST_GROUPS=[['use','使用中'],['wait','待通知'],['maint','维护'],['stop','停用'],['x','未开放']];
 function buildLegend(){
   const el=document.querySelector('#legendPanel .legend-grid'); if(!el) return;
@@ -695,8 +826,8 @@ function buildLegend(){
   el.innerHTML=h;
 }
 function colorOptsHTML(cur){ return Object.keys(STCOLORS).map(k=>`<option value="${k}"${k===cur?' selected':''}>${STCOLORS[k].name}</option>`).join(''); }
-function groupOptsHTML(cur){ return ST_GROUPS.map(g=>`<option value="${g[0]}"${g[0]===cur?' selected':''}>${g[1]}</option>`).join(''); }
-function stAfterEdit(){ saveStates(); render(); stats(); buildLegend(); renderStatusList(); }
+function groupOptsHTML(cur){ return ST_GROUPS.map(g=>`<option value="${g[0]}"${g[0]===cur?' selected':''}>${g[1]}</option>`).join('')+CUSTOM_GROUPS.map(g=>`<option value="${esc(g.id)}"${g.id===cur?' selected':''}>${esc(g.name)}</option>`).join(''); }
+function stAfterEdit(){ saveStates(); render(); stats(); buildLegend(); renderStatusList(); syncStates(); syncBiGroups(); }
 function renderStatusList(){
   const box=document.getElementById('statusList'); if(!box) return;
   box.innerHTML=STATES.map((s,i)=>{
@@ -714,17 +845,14 @@ function renderStatusList(){
   }).join('');
 }
 (function initStatus(){
-  const statusBg=document.getElementById('statusBg');
   document.getElementById('st-newcolor').innerHTML=colorOptsHTML('gray');
   document.getElementById('st-newgroup').innerHTML=groupOptsHTML('use');
-  document.getElementById('statusBtn').addEventListener('click',()=>{ renderStatusList(); statusBg.classList.add('show'); });
-  statusBg.addEventListener('click',e=>{ if(e.target===statusBg) statusBg.classList.remove('show'); });
-  document.getElementById('status-close').addEventListener('click',()=>statusBg.classList.remove('show'));
   document.getElementById('status-reset').addEventListener('click',()=>{
-    if(typeof confirm==='function' && !confirm('确定把状态项目还原成预设？\n（不会更动各渠道已设定的状态值）')) return;
-    STATES=STATES_DEFAULT.map(s=>Object.assign({},s));
-    try{localStorage.removeItem(STATES_KEY);}catch(e){}
-    render(); stats(); buildLegend(); renderStatusList(); toast('状态项目已还原预设');
+    if(typeof confirm==='function' && !confirm('把内建状态的颜色/名称还原成预设？\n（只还原内建的颜色与名称；归类与自订项目不受影响，仅本机、不同步）')) return;
+    const _cg={}; STATES.forEach(function(s){ if(!s.custom) _cg[s.v]=s.group; });
+    const _cu=STATES.filter(s=>s.custom); STATES=STATES_DEFAULT.map(function(s){ var o=Object.assign({},s); if(Object.prototype.hasOwnProperty.call(_cg,o.v)) o.group=_cg[o.v]; return o; }).concat(_cu);
+    saveStates();
+    render(); stats(); buildLegend(); renderStatusList(); toast('内建颜色/名称已还原');
   });
   const list=document.getElementById('statusList');
   list.addEventListener('input',e=>{
@@ -760,6 +888,19 @@ function renderStatusList(){
     document.getElementById('st-newname').value=''; err.textContent='';
     stAfterEdit(); toast('已新增状态：'+name);
   });
+})();
+(function initSettings(){
+  const bg=document.getElementById('settingsBg');
+  function openTab(t){
+    document.querySelectorAll('#settingsBg .set-tab').forEach(b=>b.classList.toggle('on',b.dataset.tab===t));
+    document.getElementById('tab-color').style.display=(t==='color')?'':'none';
+    document.getElementById('tab-status').style.display=(t==='status')?'':'none';
+    if(t==='color'){ renderThemeGrid(); renderThemeVars(); } else { renderStatusList(); renderGroupList(); }
+  }
+  document.getElementById('settingsBtn').addEventListener('click',()=>{ openTab('color'); bg.classList.add('show'); });
+  document.querySelectorAll('#settingsBg .set-tab').forEach(b=>b.addEventListener('click',()=>openTab(b.dataset.tab)));
+  bg.addEventListener('click',e=>{ if(e.target===bg) bg.classList.remove('show'); });
+  document.getElementById('settings-close').addEventListener('click',()=>bg.classList.remove('show'));
 })();
 function isOn(v){ return (v||'').trim()==='✅'; }
 function recvOn(v){ return (v||'').indexOf('⭕')>=0; }
@@ -884,10 +1025,10 @@ function cloudPull(){
   fetchT(SYNC_URL,{method:'POST',body:JSON.stringify({action:'pull',token:TOKEN})})
     .then(r=>r.json()).then(res=>{
       if(res&&res.ok===false){ pullFail(); return; }
-      const cells=(res&&res.cells)||[]; let changed=false;
+      const cells=(res&&res.cells)||[]; let changed=false, cfg=false;
       cells.forEach(c=>{ if(c.f==='__new' && (c.t||0)>(tsMap[c.i+'|__new']||0)){ handleNewCell(c); changed=true; } });
       cells.forEach(c=>{ const key=c.i+'|'+c.f;
-        if((c.t||0)>(tsMap[key]||0)){ applyCell(c.i,c.f,c.v,c.t); changed=true; } });
+        if((c.t||0)>(tsMap[key]||0)){ if(c.i==='__cfg') cfg=applyConfigCell(c.f,c.v)||cfg; applyCell(c.i,c.f,c.v,c.t); changed=true; } });
       /* 把本机较新的（离线时改的）推回云端 */
       const up=[];
       Object.keys(tsMap).forEach(key=>{
@@ -896,7 +1037,7 @@ function cloudPull(){
       });
       if(up.length){ up.forEach(c=>pushQ[c.i+'|'+c.f]=c); flushPush(); }
       persist(); pullFails=0; setSync('idle'); refreshBanner();
-      if(changed){ render(); stats(); }
+      if(changed){ render(); stats(); } if(cfg){ buildLegend(); renderStatusList(); renderGroupList(); refreshGroupSelects(); }
     })
     .catch(pullFail);
 }
@@ -1071,29 +1212,22 @@ function render(){
   const rows=DATA.filter(pass);
   let html='';
   const vis=rows.sort(ordSort);
-  const grp={
-    use:  vis.filter(d=>stMeta(grpVal(d)).group==='use'),
-    wait: vis.filter(d=>stMeta(grpVal(d)).group==='wait'),
-    maint:vis.filter(d=>stMeta(grpVal(d)).group==='maint'),
-    stop: vis.filter(d=>stMeta(grpVal(d)).group==='stop'),
-    x:    vis.filter(d=>stMeta(grpVal(d)).group==='x'),
-    all:  vis.filter(d=>{const ev=eff(d);const ok=v=>stMeta(v).open;return clsOf(d)==='共用'?ok(ev.内部):(ok(ev.内部)||ok(ev.外部));}),
-  };
-  const META={use:['使用中','t-use','<span class="tick">✓</span>','sf-use'],
-    wait:['待通知','t-wait','','sf-wait'],
-    maint:['维护','t-maint','','sf-maint'],
-    stop:['停用','t-stop','','sf-stop'],
-    x:['未开放（内部专用）','t-x','','sf-x'],
-    all:['全部使用中','t-use','<span class="tick">✓</span>','sf-use']};
+  const groups=allGroups();
+  const grp={};
+  const known={}; groups.forEach(g=>known[g.id]=1);
+  groups.forEach(g=>{ grp[g.id]=vis.filter(d=>{ let gid=stMeta(grpVal(d)).group; if(!known[gid]) gid='use'; return gid===g.id; }); });
+  grp.all=vis.filter(d=>{const ev=eff(d);const ok=v=>stMeta(v).open;return clsOf(d)==='共用'?ok(ev.内部):(ok(ev.内部)||ok(ev.外部));});
   const edBtn=(k)=>`<button class="seced${state.editCat===k?' on':''}" data-cat="${k}">${state.editCat===k?'✓ 完成':'✎ 编辑'}</button>`;
-  const expandSec=(k)=>{ const[title,cls,icon]=META[k]; const a=grp[k]; editMode=(state.editCat===k);
-    html+=`<div class="section sec-${k}"><div class="sec-head"><div class="section-title ${cls}">${icon}${title}<span class="cnt">${a.length} 条</span></div>${edBtn(k)}</div>${a.length?`<div class="grid">${a.map(cardHTML).join('')}</div>`:''}</div>`; };
-  const foldSec=(k,op)=>{ const a=grp[k]; if(!a.length) return; const[title,cls,icon,sf]=META[k]; editMode=(state.editCat===k);
-    html+=`<details class="secfold ${sf}"${(op||state.editCat===k)?' open':''}><summary class="sec-head sec-sum"><div class="section-title ${cls}">${icon}${title}<span class="cnt">${a.length} 条</span></div>${edBtn(k)}</summary><div class="grid">${a.map(cardHTML).join('')}</div></details>`; };
-  const activeCat=(state.cat&&state.cat!=='all'&&META[state.cat])?state.cat:null;
+  const stAt=st=>st?` style="${st}"`:'';
+  const expandSec=(k)=>{ const m=grpMeta(k); const a=grp[k]||[]; editMode=(state.editCat===k);
+    html+=`<div class="section${m.scls?' '+m.scls:''}"${stAt(m.fstyle)}><div class="sec-head"><div class="section-title${m.tcls?' '+m.tcls:''}"${stAt(m.tstyle)}>${m.icon}${m.title}<span class="cnt">${a.length} 条</span></div>${edBtn(k)}</div>${a.length?`<div class="grid">${a.map(cardHTML).join('')}</div>`:''}</div>`; };
+  const foldSec=(k,op)=>{ const a=grp[k]||[]; if(!a.length) return; const m=grpMeta(k); editMode=(state.editCat===k);
+    html+=`<details class="secfold${m.fcls?' '+m.fcls:''}"${stAt(m.fstyle)}${(op||state.editCat===k)?' open':''}><summary class="sec-head sec-sum"><div class="section-title${m.tcls?' '+m.tcls:''}"${stAt(m.tstyle)}>${m.icon}${m.title}<span class="cnt">${a.length} 条</span></div>${edBtn(k)}</summary><div class="grid">${a.map(cardHTML).join('')}</div></details>`; };
+  const gids=groups.map(g=>g.id);
+  const activeCat=(state.cat&&state.cat!=='all'&&gids.indexOf(state.cat)>=0)?state.cat:null;
   if(state.view==='全部使用中'){ foldSec('all',true); }
   else if(activeCat){ expandSec(activeCat); }
-  else { foldSec('use',true); foldSec('wait'); foldSec('maint'); foldSec('stop'); foldSec('x'); }
+  else { groups.forEach(g=>foldSec(g.id, g.id==='use')); }
   editMode=false;
   document.getElementById('list').innerHTML=html;
   document.getElementById('empty').style.display=rows.length?'none':'block';
@@ -1112,7 +1246,7 @@ function fitNames(){
   });
 }
 function stats(){
-  const used=d=>stMeta(grpVal(d)).group==='use';
+  const used=d=>{const g=stMeta(grpVal(d)).group;return g!=='wait'&&g!=='maint'&&g!=='stop'&&g!=='x';};
   const unused=d=>{const g=stMeta(grpVal(d)).group;return g==='maint'||g==='stop'||g==='x';};
   document.getElementById('s-use').textContent=DATA.filter(d=>used(d)).length;
   document.getElementById('s-unused').textContent=DATA.filter(d=>unused(d)).length;
