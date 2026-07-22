@@ -563,12 +563,28 @@
 <script>
 /* ════════ 网页密码锁逻辑 ════════ */
 (function() {
-  // 检查当前会话（Session）是否已验证过密码
+  // 检查当前会话 (Session) 是否已验证过密码
   if (sessionStorage.getItem("switch_auth") !== "true") {
     var pwd = prompt("🔒 请输入控制台访问密码：");
-    
-    // 👇 请将下面的 888888 修改为您想要的实际密码
+
     if (pwd === "7878") {
+      sessionStorage.setItem("switch_auth", "true");
+    } else {
+      alert("❌ 密码错误，拒绝访问！");
+      document.write("<h2 style='text-align:center;margin-top:100px;color:red;'>⚠️ 未经授权，无法访问该页面</h2>");
+      window.stop(); // 停止加载后续页面内容
+    }
+  }
+})();
+/* ═════════════════════════════════ */
+
+/* ════════ 可自行修改区 ════════ */
+const SITE_TITLE   = "四方『内外部』通道开关";
+const SITE_BADGE   = "NEW";
+const LAST_UPDATED = "2026/07/01 14:30";
+let SYNC_URL="", TOKEN="";
+const ENC={salt:"uHy4fovqxZfe5IHTLy58yg==",iv:"6hniFq0JguPevuil",ct:"KUXQH+TmI5PCXTf7pGQNCk2wKJXXjymSowrP6y2M80kDZIfaGk/1KBewL6G2e6VHBUsLxMJ2KAAk1f5PcgCKqJtNTQQcR"};
+/* ═════════════════════════════════ */
       sessionStorage.setItem("switch_auth", "true");
     } else {
       alert("❌ 密码错误，拒绝访问！");
